@@ -1,0 +1,49 @@
+{
+    "rules": {
+        "no-negated-in-lhs"          : 1,
+        "eqeqeq"                     : 1,
+        "no-dupe-keys"               : 1,
+        "no-caller"                  : 1,
+        "no-shadow-restricted-names" : 1,
+        "no-shadow"                  : 1,
+        "no-undef"                   : 1,
+        "no-unused-vars"             : 1,
+
+        "indent"                   : [2, 4, { "SwitchCase": 1 }],
+        "no-mixed-spaces-and-tabs" : [2, "smart-tabs"],
+        "no-spaced-func"           : 2,
+        "constructor-super"        : 2,
+        "no-this-before-super"     : 2,
+        "no-unexpected-multiline"  : 2,
+        "semi"                     : [2, "never"],
+        "radix"                    : [1, "as-needed"],
+
+        "object-curly-spacing"  : [1, "always"],
+        "arrow-spacing"         : 1,
+        "prefer-template"       : 1,
+        "prefer-spread"         : 1,
+        "prefer-rest-params"    : 2,
+        "no-class-assign"       : 1,
+        "no-const-assign"       : 1,
+        "no-dupe-class-members" : 1,
+        "space-before-blocks"   : [1, "always"],
+        "space-infix-ops"       : 1,
+        "keyword-spacing"       : [1, { "before": true, "after": true }],
+        "no-unneeded-ternary"   : 1,
+        "max-len"               : [1, 150, 4],
+        "max-nested-callbacks"  : [1, 6],
+        "max-params"            : [1, 4],
+        "new-parens"            : 1,
+        "comma-spacing"         : [1, {"before": false, "after": true}],
+        "consistent-this"       : [1, "self"]
+    },
+
+    "parser": "babel-eslint",
+
+    "ecmaFeatures": { "modules" : true },
+
+    "env": {
+        "node" : true,
+        "es6"  : true
+    }
+}

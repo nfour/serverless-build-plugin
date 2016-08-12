@@ -1,0 +1,22 @@
+# For full config options, check the docs: v1.docs.serverless.com
+
+service: v1test
+
+provider:
+  name: aws
+  runtime: nodejs4.3
+
+plugins:
+  - serverless-build-plugin
+
+defaults:
+ stage: dev
+ region: ap-southeast-2
+
+functions:
+  hello:
+    handler: handlers.hello
+    events:
+      - http:
+          path: hello/{param}
+          method: get
