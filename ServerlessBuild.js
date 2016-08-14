@@ -120,6 +120,8 @@ export default class ServerlessBuild {
 
         zip.end()
 
+        throw new Error("Debugging, dont cont")
+
         return output
 
     }

@@ -7,7 +7,7 @@ provider:
   runtime: nodejs4.3
 
 plugins:
-  - serverless-build-plugin
+  - ../plugin.js
 
 defaults:
  stage: dev
@@ -16,7 +16,3 @@ defaults:
 functions:
   hello:
     handler: handlers.hello
-    events:
-      - http:
-          path: hello/{param}
-          method: get
