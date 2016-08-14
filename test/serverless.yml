@@ -9,6 +9,11 @@ provider:
 plugins:
   - serverless-build-plugin
 
+custom:
+  build:
+    bundle: true
+    build: './webpack.config.js'
+
 defaults:
  stage: dev
  region: ap-southeast-2

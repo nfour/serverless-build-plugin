@@ -5,11 +5,11 @@
   "main": "./index",
   "dependencies": {
     "is-stream" : "~1.1.0",
-    "yazl" : "~2.4.1",
-    "bluebird" : "~3.4.0",
-    "fs-extra" : "~0.26.0",
-    "node-zip"  : "~1.1.0",
-    "lutils"   : "^1.1.0"
+    "yazl"      : "~2.4.1",
+    "bluebird"  : "~3.4.0",
+    "fs-extra"  : "~0.26.0",
+    "resolve"   : "~1.1.7",
+    "lutils"    : "^1.1.0"
   },
   "devDependencies": {
     "eslint-plugin-react" : "^4.0.0",

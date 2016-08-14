@@ -9,7 +9,9 @@
     "aws-sdk"
   ],
   "dependencies": {
-    "source-map-support": "^0.4.2"
+    "source-map-support": "^0.4.2",
+    "lutils": "^1.2.1",
+    "serverless-build-plugin" : "latest"
   },
   "devDependencies": {
     "json-loader"  : "^0.5.4",
@@ -25,10 +27,10 @@
     "babel-polyfill"                                      : "latest",
     "babel-core"                                          : "^6.11.0",
 
-    "serverless"                : "beta",
-    "serverless-client-s3"      : "~2.0.0",
-    "serverless-cors-plugin"    : "~0.4.1",
-    "serverless-webpack-plugin" : "~0.4.5",
-    "webpack"                   : "~2.1.0-beta.20"
+    "serverless"              : "beta",
+    "serverless-client-s3"    : "~2.0.0",
+    "serverless-cors-plugin"  : "~0.4.1",
+    "serverless-build-plugin" : "~0.4.5",
+    "webpack"                 : "~2.1.0-beta.20"
   }
 }

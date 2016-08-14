@@ -5,10 +5,11 @@ var path    = require('path')
 var PRODUCTION = process.env.NODE_ENV === 'production'
 
 var config = {
-    entry: PRODUCTION ? [] : [ 'source-map-support/register' ],
+    // entry: PRODUCTION ? [] : [ 'source-map-support/register' ],
     target: 'node',
     externals: [
-        'aws-sdk'
+        'aws-sdk',
+        'lutils-merge'
     ],
     resolve: {
         extensions: ['', '.js']

@@ -1,13 +1,13 @@
-'use strict'
+import merge from 'lutils-merge' // Testing imports
+import clone from 'lutils-clone' // Testing imports
 
-exports.hello = (event, context, done) =>
-  done(
-    null,
-      {
-          message: 'Go Serverless v1.0! Your function executed successfully!',
-          event
-      }
-  )
+export function hello(event, context, done) {
+    done(null, {
+        message: 'Go Serverless v1.0! Your function executed successfully!',
+        event
+    })
+}
 
-exports.blah = (event, context, done) =>
-  done(null, { message: "blah" })
+export function test(event, context, done) {
+    done(null, { message: "blah" })
+}
