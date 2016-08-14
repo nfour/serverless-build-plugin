@@ -11,8 +11,8 @@ Promise.promisifyAll(fs)
 export default class ServerlessBuild {
     config = {
         tryFiles: [
-            "gulpfile.babel.js",
             "webpack.config.js",
+            "gulpfile.babel.js",
             "gulpfile.js",
         ],
 
