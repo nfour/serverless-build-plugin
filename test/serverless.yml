@@ -7,7 +7,7 @@ provider:
   runtime: nodejs4.3
 
 plugins:
-  - ../plugin.js
+  - serverless-build-plugin
 
 defaults:
  stage: dev
