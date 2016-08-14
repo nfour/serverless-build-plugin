@@ -1,6 +1,8 @@
 # SERVERLESS BUILD PLUGIN
 This plugin is intended to add flexibility to the serverless build process for serverless 1.0.
 
+Currently in testing state. To try this, simply npm install both `./test` and `./`, then `sls deploy` with a default profile or `export AWS_PROFILE=myprofile`.
+
 ### FEATURE GOALS
 - [x] Allow for arbitrary build files to export:
     - Functions (which should return any of the below)
@@ -18,6 +20,8 @@ This plugin is intended to add flexibility to the serverless build process for s
     - May be worth ignoring the return value when it isnt a webpack config, just assume the files were written to `.serverless/`
 - [ ] Add the above described minimal packaging method, leveraging the sls@1.0 existing packaging infrastructure
     - This is subject to an ongoing discussion @ serverless thus may change implimentation
+
+
 
 ### REF
 - https://github.com/asprouse/serverless-webpack-plugin/blob/master/index.js
