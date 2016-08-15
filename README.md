@@ -26,11 +26,13 @@ Currently in testing state. To try this, simply npm install both `./test` and `.
 ### TODO
 - [ ] Test webpack building, get parity with `severless-webpack-plugin`
     - [x] Webpack builds hanlder and source map
+    - [ ] Purges existing build folder (as an option)
     - [ ] Extenerals are copied over
 
 - [ ] Add the above described `minimal packaging` method, leveraging the sls@1.0 existing packaging workflow
     - [ ] node_modules packaging
         - [x] Copys them over
+        - [ ] Purges existing build folder
         - [ ] Minifies them with uglify
         - [ ] Minified with webpack in order to remove unused code
         - [ ] Integrate this with the webpack `extenerals`, as sls-webpack-plugin does
