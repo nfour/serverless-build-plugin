@@ -11,7 +11,7 @@ plugins:
 
 custom:
   build:
-    bundle: true
+    # bundle: true
     build: './webpack.config.js'
 
 defaults:

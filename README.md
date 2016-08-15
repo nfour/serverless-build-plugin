@@ -19,6 +19,10 @@ Currently in testing state. To try this, simply npm install both `./test` and `.
 - [ ] Test alternate build methods with callback, string, stream etc.
     - May be worth ignoring the return value when it isnt a webpack config, just assume the files were written to `.serverless/`
 - [ ] Add the above described minimal packaging method, leveraging the sls@1.0 existing packaging infrastructure
+    - [ ] node_modules packaging
+        - [x] Copys them over
+        - [ ] Minifies them with uglify
+        - [ ] Integrate this with the webpack `extenerals`, as sls-webpack-plugin does
     - This is subject to an ongoing discussion @ serverless thus may change implimentation
 
 

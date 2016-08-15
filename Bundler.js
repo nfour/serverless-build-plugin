@@ -26,8 +26,8 @@ export default class Bundler {
         const cache = {}
 
         /**
-         *  Resolves paths first to their mainFile via require('resolve')
-         *  Then finds their package root directory, resolves its packages recursively.
+         *  Resolves paths first to their mainFile via require('resolve')()
+         *  Then finds their package root directory & also resolves its packages recursively.
          */
         async function recurse(packageDir) {
             const packageJson = require( path.join(packageDir, './package.json') )
@@ -63,12 +63,12 @@ export default class Bundler {
         await recurse(initialPackageDir)
 
         // We dont need the initial dep
-        return resolvedDeps.slice(1)
+        return resolvedDeps
     }
 
-    async copyPackage(packagePath) {
-        const dest = path.join(this.destination, path.relative(this.servicePath, packagePath))
-
+    async copyPackage(packagePath, packageName) {
+        // TODO: generate a better path that considers ./node_modules/package/node_modules/package
+        const dest = path.join(this.destination, path.join('./node_modules', packageName))
         console.log(dest)
 
         return fs.copyAsync(packagePath, dest)
@@ -84,7 +84,7 @@ export default class Bundler {
         await Promise.map(deps, ({ name, packagePath }) => {
             console.log(`Copying ${name}...`)
 
-            return this.copyPackage(packagePath)
+            return this.copyPackage(packagePath, name)
         })
 
         throw new Error()
