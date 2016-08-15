@@ -3,6 +3,15 @@ This plugin is intended to add flexibility to the serverless build process for s
 
 Currently in testing state. To try this, simply npm install both `./test` and `./`, then `sls deploy` with a default profile or `export AWS_PROFILE=myprofile`.
 
+### TESTING USAGE
+- Running the bundler:
+    - Set `custom.build.bundle` to `true`
+- Running a build file or webpack config:
+    - Set `custom.build.bundle` to `false`
+    - Set `custom.build.build` to the relative path of your build file.
+        - If unset or file not found, this will automatically try for a `webpack.config.js`
+
+
 ### FEATURE GOALS
 - [x] Allow for arbitrary build files to export:
     - Functions (which should return any of the below)
@@ -31,6 +40,7 @@ Currently in testing state. To try this, simply npm install both `./test` and `.
     - This is subject to an ongoing discussion @ serverless thus may change implimentation
 - [ ] Test alternate build methods with promise, string, stream etc.
     - May be worth ignoring the return value when it isnt a webpack config, just assume the files were written to `.serverless/`
+
 
 
 ### REF

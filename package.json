@@ -9,6 +9,8 @@
     "bluebird"  : "~3.4.0",
     "fs-extra"  : "~0.26.0",
     "resolve"   : "~1.1.7",
+    "glob"      : "~7.0.5",
+    "del"       : "~2.2.2",
     "lutils"    : "^1.1.0"
   },
   "devDependencies": {

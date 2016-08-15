@@ -9,7 +9,7 @@ import Bundler from './Bundler'
 
 Promise.promisifyAll(fs)
 
-// FIXME:
+// FIXME: for debugging
 console.inspect = (val, ...args) => console.log( require('util').inspect(val, { depth: 6, colors: true, ...args }) )
 
 
@@ -25,22 +25,26 @@ export default class ServerlessBuild {
 
     constructor(serverless, options = {}) {
         this.serverless = serverless
+        if ( ! this.serverless.getVersion().startsWith('1') )
+            throw new this.serverless.classes.Error(
+                'serverless-build-plugin requires serverless@1.x.x'
+            )
+
         this.config    = {
             ...this.config,
             ...(this.serverless.service.custom.build || {}),
             ...options
         }
 
-        if ( ! this.serverless.getVersion().startsWith('1') )
-            throw new this.serverless.classes.Error(
-                'serverless-build-plugin requires serverless@1.x.x'
-            )
-
-        console.log({ options: this.config })
-
         this.hooks = {
             'before:deploy:createDeploymentPackage': (...args) => this.build(...args)
         }
+
+        this.tmpDir         = path.join(this.serverless.config.servicePath, './.serverless')
+        this.buildTmpDir    = path.join(this.tmpDir, './build')
+        this.artifactTmpDir = path.join(this.tmpDir, './artifacts')
+
+        console.log({ options: this.config })
     }
 
     /**
@@ -50,7 +54,7 @@ export default class ServerlessBuild {
         console.log({ args }) // TODO: capture these
 
         if ( this.config.bundle )
-            return this.bundle() // TODO: add our own optimizer to babel + minify/bundle non-dev node_modules
+            return this.bundle()
         else
             return this.buildFromFile()
     }
@@ -60,10 +64,7 @@ export default class ServerlessBuild {
      *  Also includes all node_modules and their dependencies, also minified. No dev deps.
      */
     async bundle() {
-        const slsTmpDir   = path.join(this.serverless.config.servicePath, './.serverless')
-        const buildTmpDir = path.join(slsTmpDir, './build') // TODO: consolidate these paths in the constructor
-
-        return new Bundler(this, buildTmpDir).bundle() // TODO: improve these params, too brittle
+        return new Bundler(this, this.buildTmpDir).bundle() // TODO: improve these params, too brittle
     }
 
     /**
@@ -74,10 +75,6 @@ export default class ServerlessBuild {
             service : { service },
             config  : { servicePath }
         } = this.serverless
-
-        const slsTmpDir      = path.join(servicePath, './.serverless')
-        const buildTmpDir    = path.join(slsTmpDir, './build')
-        const artifactTmpDir = path.join(slsTmpDir, './artifacts')
 
         //
         // RESOLVE BUILD FILE
@@ -97,11 +94,11 @@ export default class ServerlessBuild {
             result = await Promise.try(() => result(this))
 
         // Ensure directories
-        await fs.mkdirsAsync(buildTmpDir)
-        await fs.mkdirsAsync(artifactTmpDir)
+        await fs.mkdirsAsync(this.buildTmpDir)
+        await fs.mkdirsAsync(this.artifactTmpDir)
 
         // Prepare zip instance
-        const zipPath    = path.resolve(artifactTmpDir, `./${service}-${new Date().getTime()}.zip`)
+        const zipPath    = path.resolve(this.artifactTmpDir, `./${service}-${new Date().getTime()}.zip`)
         const zip        = new Yazl.ZipFile()
         const zipOptions = { compress: true }
 
@@ -116,11 +113,11 @@ export default class ServerlessBuild {
             // WEBPACK CONFIG
             //
 
-            const logging = await this.buildWebpack(result, buildTmpDir)
+            const logging = await this.buildWebpack(result)
             this.serverless.cli.log(logging)
 
             ;[ 'handler.js', `handler.js.map`].forEach((fileName) => {
-                const filePath = path.resolve(buildTmpDir, fileName)
+                const filePath = path.resolve(this.buildTmpDir, fileName)
 
                 zip.addFile(filePath, fileName, zipOptions)
             })
@@ -157,7 +154,7 @@ export default class ServerlessBuild {
 
         await output
 
-        throw new Error("Debugging, dont continue!")
+        throw new Error("---- serverless-build-plugin buildFile finished")
 
         return output
     }
@@ -177,7 +174,7 @@ export default class ServerlessBuild {
     /**
      *  Uses and extends a webpack config and runs it.
      */
-    async buildWebpack(config, buildTmpDir) {
+    async buildWebpack(config) {
         const {
             service: { functions = [] },
             config: { servicePath }
@@ -192,11 +189,11 @@ export default class ServerlessBuild {
         entryPoints = entryPoints.map((filePath) => `./${filePath}.js`)
 
         config.context = servicePath
-        config.entry = [ ...(config.entry || []), ...entryPoints ]
-        config.output = {
+        config.entry   = [ ...(config.entry || []), ...entryPoints ]
+        config.output  = {
             ...config.output,
             libraryTarget : 'commonjs',
-            path          : buildTmpDir,
+            path          : this.buildTmpDir,
             filename      : 'handler.js'
         }
 

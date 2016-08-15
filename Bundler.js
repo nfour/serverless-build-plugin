@@ -9,17 +9,17 @@ Promise.promisifyAll(fs)
  *  This is intended to handle the inclusion of node_modules
  */
 export default class Bundler {
-    constructor(plugin, destination) {
-        console.log(plugin.serverless.serverlessPath)
-        this.servicePath = plugin.serverless.config.servicePath
-        this.destination = destination
+    constructor(plugin) {
+        this.plugin      = plugin
+        this.serverless  = plugin.serverless
+        this.buildTmpDir = plugin.buildTmpDir
     }
 
     /**
      *  Resolves a packages dependencies to an array of paths.
      *
      *  @returns {Array}
-     *      [ { name, package, main }, ... ]
+     *      [ { name, packagePath, mainPath }, ... ]
      */
     async resolveDependencies(initialPackageDir) {
         const resolvedDeps = []
@@ -68,16 +68,18 @@ export default class Bundler {
 
     async copyPackage(packagePath, packageName) {
         // TODO: generate a better path that considers ./node_modules/package/node_modules/package
-        const dest = path.join(this.destination, path.join('./node_modules', packageName))
-        console.log(dest)
+        // This will mean checking for multiple node_modules parents, as dependencies could be pathed
+        // outside of the source directory, such as globals, parent projects etc.
+        const saveToPath = path.join(this.buildTmpDir, path.join('./node_modules', packageName))
+        console.log({ saveToPath })
 
-        return fs.copyAsync(packagePath, dest)
+        return fs.copyAsync(packagePath, saveToPath)
     }
 
     async bundle() {
-        const deps = await this.resolveDependencies(this.servicePath)
+        const deps = await this.resolveDependencies(this.serverless.config.servicePath)
 
-        await fs.mkdirsAsync(path.join(this.destination, './node_modules'))
+        await fs.mkdirsAsync(path.join(this.buildTmpDir, './node_modules'))
 
         console.inspect(deps)
 
@@ -87,6 +89,6 @@ export default class Bundler {
             return this.copyPackage(packagePath, name)
         })
 
-        throw new Error()
+        throw new Error("---- serverless-build-plugin bundler finished")
     }
 }

@@ -11,8 +11,8 @@ plugins:
 
 custom:
   build:
-    # bundle: true
-    build: './webpack.config.js'
+    bundle : true
+    build  : './webpack.config.js'
 
 defaults:
  stage: dev
