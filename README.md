@@ -10,21 +10,27 @@ Currently in testing state. To try this, simply npm install both `./test` and `.
     - File strings & buffers
     - File streams
 
-- [ ] Allow for minimal packaging, simply with babel and non-dev dependency resolution and minification in order to maintain the same structure as the source.
+- [ ] Allow for `minimal packaging`, simply with babel and non-dev dependency resolution and minification in order to maintain the same structure as the source.
     - This will allow issues with webpack to be sidestepped by sacrificing some file size
     - Closer to an node environment
 
 ### TODO
 - [ ] Test webpack building, get parity with `severless-webpack-plugin`
-- [ ] Test alternate build methods with callback, string, stream etc.
-    - May be worth ignoring the return value when it isnt a webpack config, just assume the files were written to `.serverless/`
-- [ ] Add the above described minimal packaging method, leveraging the sls@1.0 existing packaging infrastructure
+    - [x] Webpack builds hanlder and source map
+    - [ ] Extenerals are copied over
+
+- [ ] Add the above described `minimal packaging` method, leveraging the sls@1.0 existing packaging workflow
     - [ ] node_modules packaging
         - [x] Copys them over
         - [ ] Minifies them with uglify
+        - [ ] Minified with webpack in order to remove unused code
         - [ ] Integrate this with the webpack `extenerals`, as sls-webpack-plugin does
-    - This is subject to an ongoing discussion @ serverless thus may change implimentation
+    - [ ] Add src code with babel complation as necessary to `./build`
+    - [ ] Uglify source
 
+    - This is subject to an ongoing discussion @ serverless thus may change implimentation
+- [ ] Test alternate build methods with promise, string, stream etc.
+    - May be worth ignoring the return value when it isnt a webpack config, just assume the files were written to `.serverless/`
 
 
 ### REF
