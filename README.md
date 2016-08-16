@@ -34,21 +34,18 @@ The plugin can be configured both on the commandline and under `custom.build` in
     - [x] Webpack builds hanlder and source map
     - [x] Purges existing build folder (as an option)
     - [ ] Extenerals are copied over
+        - Will be fixed when bundle is combined
 
-- [ ] Add the above described `minimal packaging` method, leveraging the sls@1.0 existing packaging workflow
-    - [ ] node_modules packaging
-        - [x] Copys them over
-        - [ ] Purges existing build folder
-        - [ ] Minifies them with uglify
-        - [ ] Minified with webpack in order to remove unused code
-        - [ ] Integrate this with the webpack `extenerals`, as sls-webpack-plugin does
-    - [ ] Add src code with babel complation as necessary to `./build`
-    - [ ] Uglify source
+- [ ] Combine both `buildFile` and `bundle` into one, as bundle will need a build method anyway. Not orthoganal.
+- [ ] node_modules packaging
+    - [x] Copys them over
+        - [x] Nested deps too
+    - [x] Purges existing build folder
+    - [x] Cleanup
+    - [ ] Minify .js
 
-    - This is subject to an ongoing discussion @ serverless thus may change implimentation
-- [ ] Test alternate build methods with promise, string, stream etc.
-    - May be worth ignoring the return value when it isnt a webpack config, just assume the files were written to `.serverless/`
-
+- [ ] Create a babel default build method, like webpack, for the servicePath
+    - [ ] Minify .js
 
 
 ### REF
