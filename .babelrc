@@ -4,7 +4,7 @@
         "add-module-exports",
         [
             "transform-runtime",
-            { "polyfill": true, "regenerator": true }
+            { "polyfill": false, "regenerator": true }
         ],
         [
             "transform-async-to-module-method",
