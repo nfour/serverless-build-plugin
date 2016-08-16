@@ -11,6 +11,12 @@ Currently in testing state. To try this, simply npm install both `./test` and `.
     - Set `custom.build.build` to the relative path of your build file.
         - If unset or file not found, this will automatically try for a `webpack.config.js`
 
+### CONFIG
+The plugin can be configured both on the commandline and under `custom.build` in `serverless.yml`
+
+- `sls deploy --keep`, keep build files and artifacts, do not purge.
+- `sls deploy --build=./buildFile.js`
+- `sls deploy --bundle` use bundling instead of a build file.
 
 ### FEATURE GOALS
 - [x] Allow for arbitrary build files to export:
