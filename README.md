@@ -32,7 +32,7 @@ The plugin can be configured both on the commandline and under `custom.build` in
 ### TODO
 - [ ] Test webpack building, get parity with `severless-webpack-plugin`
     - [x] Webpack builds hanlder and source map
-    - [ ] Purges existing build folder (as an option)
+    - [x] Purges existing build folder (as an option)
     - [ ] Extenerals are copied over
 
 - [ ] Add the above described `minimal packaging` method, leveraging the sls@1.0 existing packaging workflow
