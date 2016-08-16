@@ -1,0 +1,472 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/home/sam/.nvm/versions/node/v6.3.1/bin/node',
+1 verbose cli   '/home/sam/.nvm/versions/node/v6.3.1/bin/npm',
+1 verbose cli   'i' ]
+2 info using npm@3.10.3
+3 info using node@v6.3.1
+4 silly loadCurrentTree Starting
+5 silly install loadCurrentTree
+6 silly install readLocalPackageData
+7 silly install normalizeTree
+8 silly loadCurrentTree Finishing
+9 silly loadIdealTree Starting
+10 silly install loadIdealTree
+11 silly cloneCurrentTree Starting
+12 silly install cloneCurrentTreeToIdealTree
+13 silly cloneCurrentTree Finishing
+14 silly loadShrinkwrap Starting
+15 silly install loadShrinkwrap
+16 silly loadShrinkwrap Finishing
+17 silly loadAllDepsIntoIdealTree Starting
+18 silly install loadAllDepsIntoIdealTree
+19 silly fetchNamedPackageData lutils
+20 silly mapToRegistry name lutils
+21 silly mapToRegistry using default registry
+22 silly mapToRegistry registry https://registry.npmjs.org/
+23 silly mapToRegistry data Result {
+23 silly mapToRegistry   raw: 'lutils',
+23 silly mapToRegistry   scope: null,
+23 silly mapToRegistry   escapedName: 'lutils',
+23 silly mapToRegistry   name: 'lutils',
+23 silly mapToRegistry   rawSpec: '',
+23 silly mapToRegistry   spec: 'latest',
+23 silly mapToRegistry   type: 'tag' }
+24 silly mapToRegistry uri https://registry.npmjs.org/lutils
+25 verbose request uri https://registry.npmjs.org/lutils
+26 verbose request no auth needed
+27 info attempt registry request try #1 at 8:50:03 AM
+28 verbose request using bearer token for auth
+29 verbose request id 3b71079eaef931f5
+30 verbose etag "J8I5H7SOF2REU60U2TSKWDJH"
+31 http request GET https://registry.npmjs.org/lutils
+32 http 304 https://registry.npmjs.org/lutils
+33 verbose headers { 'cache-control': 'max-age=300',
+33 verbose headers   'accept-ranges': 'bytes',
+33 verbose headers   date: 'Tue, 16 Aug 2016 22:50:04 GMT',
+33 verbose headers   via: '1.1 varnish',
+33 verbose headers   connection: 'keep-alive',
+33 verbose headers   'x-served-by': 'cache-bne7722-BNE',
+33 verbose headers   'x-cache': 'MISS',
+33 verbose headers   'x-cache-hits': '0',
+33 verbose headers   'x-timer': 'S1471387803.811734,VS0,VE233',
+33 verbose headers   vary: 'Accept-Encoding' }
+34 silly get cb [ 304,
+34 silly get   { 'cache-control': 'max-age=300',
+34 silly get     'accept-ranges': 'bytes',
+34 silly get     date: 'Tue, 16 Aug 2016 22:50:04 GMT',
+34 silly get     via: '1.1 varnish',
+34 silly get     connection: 'keep-alive',
+34 silly get     'x-served-by': 'cache-bne7722-BNE',
+34 silly get     'x-cache': 'MISS',
+34 silly get     'x-cache-hits': '0',
+34 silly get     'x-timer': 'S1471387803.811734,VS0,VE233',
+34 silly get     vary: 'Accept-Encoding' } ]
+35 verbose etag https://registry.npmjs.org/lutils from cache
+36 verbose get saving lutils to /home/sam/.npm/registry.npmjs.org/lutils/.cache.json
+37 verbose correctMkdir /home/sam/.npm correctMkdir not in flight; initializing
+38 silly resolveWithNewModule lutils@1.2.1 checking installable status
+39 silly cache add args [ 'lutils@^1.2.1', null ]
+40 verbose cache add spec lutils@^1.2.1
+41 silly cache add parsed spec Result {
+41 silly cache add   raw: 'lutils@^1.2.1',
+41 silly cache add   scope: null,
+41 silly cache add   escapedName: 'lutils',
+41 silly cache add   name: 'lutils',
+41 silly cache add   rawSpec: '^1.2.1',
+41 silly cache add   spec: '>=1.2.1 <2.0.0',
+41 silly cache add   type: 'range' }
+42 silly addNamed lutils@>=1.2.1 <2.0.0
+43 verbose addNamed ">=1.2.1 <2.0.0" is a valid semver range for lutils
+44 silly addNameRange { name: 'lutils', range: '>=1.2.1 <2.0.0', hasData: false }
+45 silly mapToRegistry name lutils
+46 silly mapToRegistry using default registry
+47 silly mapToRegistry registry https://registry.npmjs.org/
+48 silly mapToRegistry data Result {
+48 silly mapToRegistry   raw: 'lutils',
+48 silly mapToRegistry   scope: null,
+48 silly mapToRegistry   escapedName: 'lutils',
+48 silly mapToRegistry   name: 'lutils',
+48 silly mapToRegistry   rawSpec: '',
+48 silly mapToRegistry   spec: 'latest',
+48 silly mapToRegistry   type: 'tag' }
+49 silly mapToRegistry uri https://registry.npmjs.org/lutils
+50 verbose addNameRange registry:https://registry.npmjs.org/lutils not in flight; fetching
+51 verbose get https://registry.npmjs.org/lutils not expired, no request
+52 silly addNameRange number 2 { name: 'lutils', range: '>=1.2.1 <2.0.0', hasData: true }
+53 silly addNameRange versions [ 'lutils',
+53 silly addNameRange   [ '0.2.0',
+53 silly addNameRange     '0.2.1',
+53 silly addNameRange     '0.2.3',
+53 silly addNameRange     '0.2.4',
+53 silly addNameRange     '0.2.6',
+53 silly addNameRange     '0.2.7',
+53 silly addNameRange     '0.2.8',
+53 silly addNameRange     '0.2.9',
+53 silly addNameRange     '0.2.10',
+53 silly addNameRange     '0.2.11',
+53 silly addNameRange     '1.0.0',
+53 silly addNameRange     '1.0.1',
+53 silly addNameRange     '1.1.0',
+53 silly addNameRange     '1.1.1',
+53 silly addNameRange     '1.1.2',
+53 silly addNameRange     '1.2.0',
+53 silly addNameRange     '1.2.1' ] ]
+54 silly addNamed lutils@1.2.1
+55 verbose addNamed "1.2.1" is a plain semver version for lutils
+56 silly cache afterAdd lutils@1.2.1
+57 verbose afterAdd /home/sam/.npm/lutils/1.2.1/package/package.json not in flight; writing
+58 verbose correctMkdir /home/sam/.npm correctMkdir not in flight; initializing
+59 verbose afterAdd /home/sam/.npm/lutils/1.2.1/package/package.json written
+60 silly fetchNamedPackageData lutils-typeof
+61 silly mapToRegistry name lutils-typeof
+62 silly mapToRegistry using default registry
+63 silly mapToRegistry registry https://registry.npmjs.org/
+64 silly mapToRegistry data Result {
+64 silly mapToRegistry   raw: 'lutils-typeof',
+64 silly mapToRegistry   scope: null,
+64 silly mapToRegistry   escapedName: 'lutils-typeof',
+64 silly mapToRegistry   name: 'lutils-typeof',
+64 silly mapToRegistry   rawSpec: '',
+64 silly mapToRegistry   spec: 'latest',
+64 silly mapToRegistry   type: 'tag' }
+65 silly mapToRegistry uri https://registry.npmjs.org/lutils-typeof
+66 silly fetchNamedPackageData lutils-merge
+67 silly mapToRegistry name lutils-merge
+68 silly mapToRegistry using default registry
+69 silly mapToRegistry registry https://registry.npmjs.org/
+70 silly mapToRegistry data Result {
+70 silly mapToRegistry   raw: 'lutils-merge',
+70 silly mapToRegistry   scope: null,
+70 silly mapToRegistry   escapedName: 'lutils-merge',
+70 silly mapToRegistry   name: 'lutils-merge',
+70 silly mapToRegistry   rawSpec: '',
+70 silly mapToRegistry   spec: 'latest',
+70 silly mapToRegistry   type: 'tag' }
+71 silly mapToRegistry uri https://registry.npmjs.org/lutils-merge
+72 silly fetchNamedPackageData lutils-clone
+73 silly mapToRegistry name lutils-clone
+74 silly mapToRegistry using default registry
+75 silly mapToRegistry registry https://registry.npmjs.org/
+76 silly mapToRegistry data Result {
+76 silly mapToRegistry   raw: 'lutils-clone',
+76 silly mapToRegistry   scope: null,
+76 silly mapToRegistry   escapedName: 'lutils-clone',
+76 silly mapToRegistry   name: 'lutils-clone',
+76 silly mapToRegistry   rawSpec: '',
+76 silly mapToRegistry   spec: 'latest',
+76 silly mapToRegistry   type: 'tag' }
+77 silly mapToRegistry uri https://registry.npmjs.org/lutils-clone
+78 verbose request uri https://registry.npmjs.org/lutils-typeof
+79 verbose request no auth needed
+80 info attempt registry request try #1 at 8:50:04 AM
+81 verbose request using bearer token for auth
+82 verbose etag "AWTKR2PVWWND4XK0VIBBFS1S7"
+83 http request GET https://registry.npmjs.org/lutils-typeof
+84 verbose request uri https://registry.npmjs.org/lutils-merge
+85 verbose request no auth needed
+86 info attempt registry request try #1 at 8:50:04 AM
+87 verbose request using bearer token for auth
+88 verbose etag "844EE186KMH6O6F1WSTQ2LZR"
+89 http request GET https://registry.npmjs.org/lutils-merge
+90 verbose request uri https://registry.npmjs.org/lutils-clone
+91 verbose request no auth needed
+92 info attempt registry request try #1 at 8:50:04 AM
+93 verbose request using bearer token for auth
+94 verbose etag "5ASM9XMOH3LB21RKIOCHA79MV"
+95 http request GET https://registry.npmjs.org/lutils-clone
+96 http 304 https://registry.npmjs.org/lutils-typeof
+97 verbose headers { 'cache-control': 'max-age=300',
+97 verbose headers   'accept-ranges': 'bytes',
+97 verbose headers   date: 'Tue, 16 Aug 2016 22:50:04 GMT',
+97 verbose headers   via: '1.1 varnish',
+97 verbose headers   connection: 'keep-alive',
+97 verbose headers   'x-served-by': 'cache-bne7722-BNE',
+97 verbose headers   'x-cache': 'MISS',
+97 verbose headers   'x-cache-hits': '0',
+97 verbose headers   'x-timer': 'S1471387804.139649,VS0,VE236',
+97 verbose headers   vary: 'Accept-Encoding' }
+98 silly get cb [ 304,
+98 silly get   { 'cache-control': 'max-age=300',
+98 silly get     'accept-ranges': 'bytes',
+98 silly get     date: 'Tue, 16 Aug 2016 22:50:04 GMT',
+98 silly get     via: '1.1 varnish',
+98 silly get     connection: 'keep-alive',
+98 silly get     'x-served-by': 'cache-bne7722-BNE',
+98 silly get     'x-cache': 'MISS',
+98 silly get     'x-cache-hits': '0',
+98 silly get     'x-timer': 'S1471387804.139649,VS0,VE236',
+98 silly get     vary: 'Accept-Encoding' } ]
+99 verbose etag https://registry.npmjs.org/lutils-typeof from cache
+100 verbose get saving lutils-typeof to /home/sam/.npm/registry.npmjs.org/lutils-typeof/.cache.json
+101 verbose correctMkdir /home/sam/.npm correctMkdir not in flight; initializing
+102 silly resolveWithNewModule lutils-typeof@0.2.3 checking installable status
+103 silly cache add args [ 'lutils-typeof@^0.2.3', null ]
+104 verbose cache add spec lutils-typeof@^0.2.3
+105 silly cache add parsed spec Result {
+105 silly cache add   raw: 'lutils-typeof@^0.2.3',
+105 silly cache add   scope: null,
+105 silly cache add   escapedName: 'lutils-typeof',
+105 silly cache add   name: 'lutils-typeof',
+105 silly cache add   rawSpec: '^0.2.3',
+105 silly cache add   spec: '>=0.2.3 <0.3.0',
+105 silly cache add   type: 'range' }
+106 silly addNamed lutils-typeof@>=0.2.3 <0.3.0
+107 verbose addNamed ">=0.2.3 <0.3.0" is a valid semver range for lutils-typeof
+108 silly addNameRange { name: 'lutils-typeof',
+108 silly addNameRange   range: '>=0.2.3 <0.3.0',
+108 silly addNameRange   hasData: false }
+109 silly mapToRegistry name lutils-typeof
+110 silly mapToRegistry using default registry
+111 silly mapToRegistry registry https://registry.npmjs.org/
+112 silly mapToRegistry data Result {
+112 silly mapToRegistry   raw: 'lutils-typeof',
+112 silly mapToRegistry   scope: null,
+112 silly mapToRegistry   escapedName: 'lutils-typeof',
+112 silly mapToRegistry   name: 'lutils-typeof',
+112 silly mapToRegistry   rawSpec: '',
+112 silly mapToRegistry   spec: 'latest',
+112 silly mapToRegistry   type: 'tag' }
+113 silly mapToRegistry uri https://registry.npmjs.org/lutils-typeof
+114 verbose addNameRange registry:https://registry.npmjs.org/lutils-typeof not in flight; fetching
+115 verbose get https://registry.npmjs.org/lutils-typeof not expired, no request
+116 silly addNameRange number 2 { name: 'lutils-typeof', range: '>=0.2.3 <0.3.0', hasData: true }
+117 silly addNameRange versions [ 'lutils-typeof',
+117 silly addNameRange   [ '0.1.0', '0.1.1', '0.1.2', '0.2.0', '0.2.1', '0.2.2', '0.2.3' ] ]
+118 silly addNamed lutils-typeof@0.2.3
+119 verbose addNamed "0.2.3" is a plain semver version for lutils-typeof
+120 silly cache afterAdd lutils-typeof@0.2.3
+121 verbose afterAdd /home/sam/.npm/lutils-typeof/0.2.3/package/package.json not in flight; writing
+122 verbose correctMkdir /home/sam/.npm correctMkdir not in flight; initializing
+123 verbose afterAdd /home/sam/.npm/lutils-typeof/0.2.3/package/package.json written
+124 http 304 https://registry.npmjs.org/lutils-merge
+125 verbose headers { 'cache-control': 'max-age=300',
+125 verbose headers   'accept-ranges': 'bytes',
+125 verbose headers   date: 'Tue, 16 Aug 2016 22:50:04 GMT',
+125 verbose headers   via: '1.1 varnish',
+125 verbose headers   connection: 'keep-alive',
+125 verbose headers   'x-served-by': 'cache-bne7721-BNE',
+125 verbose headers   'x-cache': 'MISS',
+125 verbose headers   'x-cache-hits': '0',
+125 verbose headers   'x-timer': 'S1471387804.154787,VS0,VE768',
+125 verbose headers   vary: 'Accept-Encoding' }
+126 silly get cb [ 304,
+126 silly get   { 'cache-control': 'max-age=300',
+126 silly get     'accept-ranges': 'bytes',
+126 silly get     date: 'Tue, 16 Aug 2016 22:50:04 GMT',
+126 silly get     via: '1.1 varnish',
+126 silly get     connection: 'keep-alive',
+126 silly get     'x-served-by': 'cache-bne7721-BNE',
+126 silly get     'x-cache': 'MISS',
+126 silly get     'x-cache-hits': '0',
+126 silly get     'x-timer': 'S1471387804.154787,VS0,VE768',
+126 silly get     vary: 'Accept-Encoding' } ]
+127 verbose etag https://registry.npmjs.org/lutils-merge from cache
+128 verbose get saving lutils-merge to /home/sam/.npm/registry.npmjs.org/lutils-merge/.cache.json
+129 verbose correctMkdir /home/sam/.npm correctMkdir not in flight; initializing
+130 silly resolveWithNewModule lutils-merge@0.2.2 checking installable status
+131 silly cache add args [ 'lutils-merge@^0.2.2', null ]
+132 verbose cache add spec lutils-merge@^0.2.2
+133 silly cache add parsed spec Result {
+133 silly cache add   raw: 'lutils-merge@^0.2.2',
+133 silly cache add   scope: null,
+133 silly cache add   escapedName: 'lutils-merge',
+133 silly cache add   name: 'lutils-merge',
+133 silly cache add   rawSpec: '^0.2.2',
+133 silly cache add   spec: '>=0.2.2 <0.3.0',
+133 silly cache add   type: 'range' }
+134 silly addNamed lutils-merge@>=0.2.2 <0.3.0
+135 verbose addNamed ">=0.2.2 <0.3.0" is a valid semver range for lutils-merge
+136 silly addNameRange { name: 'lutils-merge', range: '>=0.2.2 <0.3.0', hasData: false }
+137 silly mapToRegistry name lutils-merge
+138 silly mapToRegistry using default registry
+139 silly mapToRegistry registry https://registry.npmjs.org/
+140 silly mapToRegistry data Result {
+140 silly mapToRegistry   raw: 'lutils-merge',
+140 silly mapToRegistry   scope: null,
+140 silly mapToRegistry   escapedName: 'lutils-merge',
+140 silly mapToRegistry   name: 'lutils-merge',
+140 silly mapToRegistry   rawSpec: '',
+140 silly mapToRegistry   spec: 'latest',
+140 silly mapToRegistry   type: 'tag' }
+141 silly mapToRegistry uri https://registry.npmjs.org/lutils-merge
+142 verbose addNameRange registry:https://registry.npmjs.org/lutils-merge not in flight; fetching
+143 verbose get https://registry.npmjs.org/lutils-merge not expired, no request
+144 silly addNameRange number 2 { name: 'lutils-merge', range: '>=0.2.2 <0.3.0', hasData: true }
+145 silly addNameRange versions [ 'lutils-merge',
+145 silly addNameRange   [ '0.1.0',
+145 silly addNameRange     '0.1.1',
+145 silly addNameRange     '0.1.2',
+145 silly addNameRange     '0.1.3',
+145 silly addNameRange     '0.1.4',
+145 silly addNameRange     '0.2.0',
+145 silly addNameRange     '0.2.1',
+145 silly addNameRange     '0.2.2' ] ]
+146 silly addNamed lutils-merge@0.2.2
+147 verbose addNamed "0.2.2" is a plain semver version for lutils-merge
+148 silly cache afterAdd lutils-merge@0.2.2
+149 verbose afterAdd /home/sam/.npm/lutils-merge/0.2.2/package/package.json not in flight; writing
+150 verbose correctMkdir /home/sam/.npm correctMkdir not in flight; initializing
+151 verbose afterAdd /home/sam/.npm/lutils-merge/0.2.2/package/package.json written
+152 http 304 https://registry.npmjs.org/lutils-clone
+153 verbose headers { 'cache-control': 'max-age=300',
+153 verbose headers   'accept-ranges': 'bytes',
+153 verbose headers   date: 'Tue, 16 Aug 2016 22:50:05 GMT',
+153 verbose headers   via: '1.1 varnish',
+153 verbose headers   connection: 'keep-alive',
+153 verbose headers   'x-served-by': 'cache-bne7721-BNE',
+153 verbose headers   'x-cache': 'MISS',
+153 verbose headers   'x-cache-hits': '0',
+153 verbose headers   'x-timer': 'S1471387804.158159,VS0,VE925',
+153 verbose headers   vary: 'Accept-Encoding' }
+154 silly get cb [ 304,
+154 silly get   { 'cache-control': 'max-age=300',
+154 silly get     'accept-ranges': 'bytes',
+154 silly get     date: 'Tue, 16 Aug 2016 22:50:05 GMT',
+154 silly get     via: '1.1 varnish',
+154 silly get     connection: 'keep-alive',
+154 silly get     'x-served-by': 'cache-bne7721-BNE',
+154 silly get     'x-cache': 'MISS',
+154 silly get     'x-cache-hits': '0',
+154 silly get     'x-timer': 'S1471387804.158159,VS0,VE925',
+154 silly get     vary: 'Accept-Encoding' } ]
+155 verbose etag https://registry.npmjs.org/lutils-clone from cache
+156 verbose get saving lutils-clone to /home/sam/.npm/registry.npmjs.org/lutils-clone/.cache.json
+157 verbose correctMkdir /home/sam/.npm correctMkdir not in flight; initializing
+158 silly resolveWithNewModule lutils-clone@0.1.6 checking installable status
+159 silly cache add args [ 'lutils-clone@^0.1.6', null ]
+160 verbose cache add spec lutils-clone@^0.1.6
+161 silly cache add parsed spec Result {
+161 silly cache add   raw: 'lutils-clone@^0.1.6',
+161 silly cache add   scope: null,
+161 silly cache add   escapedName: 'lutils-clone',
+161 silly cache add   name: 'lutils-clone',
+161 silly cache add   rawSpec: '^0.1.6',
+161 silly cache add   spec: '>=0.1.6 <0.2.0',
+161 silly cache add   type: 'range' }
+162 silly addNamed lutils-clone@>=0.1.6 <0.2.0
+163 verbose addNamed ">=0.1.6 <0.2.0" is a valid semver range for lutils-clone
+164 silly addNameRange { name: 'lutils-clone', range: '>=0.1.6 <0.2.0', hasData: false }
+165 silly mapToRegistry name lutils-clone
+166 silly mapToRegistry using default registry
+167 silly mapToRegistry registry https://registry.npmjs.org/
+168 silly mapToRegistry data Result {
+168 silly mapToRegistry   raw: 'lutils-clone',
+168 silly mapToRegistry   scope: null,
+168 silly mapToRegistry   escapedName: 'lutils-clone',
+168 silly mapToRegistry   name: 'lutils-clone',
+168 silly mapToRegistry   rawSpec: '',
+168 silly mapToRegistry   spec: 'latest',
+168 silly mapToRegistry   type: 'tag' }
+169 silly mapToRegistry uri https://registry.npmjs.org/lutils-clone
+170 verbose addNameRange registry:https://registry.npmjs.org/lutils-clone not in flight; fetching
+171 verbose get https://registry.npmjs.org/lutils-clone not expired, no request
+172 silly addNameRange number 2 { name: 'lutils-clone', range: '>=0.1.6 <0.2.0', hasData: true }
+173 silly addNameRange versions [ 'lutils-clone',
+173 silly addNameRange   [ '0.1.0', '0.1.2', '0.1.3', '0.1.4', '0.1.5', '0.1.6' ] ]
+174 silly addNamed lutils-clone@0.1.6
+175 verbose addNamed "0.1.6" is a plain semver version for lutils-clone
+176 silly cache afterAdd lutils-clone@0.1.6
+177 verbose afterAdd /home/sam/.npm/lutils-clone/0.1.6/package/package.json not in flight; writing
+178 verbose correctMkdir /home/sam/.npm correctMkdir not in flight; initializing
+179 verbose afterAdd /home/sam/.npm/lutils-clone/0.1.6/package/package.json written
+180 silly fetchNamedPackageData serverless-build-plugin
+181 silly mapToRegistry name serverless-build-plugin
+182 silly mapToRegistry using default registry
+183 silly mapToRegistry registry https://registry.npmjs.org/
+184 silly mapToRegistry data Result {
+184 silly mapToRegistry   raw: 'serverless-build-plugin',
+184 silly mapToRegistry   scope: null,
+184 silly mapToRegistry   escapedName: 'serverless-build-plugin',
+184 silly mapToRegistry   name: 'serverless-build-plugin',
+184 silly mapToRegistry   rawSpec: '',
+184 silly mapToRegistry   spec: 'latest',
+184 silly mapToRegistry   type: 'tag' }
+185 silly mapToRegistry uri https://registry.npmjs.org/serverless-build-plugin
+186 verbose request uri https://registry.npmjs.org/serverless-build-plugin
+187 verbose request no auth needed
+188 info attempt registry request try #1 at 8:50:05 AM
+189 verbose request using bearer token for auth
+190 http request GET https://registry.npmjs.org/serverless-build-plugin
+191 http 404 https://registry.npmjs.org/serverless-build-plugin
+192 verbose headers { 'content-type': 'application/json',
+192 verbose headers   'cache-control': 'max-age=0',
+192 verbose headers   'content-length': '2',
+192 verbose headers   'accept-ranges': 'bytes',
+192 verbose headers   date: 'Tue, 16 Aug 2016 22:50:05 GMT',
+192 verbose headers   via: '1.1 varnish',
+192 verbose headers   connection: 'keep-alive',
+192 verbose headers   'x-served-by': 'cache-bne7722-BNE',
+192 verbose headers   'x-cache': 'MISS',
+192 verbose headers   'x-cache-hits': '0',
+192 verbose headers   'x-timer': 'S1471387805.117315,VS0,VE201',
+192 verbose headers   vary: 'Accept-Encoding' }
+193 silly get cb [ 404,
+193 silly get   { 'content-type': 'application/json',
+193 silly get     'cache-control': 'max-age=0',
+193 silly get     'content-length': '2',
+193 silly get     'accept-ranges': 'bytes',
+193 silly get     date: 'Tue, 16 Aug 2016 22:50:05 GMT',
+193 silly get     via: '1.1 varnish',
+193 silly get     connection: 'keep-alive',
+193 silly get     'x-served-by': 'cache-bne7722-BNE',
+193 silly get     'x-cache': 'MISS',
+193 silly get     'x-cache-hits': '0',
+193 silly get     'x-timer': 'S1471387805.117315,VS0,VE201',
+193 silly get     vary: 'Accept-Encoding' } ]
+194 silly fetchPackageMetaData Error: Registry returned 404 for GET on https://registry.npmjs.org/serverless-build-plugin
+194 silly fetchPackageMetaData     at makeError (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:264:12)
+194 silly fetchPackageMetaData     at CachingRegistryClient.<anonymous> (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:242:14)
+194 silly fetchPackageMetaData     at Request._callback (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:172:14)
+194 silly fetchPackageMetaData     at Request.self.callback (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/request/request.js:200:22)
+194 silly fetchPackageMetaData     at emitTwo (events.js:106:13)
+194 silly fetchPackageMetaData     at Request.emit (events.js:191:7)
+194 silly fetchPackageMetaData     at Request.<anonymous> (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/request/request.js:1067:10)
+194 silly fetchPackageMetaData     at emitOne (events.js:101:20)
+194 silly fetchPackageMetaData     at Request.emit (events.js:188:7)
+194 silly fetchPackageMetaData     at IncomingMessage.<anonymous> (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/request/request.js:988:12)
+194 silly fetchPackageMetaData  error for serverless-build-plugin@latest { Error: Registry returned 404 for GET on https://registry.npmjs.org/serverless-build-plugin
+194 silly fetchPackageMetaData     at makeError (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:264:12)
+194 silly fetchPackageMetaData     at CachingRegistryClient.<anonymous> (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:242:14)
+194 silly fetchPackageMetaData     at Request._callback (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:172:14)
+194 silly fetchPackageMetaData     at Request.self.callback (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/request/request.js:200:22)
+194 silly fetchPackageMetaData     at emitTwo (events.js:106:13)
+194 silly fetchPackageMetaData     at Request.emit (events.js:191:7)
+194 silly fetchPackageMetaData     at Request.<anonymous> (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/request/request.js:1067:10)
+194 silly fetchPackageMetaData     at emitOne (events.js:101:20)
+194 silly fetchPackageMetaData     at Request.emit (events.js:188:7)
+194 silly fetchPackageMetaData     at IncomingMessage.<anonymous> (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/request/request.js:988:12)
+194 silly fetchPackageMetaData   pkgid: 'serverless-build-plugin',
+194 silly fetchPackageMetaData   statusCode: 404,
+194 silly fetchPackageMetaData   code: 'E404' }
+195 silly rollbackFailedOptional Starting
+196 silly rollbackFailedOptional Finishing
+197 silly runTopLevelLifecycles Starting
+198 silly runTopLevelLifecycles Finishing
+199 silly install printInstalled
+200 verbose stack Error: Registry returned 404 for GET on https://registry.npmjs.org/serverless-build-plugin
+200 verbose stack     at makeError (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:264:12)
+200 verbose stack     at CachingRegistryClient.<anonymous> (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:242:14)
+200 verbose stack     at Request._callback (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:172:14)
+200 verbose stack     at Request.self.callback (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/request/request.js:200:22)
+200 verbose stack     at emitTwo (events.js:106:13)
+200 verbose stack     at Request.emit (events.js:191:7)
+200 verbose stack     at Request.<anonymous> (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/request/request.js:1067:10)
+200 verbose stack     at emitOne (events.js:101:20)
+200 verbose stack     at Request.emit (events.js:188:7)
+200 verbose stack     at IncomingMessage.<anonymous> (/home/sam/.nvm/versions/node/v6.3.1/lib/node_modules/npm/node_modules/request/request.js:988:12)
+201 verbose statusCode 404
+202 verbose pkgid serverless-build-plugin
+203 verbose cwd /home/sam/W/serverless-build-plugin/test
+204 error Linux 4.7.0-1-ARCH
+205 error argv "/home/sam/.nvm/versions/node/v6.3.1/bin/node" "/home/sam/.nvm/versions/node/v6.3.1/bin/npm" "i"
+206 error node v6.3.1
+207 error npm  v3.10.3
+208 error code E404
+209 error 404 Registry returned 404 for GET on https://registry.npmjs.org/serverless-build-plugin
+210 error 404
+211 error 404 'serverless-build-plugin' is not in the npm registry.
+212 error 404 You should bug the author to publish it (or use the name yourself!)
+213 error 404 It was specified as a dependency of 'untitled'
+214 error 404 Note that you can also install from a
+215 error 404 tarball, folder, http url, or git url.
+216 verbose exit [ 1, true ]
