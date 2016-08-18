@@ -11,12 +11,16 @@ plugins:
 
 custom:
   build:
-    file: './webpack.config.js'
+    method: "babel"
+    # file: './webpack.config.js'
 
 defaults:
  stage: dev
  region: ap-southeast-2
 
 functions:
-  hello:
-    handler: handlers.hello
+  one:
+    handler: functions.one.handler.handler
+
+  two:
+    handler: functions.two.handler.handler
