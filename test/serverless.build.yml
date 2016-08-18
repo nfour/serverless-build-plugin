@@ -1,0 +1,16 @@
+ignore:
+  - * # Root dir files can fuck off
+
+functions:
+  one:
+    include:
+      - functions/one/**
+      - lib/one/**
+      - !!js/regexp .+(js|json)$
+
+    ignore:
+      - lib/one/*.json
+
+  two:
+    ignore:
+      - lib/one/**
