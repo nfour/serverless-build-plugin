@@ -11,6 +11,10 @@ The plugin can be configured both on the commandline and under `custom.build` in
 - `sls deploy --build=./buildFile.js`
 - `sls deploy --bundle` use bundling instead of a build file.
 
+### ROADBLOCKS
+- serverless 1.0 still doesn't support packaging single functions
+    - See: [#1719](https://github.com/serverless/serverless/issues/1719) & [#1777](https://github.com/serverless/serverless/issues/1777)
+
 ### FEATURE GOALS
 - [x] Allow for arbitrary build files to export:
     - Functions (which should return any of the below)
@@ -28,6 +32,7 @@ The plugin can be configured both on the commandline and under `custom.build` in
     - [x] Purges existing build folder (as an option)
     - [x] Externals are copied over
         - Will be fixed when bundle is combined
+    - [ ] Ensure parity
 
 - [x] Combine both `buildFile` and `bundle` into one, as bundle will need a build method anyway. Not orthoganal.
 - [ ] node_modules packaging
