@@ -1,4 +1,4 @@
 /admin.env
 node_modules/*
-!node_modules/serverless-build-plugin.js
+!node_modules/serverless-build-plugin
 .serverless
