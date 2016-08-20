@@ -1,4 +1,4 @@
-ignore:
+exclude:
   - * # Root dir files can fuck off
 
 functions:
@@ -8,9 +8,9 @@ functions:
       - lib/one/**
       - !!js/regexp .+(js|json)$
 
-    ignore:
+    exclude:
       - lib/one/*.json
 
   two:
-    ignore:
+    exclude:
       - lib/one/**
