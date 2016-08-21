@@ -1,4 +1,7 @@
 # SERVERLESS BUILD PLUGIN
+
+`*** WARNING ***` This is a development release, do not use outside of experimentation.
+
 This plugin is intended to add flexibility to the serverless build process for serverless 1.0.
 
 Currently in testing state. To try this, simply:

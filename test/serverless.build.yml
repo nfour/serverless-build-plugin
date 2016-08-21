@@ -1,16 +1,15 @@
-exclude:
-  - * # Root dir files can fuck off
-
+excludes:
+  - ./*
 functions:
   one:
-    include:
+    includes:
       - functions/one/**
       - lib/one/**
       - !!js/regexp .+(js|json)$
 
-    exclude:
+    excludes:
       - lib/one/*.json
 
   two:
-    exclude:
+    excludes:
       - lib/one/**

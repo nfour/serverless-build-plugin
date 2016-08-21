@@ -1,2 +1,2 @@
 require('babel-register') // FIXME: testing only
-module.exports = require('./lib/ServerlessBuild')
+module.exports = require('./lib/ServerlessBuildPlugin')

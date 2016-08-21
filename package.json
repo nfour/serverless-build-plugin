@@ -1,7 +1,8 @@
 {
-    "name": "serverless-build-plugin",
-    "version": "0.0.1-alpha",
-    "main": "./index",
+    "name"    : "serverless-build-plugin",
+    "version" : "0.0.1-alpha.2",
+    "main"    : "./index",
+
     "dependencies": {
         "is-stream" : "~1.1.0",
         "yazl"      : "~2.4.1",
@@ -10,11 +11,13 @@
         "resolve"   : "~1.1.7",
         "walk"      : "~2.3.9",
         "minimatch" : "~3.0.3",
+        "js-yaml"   : "~3.6.1",
         "lutils"    : "^1.1.0"
     },
+
     "devDependencies": {
-        "eslint"              : "~2.7.0",
-        "babel-eslint"        : "~6.0.2",
+        "eslint"       : "~2.7.0",
+        "babel-eslint" : "~6.0.2",
 
         "nyc"   : "~6.2.1",
         "mocha" : "~2.4.5",
@@ -37,5 +40,10 @@
         "serverless-cors-plugin"    : "~0.4.1",
         "serverless-webpack-plugin" : "~0.4.5",
         "webpack"                   : "~2.1.0-beta.20"
+    },
+
+    "respository": {
+        "type" : "git",
+        "url"  : "https://github.com/nfour/serverless-build-plugin"
     }
 }
