@@ -1,15 +1,19 @@
+method: "babel"
+# file: ./webpack.config.js
+
 excludes:
-  - ./*
+  - "*"
+
+
 functions:
   one:
     includes:
-      - functions/one/**
-      - lib/one/**
-      - !!js/regexp .+(js|json)$
+      - "functions/one/**"
+      - "lib/one/**"
 
     excludes:
-      - lib/one/*.json
+      - "**/*.json"
 
   two:
     excludes:
-      - lib/one/**
+      - "lib/one/**"
