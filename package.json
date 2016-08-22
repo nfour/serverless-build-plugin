@@ -13,6 +13,7 @@
         "minimatch" : "~3.0.3",
         "js-yaml"   : "~3.6.1",
         "uglify-js" : "~2.7.0",
+        "babel-core" : "~6.13.0",
         "lutils"    : "^1.1.0"
     },
 

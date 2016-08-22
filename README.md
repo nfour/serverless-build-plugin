@@ -64,3 +64,5 @@ There are three ways to configure the plugin:
             - Can then seperate function includes in a clear way, with both regexp and globs
 
     - [x] Minify .js
+
+- [ ] Make webpack and babel peer dependencies
