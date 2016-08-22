@@ -4,32 +4,43 @@
 
 This plugin is intended to add flexibility to the serverless build process for serverless 1.0.
 
-Currently in testing state. To try this, simply:
-- npm install both `./test` and `./`
-- then `sls deploy` in the test folder with a default AWS profile or `export AWS_PROFILE=myprofile`.
+Currently in testing state. To run:
+```
+npm i
+cd test
+npm i
+export AWS_PROFILE=default
+sls deploy --method=babel --function=one
+```
 
-The plugin can be configured both on the commandline and under `custom.build` in `serverless.yml`
+## BUILD METHODS
 
-- `sls deploy --keep`, keep build files and artifacts, do not purge.
-- `sls deploy --build=./buildFile.js`
-- `sls deploy --bundle` use bundling instead of a build file.
+There are two ways to build:
+- **Bundling**
+    - This will preserve the existing source filestructure and potentially any non-excluded files.
+    - Optionally, each JS file in babel'ed and uglified individually
+- **Build Files**
+    - With this method, specify a file (or let it default)
+    - The file can return a string, a stream or a webpack.config.js
+    - If the file exports a default function, its return value will instead be used as above
+    - Webpack configs will be executed, and their output injected into the zip
+    - Strings & streams will be piped into a `handler.js`
 
-### ROADBLOCKS
+## CONFIGURATION
+
+There are three ways to configure the plugin:
+- Create a `serverless.build.yml` inside the project directory
+- Populate `custom.build` in `serverless.yml`
+- The commandline
+    - `sls deploy --keep`, keep build files and artifacts, do not purge.
+    - `sls deploy --build=./buildFile.js`
+    - `sls deploy --bundle` use bundling instead of a build file.
+
+## ROADBLOCKS
 - serverless 1.0 still doesn't support packaging single functions
     - See: [#1719](https://github.com/serverless/serverless/issues/1719) & [#1777](https://github.com/serverless/serverless/issues/1777)
 
-### FEATURE GOALS
-- [x] Allow for arbitrary build files to export:
-    - Functions (which should return any of the below)
-    - Webpack configs
-    - File strings & buffers
-    - File streams
-
-- [ ] Allow for `minimal packaging`, simply with babel and non-dev dependency resolution and minification in order to maintain the same structure as the source.
-    - This will allow issues with webpack to be sidestepped by sacrificing some file size
-    - Closer to a node environment
-
-### TODO
+## TODO
 - [ ] Test webpack building, get parity with `severless-webpack-plugin`
     - [x] Webpack builds hanlder and source map
     - [x] Purges existing build folder (as an option)
@@ -45,16 +56,11 @@ The plugin can be configured both on the commandline and under `custom.build` in
     - [x] Cleanup
     - [ ] Minify .js
 
-- [ ] Create a babel default build method, like webpack, for the servicePath
-    - [ ] Figure out file include and ignoring to ensure minimal builds on a per function basis
+- [x] Create a babel default build method, like webpack, for the servicePath
+    - [x] Figure out file include and ignoring to ensure minimal builds on a per function basis
         - [ ] Option 1: Use multiple `.serverless-(ignore|include)` that function like .gitignore files
-        - [ ] Option 2: Use a `serverless.build.yml`
+        - [x] Option 2: Use a `serverless.build.yml`
             - Specify the build options for each function individually, including root options
             - Can then seperate function includes in a clear way, with both regexp and globs
 
-    - [ ] Minify .js
-
-
-### REF
-- https://github.com/asprouse/serverless-webpack-plugin/blob/master/index.js
-- https://github.com/redbadger/serverless-webpack-plugin/blob/a9235521ef395513d48f6ca41bf6779744d8ebdb/1.0/src/index.js
+    - [x] Minify .js
