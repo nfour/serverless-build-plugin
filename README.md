@@ -39,6 +39,7 @@ There are three ways to configure the plugin:
 ## ROADBLOCKS
 - serverless 1.0 still doesn't support packaging single functions
     - See: [#1719](https://github.com/serverless/serverless/issues/1719) & [#1777](https://github.com/serverless/serverless/issues/1777)
+    - Likely to be merged soon! [#1906](https://github.com/serverless/serverless/pull/1906)
 
 ## TODO
 - [ ] Test webpack building, get parity with `severless-webpack-plugin`
