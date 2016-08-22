@@ -37,11 +37,7 @@
         "babel-core"                                          : "^6.11.0",
         "babel-cli"                                           : "^6.1.0",
 
-        "serverless"                : "beta",
-        "serverless-client-s3"      : "~2.0.0",
-        "serverless-cors-plugin"    : "~0.4.1",
-        "serverless-webpack-plugin" : "~0.4.5",
-        "webpack"                   : "~2.1.0-beta.20"
+        "webpack" : "~2.1.0-beta.20"
     },
 
     "respository": {
