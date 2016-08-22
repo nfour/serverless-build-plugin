@@ -1,6 +1,8 @@
 method: "babel"
 # file: ./webpack.config.js
 
+uglify: true
+
 excludes:
   - "*"
 
