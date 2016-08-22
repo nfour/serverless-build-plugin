@@ -18,7 +18,7 @@ defaults:
 
 functions:
   one:
-    handler: functions.one.handler.handler
+    handler: functions/one/handler.handler
 
   two:
-    handler: functions.two.handler.handler
+    handler: functions/two/handler.handler
