@@ -1,6 +1,6 @@
 # For full config options, check the docs: v1.docs.serverless.com
 
-service: v1test
+service: v1test3
 
 provider:
   name: aws
