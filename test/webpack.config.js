@@ -9,7 +9,7 @@ var config = {
     target: 'node',
     externals: [
         'aws-sdk',
-        'lutils-merge'
+        'lutils'
     ],
     resolve: {
         extensions: ['', '.js']
