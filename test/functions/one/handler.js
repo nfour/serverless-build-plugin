@@ -1,7 +1,12 @@
 import number from '../../lib/one'
+import { typeOf } from 'lutils'
+import Promise from 'bluebird'
 
-export function handler(event, context, done) {
+export async function handler(event, context, done) {
     console.log({ number })
+    console.log({ env: process.env })
 
-    done(null, { message: number + number })
+    await Promise.delay(200)
+
+    done(null, { message: number + typeOf(number) })
 }
