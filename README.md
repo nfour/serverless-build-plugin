@@ -33,7 +33,7 @@ There are three ways to configure the plugin:
 - Populate `custom.build` in `serverless.yml`
 - The commandline
     - `sls deploy --keep`, keep build files and artifacts, do not purge.
-    - `sls deploy --build=./buildFile.js`
+    - `sls deploy --file=./buildFile.js`
     - `sls deploy --bundle` use bundling instead of a build file.
 
 ## ROADBLOCKS
