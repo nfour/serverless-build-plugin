@@ -6,7 +6,6 @@ uglify: true
 excludes:
   - "*"
 
-
 functions:
   one:
     includes:
