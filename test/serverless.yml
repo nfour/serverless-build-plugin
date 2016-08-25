@@ -16,6 +16,10 @@ defaults:
  stage: dev
  region: ap-southeast-2
 
+package:
+    exclude:
+        - node_modules
+
 functions:
   one:
     handler: functions/one/handler.handler
