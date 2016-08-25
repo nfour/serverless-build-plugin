@@ -1,10 +1,10 @@
-method: "babel"
-# file: ./webpack.config.js
+method: "bundle"
 
-uglify: true
+babel  : true
+uglify : true
 
 excludes:
-  - "*"
+  - "*" # Ignores the root directory
 
 functions:
   one:

@@ -4,17 +4,17 @@
     "main"    : "./index",
 
     "dependencies": {
-        "is-stream" : "~1.1.0",
-        "yazl"      : "~2.4.1",
-        "bluebird"  : "~3.4.0",
-        "fs-extra"  : "~0.26.0",
-        "resolve"   : "~1.1.7",
-        "walk"      : "~2.3.9",
-        "minimatch" : "~3.0.3",
-        "js-yaml"   : "~3.6.1",
-        "uglify-js" : "~2.7.0",
-        "babel-core" : "~6.13.0",
-        "lutils"    : "^1.1.0"
+        "is-stream"   : "~1.1.0",
+        "yazl"        : "~2.4.1",
+        "bluebird"    : "~3.4.0",
+        "fs-extra"    : "~0.26.0",
+        "resolve-pkg" : "~0.2.0",
+        "walk"        : "~2.3.9",
+        "minimatch"   : "~3.0.3",
+        "js-yaml"     : "~3.6.1",
+        "uglify-js"   : "~2.7.0",
+        "babel-core"  : "~6.13.0",
+        "lutils"      : "^1.1.0"
     },
 
     "devDependencies": {
@@ -27,7 +27,7 @@
 
         "babel-loader" : "^6.2.0",
 
-        "babel-preset-es2015"                                 : "latest",
+        "babel-preset-node6"                                  : "latest",
         "babel-preset-stage-1"                                : "^6.0.0",
         "babel-plugin-transform-async-to-module-method"       : "latest",
         "babel-plugin-transform-inline-environment-variables" : "latest",

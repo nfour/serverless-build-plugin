@@ -2,28 +2,32 @@
 
 `*** WARNING ***` This is a development release, do not use outside of experimentation.
 
-This plugin is intended to add flexibility to the serverless build process for serverless 1.0.
+This plugin is intended to add flexibility to the serverless build process for nodejs, under serverless 1.0.
 
-Currently in testing state. To run:
+Currently in testing state. To try it:
 ```
 npm i
 cd test
 npm i
 export AWS_PROFILE=default
-sls deploy --method=babel --function=one
+sls deploy
+sls deploy function -f one
+sls invoke function -f one
 ```
+`sls deploy` will currently take a while due to packaging everything for the first deployment.
 
-## BUILD METHODS
+
+## METHODS
 
 There are two ways to build:
 - **Bundling**
     - This will preserve the existing source filestructure and potentially any non-excluded files.
     - Optionally, each JS file in babel'ed and uglified individually
 - **Build Files**
-    - With this method, specify a file (or let it default)
-    - The file can return a string, a stream or a webpack.config.js
-    - If the file exports a default function, its return value will instead be used as above
-    - Webpack configs will be executed, and their output injected into the zip
+    - With this method, specify a file (or let it default to a `webpack.config.js`)
+    - The file can return a string, a stream or a `webpack.config.js` object
+    - If the file exports a default function, its return value will instead be used, as above
+    - Webpack configs will be executed, and their output injected into the zip, including `externals` modules
     - Strings & streams will be piped into a `handler.js`
 
 ## CONFIGURATION
@@ -32,9 +36,20 @@ There are three ways to configure the plugin:
 - Create a `serverless.build.yml` inside the project directory
 - Populate `custom.build` in `serverless.yml`
 - The commandline
-    - `sls deploy --keep`, keep build files and artifacts, do not purge.
-    - `sls deploy --file=./buildFile.js`
-    - `sls deploy --bundle` use bundling instead of a build file.
+    - `sls deploy function -f one --file=./buildFile.js`
+
+### OPTIONS
+- `babel`
+    - Can be `true`, will search for a `.babelrc` in the project directory
+    - Can be a babelrc-like object
+- `uglify`
+    - When `true`, will uglify source & modules
+    - Can be an options object, passed to uglify
+- `method`
+    - When `bundle`, will use bundling method
+    - When `file`, will use a build file or webpack config
+- `file`
+    - Path to a build file or webpack config
 
 ## ROADBLOCKS
 - serverless 1.0 still doesn't support packaging single functions
@@ -42,28 +57,20 @@ There are three ways to configure the plugin:
     - Likely to be merged soon! [#1906](https://github.com/serverless/serverless/pull/1906)
 
 ## TODO
-- [ ] Test webpack building, get parity with `severless-webpack-plugin`
-    - [x] Webpack builds hanlder and source map
-    - [x] Purges existing build folder (as an option)
-    - [x] Externals are copied over
-        - Will be fixed when bundle is combined
-    - [ ] Ensure parity
-
-- [x] Combine both `buildFile` and `bundle` into one, as bundle will need a build method anyway. Not orthoganal.
-- [ ] node_modules packaging
-    - [x] Copys them over
-        - [x] Nested deps too
-    - [x] Purges existing build folder
-    - [x] Cleanup
-    - [ ] Minify .js
-
-- [x] Create a babel default build method, like webpack, for the servicePath
-    - [x] Figure out file include and ignoring to ensure minimal builds on a per function basis
-        - [ ] Option 1: Use multiple `.serverless-(ignore|include)` that function like .gitignore files
-        - [x] Option 2: Use a `serverless.build.yml`
-            - Specify the build options for each function individually, including root options
-            - Can then seperate function includes in a clear way, with both regexp and globs
-
-    - [x] Minify .js
-
-- [ ] Make webpack and babel peer dependencies
+- [x] Bundling based builds
+    - [x] Source code
+        - [x] Minified with uglifyjs, includes .map
+        - [x] Babelifie, includes .map
+    - [x] node_modules
+        - [x] Recursive resolution of non-dev dependencies
+            - [x] Also includes "meta" packages
+        - [x] Minified with uglifyjs
+- [x] File based builds
+    - [x] Webpack
+        - [x] Partiy with `severless-webpack-plugin`
+        - [x] External node_modules are included
+    - [x] Build files
+        - [x] Can inherit a webpack config
+        - [x] Can pipe buffers and streams to a handler.js
+- [x] Performs cleanup
+- [ ] Make `webpack` and `babel-core` peer dependencies

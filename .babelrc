@@ -1,11 +1,7 @@
 {
-    "presets": ["es2015", "stage-1"],
+    "presets": ["node6", "stage-1"],
     "plugins": [
         "add-module-exports",
-        [
-            "transform-runtime",
-            { "polyfill": false, "regenerator": true }
-        ],
         [
             "transform-async-to-module-method",
             { "module": "bluebird", "method": "coroutine" }

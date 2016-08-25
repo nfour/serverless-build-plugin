@@ -1,3 +1,4 @@
+import 'babel-polyfill'
 import number from '../../lib/one'
 import { typeOf } from 'lutils'
 import Promise from 'bluebird'

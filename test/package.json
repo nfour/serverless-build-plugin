@@ -9,9 +9,10 @@
     "aws-sdk"
   ],
   "dependencies": {
-    "source-map-support": "^0.4.2",
-    "bluebird": "latest",
-    "lutils": "^1.2.1"
+    "source-map-support" : "^0.4.2",
+    "bluebird"           : "latest",
+    "babel-polyfill"     : "latest",
+    "lutils"             : "^1.2.1"
   },
   "devDependencies": {
     "json-loader"  : "^0.5.4",
@@ -24,7 +25,6 @@
     "babel-plugin-transform-inline-environment-variables" : "latest",
     "babel-plugin-add-module-exports"                     : "^0.2.0",
     "babel-plugin-transform-runtime"                      : "latest",
-    "babel-polyfill"                                      : "latest",
     "babel-core"                                          : "^6.11.0",
 
     "serverless"              : "beta",
