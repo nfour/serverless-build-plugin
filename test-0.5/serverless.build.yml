@@ -1,0 +1,23 @@
+method: "babel"
+
+babel  : true
+uglify : true
+
+excludes:
+  - "*" # Ignores the root directory
+
+functions:
+  test:
+    includes:
+      - "test/**"
+      - "lib/one/**"
+
+    excludes:
+      - "**/*.json"
+
+  blah:
+    includes:
+      - "blah/**"
+
+    excludes:
+      - "**/*.json"

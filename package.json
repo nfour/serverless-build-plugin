@@ -6,6 +6,8 @@
     "dependencies": {
         "is-stream"   : "~1.1.0",
         "yazl"        : "~2.4.1",
+        "yauzl"     : "~2.6.0",
+        "mkdirp"    : "~0.5.1",
         "bluebird"    : "~3.4.0",
         "fs-extra"    : "~0.26.0",
         "resolve-pkg" : "~0.2.0",

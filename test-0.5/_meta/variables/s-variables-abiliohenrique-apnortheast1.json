@@ -1,0 +1,6 @@
+{
+  "region": "ap-northeast-1",
+  "resourcesStackName": "sls-test-build-abiliohenrique-r",
+  "iamRoleArnLambda": "arn:aws:iam::257015880742:role/sls-test-build-abiliohenrique-r-IamRoleLambda-199PHVFMZ5O5B",
+  "apiGatewayApi": "sls-test-build"
+}
