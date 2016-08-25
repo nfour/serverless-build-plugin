@@ -1,4 +1,4 @@
-import 'babel-polyfill'
+import 'source-map-support/register'
 import number from '../../lib/one'
 import { typeOf } from 'lutils'
 import Promise from 'bluebird'
@@ -9,5 +9,7 @@ export async function handler(event, context, done) {
 
     await Promise.delay(200)
 
-    done(null, { message: number + typeOf(number) })
+    await require('./file')()
+
+    done(null, { message: JSON.stringify({ num: number + typeOf(number) }) })
 }

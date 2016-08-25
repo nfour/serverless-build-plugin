@@ -74,4 +74,15 @@ There are three ways to configure the plugin:
         - [x] Can inherit a webpack config
         - [x] Can pipe buffers and streams to a handler.js
 - [x] Performs cleanup
-- [ ] Make `webpack` and `babel-core` peer dependencies
+- [ ] Optimizations & refactors
+    - [ ] Refactor out the plugin inheritence dependency
+        - [x] ModuleBundler
+        - [x] SourceBundler
+        - [ ] FileBuild
+        - [ ] Webpack
+        - [x] Babel
+        - [x] Uglify
+    - [ ] Make ServerlessBuildPlugin work on a per-function workflow
+    - [ ] Change transforms to write to file instead of memory
+        - This could bloat memory quite a bit as it stands
+    - [ ] Make `webpack` and `babel-core` peer dependencies

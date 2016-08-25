@@ -11,7 +11,7 @@
   "dependencies": {
     "source-map-support" : "^0.4.2",
     "bluebird"           : "latest",
-    "babel-polyfill"     : "latest",
+    "babel-runtime"     : "latest",
     "lutils"             : "^1.2.1"
   },
   "devDependencies": {
