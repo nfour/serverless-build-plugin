@@ -1,7 +1,7 @@
 method: "bundle"
 
 babel  : true
-uglify : true
+uglify : null
 
 excludes:
   - "*" # Ignores the root directory

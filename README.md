@@ -12,7 +12,7 @@ npm i
 export AWS_PROFILE=default
 sls deploy
 sls deploy function -f one
-sls invoke function -f one
+sls invoke -f one
 ```
 `sls deploy` will currently take a while due to packaging everything for the first deployment.
 This is a bug due to not being able to hook into it.
