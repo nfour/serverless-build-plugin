@@ -1,5 +1,6 @@
 method: "bundle"
 
+sourceMaps: true
 babel  : true
 uglify : null
 
