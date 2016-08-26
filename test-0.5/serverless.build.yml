@@ -1,23 +1,24 @@
-method: "babel"
+method: "bundle"
 
-babel  : true
-uglify : true
+sourceMaps : true
+babel      : true
+uglify     : true
 
 excludes:
   - "*" # Ignores the root directory
 
 functions:
   test:
-    includes:
+    include:
       - "test/**"
       - "lib/one/**"
 
-    excludes:
+    exclude:
       - "**/*.json"
 
   blah:
-    includes:
+    include:
       - "blah/**"
 
-    excludes:
+    exclude:
       - "**/*.json"
