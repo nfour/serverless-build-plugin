@@ -1,49 +1,42 @@
 {
-    "name"    : "serverless-build-plugin",
-    "version" : "0.0.3-alpha.1",
-    "main"    : "./index",
-
-    "dependencies": {
-        "is-stream"   : "~1.1.0",
-        "yazl"        : "~2.4.1",
-        "yauzl"     : "~2.6.0",
-        "mkdirp"    : "~0.5.1",
-        "bluebird"    : "~3.4.0",
-        "fs-extra"    : "~0.26.0",
-        "resolve-pkg" : "~0.2.0",
-        "walk"        : "~2.3.9",
-        "minimatch"   : "~3.0.3",
-        "js-yaml"     : "~3.6.1",
-        "uglify-js"   : "~2.7.0",
-        "babel-core"  : "~6.13.0",
-        "lutils"      : "^1.1.0"
-    },
-
-    "devDependencies": {
-        "eslint"       : "~2.7.0",
-        "babel-eslint" : "~6.0.2",
-
-        "nyc"   : "~6.2.1",
-        "mocha" : "~2.4.5",
-        "chai"  : "~3.5.0",
-
-        "babel-loader" : "^6.2.0",
-
-        "babel-preset-node6"                                  : "latest",
-        "babel-preset-stage-1"                                : "^6.0.0",
-        "babel-plugin-transform-async-to-module-method"       : "latest",
-        "babel-plugin-transform-inline-environment-variables" : "latest",
-        "babel-plugin-add-module-exports"                     : "^0.2.0",
-        "babel-plugin-transform-runtime"                      : "latest",
-        "babel-polyfill"                                      : "latest",
-        "babel-core"                                          : "^6.11.0",
-        "babel-cli"                                           : "^6.1.0",
-
-        "webpack" : "~2.1.0-beta.20"
-    },
-
-    "repository": {
-        "type" : "git",
-        "url"  : "https://github.com/nfour/serverless-build-plugin"
-    }
+  "name": "serverless-build-plugin",
+  "version": "0.0.3",
+  "main": "./index",
+  "dependencies": {
+    "is-stream": "~1.1.0",
+    "yazl": "~2.4.1",
+    "yauzl": "~2.6.0",
+    "mkdirp": "~0.5.1",
+    "bluebird": "~3.4.0",
+    "fs-extra": "~0.26.0",
+    "resolve-pkg": "~0.2.0",
+    "walk": "~2.3.9",
+    "minimatch": "~3.0.3",
+    "js-yaml": "~3.6.1",
+    "uglify-js": "~2.7.0",
+    "babel-core": "~6.13.0",
+    "lutils": "^1.1.0"
+  },
+  "devDependencies": {
+    "eslint": "~2.7.0",
+    "babel-eslint": "~6.0.2",
+    "nyc": "~6.2.1",
+    "mocha": "~2.4.5",
+    "chai": "~3.5.0",
+    "babel-loader": "^6.2.0",
+    "babel-preset-node6": "latest",
+    "babel-preset-stage-1": "^6.0.0",
+    "babel-plugin-transform-async-to-module-method": "latest",
+    "babel-plugin-transform-inline-environment-variables": "latest",
+    "babel-plugin-add-module-exports": "^0.2.0",
+    "babel-plugin-transform-runtime": "latest",
+    "babel-polyfill": "latest",
+    "babel-core": "^6.11.0",
+    "babel-cli": "^6.1.0",
+    "webpack": "~2.1.0-beta.20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nfour/serverless-build-plugin"
+  }
 }
