@@ -4,18 +4,18 @@ sourceMaps : true
 babel      : true
 uglify     : true
 
-excludes:
+exclude:
   - "*" # Ignores the root directory
 
 functions:
   one:
-    includes:
+    include:
       - "functions/one/**"
       - "lib/one/**"
 
-    excludes:
+    exclude:
       - "**/*.json"
 
   two:
-    excludes:
+    exclude:
       - "lib/one/**"
