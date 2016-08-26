@@ -1,0 +1,9 @@
+{
+  "name": "sls-test-build",
+  "custom": {
+    "build": {}
+  },
+  "plugins": [
+    "serverless-build-plugin"
+  ]
+}
