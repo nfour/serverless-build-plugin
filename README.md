@@ -90,6 +90,8 @@ There are three ways to configure the plugin:
         - [x] Webpack
         - [x] Babel
         - [x] Uglify
+    - [ ] Use serverless' built in yaml parser (which resolve recursively)
+        - Requires an intialization step
     - [ ] Change transforms to write to file instead of memory
         - This could bloat memory quite a bit as it stands
     - [ ] Make `webpack` and `babel-core` peer dependencies
