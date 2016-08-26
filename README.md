@@ -12,10 +12,14 @@ npm i
 export AWS_PROFILE=default
 sls deploy
 sls deploy function -f one
-sls invoke -f one
+sls invoke -f one --log
+sls deploy function -f one --method=file
+sls invoke -f one --log
 ```
 `sls deploy` will currently take a while due to packaging everything for the first deployment.
 This is a bug due to not being able to hook into it.
+
+After running the above you should have build the `one` function via bundling and via webpack to compare.
 
 
 ## METHODS
@@ -54,8 +58,8 @@ There are three ways to configure the plugin:
 
 ## ROADBLOCKS
 - serverless 1.0 still doesn't support packaging single functions
-    - See: [#1719](https://github.com/serverless/serverless/issues/1719) & [#1777](https://github.com/serverless/serverless/issues/1777)
-    - Likely to be merged soon! [#1906](https://github.com/serverless/serverless/pull/1906)
+    - [#1719](https://github.com/serverless/serverless/issues/1719)
+    - [#1777](https://github.com/serverless/serverless/issues/1777)
 
 ## TODO
 - [x] Bundling based builds
@@ -75,11 +79,11 @@ There are three ways to configure the plugin:
         - [x] Can pipe buffers and streams to a handler.js
 - [x] Performs cleanup
 - [ ] Optimizations & refactors
-    - [ ] Refactor out the plugin inheritence dependency
+    - [x] Refactor out the plugin inheritence dependency
         - [x] ModuleBundler
         - [x] SourceBundler
-        - [ ] FileBuild
-        - [ ] Webpack
+        - [x] FileBuild
+        - [x] Webpack
         - [x] Babel
         - [x] Uglify
     - [ ] Make ServerlessBuildPlugin work on a per-function workflow
