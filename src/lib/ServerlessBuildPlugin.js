@@ -129,7 +129,7 @@ export default class ServerlessBuildPlugin {
             return obj
         }, {})
 
-
+        this.serverless.cli.log(`Serverless Build config:`)
         console.inspect(this.config)
     }
 

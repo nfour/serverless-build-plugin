@@ -62,6 +62,7 @@ There are three ways to configure the plugin:
     - [#1777](https://github.com/serverless/serverless/issues/1777)
 
 ## TODO
+- [x] Serverless@0.5 support
 - [ ] `sls deploy` currently broken
     - Awaiting upstream bug fix
 - [ ] Make ServerlessBuildPlugin work on a per-function workflow
