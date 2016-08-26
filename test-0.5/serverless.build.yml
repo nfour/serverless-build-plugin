@@ -1,8 +1,8 @@
 method: "bundle"
 
-sourceMaps : true
+sourceMaps : false
 babel      : true
-uglify     : true
+uglify     : false
 
 excludes:
   - "*" # Ignores the root directory
