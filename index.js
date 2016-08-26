@@ -1,22 +1,16 @@
 require('babel-register') // FIXME: testing only
-var fs = require('fs')
+var path = require('path')
+var semver = require('semver')
 
-let slsVersion
-
-try {
-    fs.accessSync('s-project.json', fs.R_OK)
-    slsVersion = '0.5'
-} catch (e) {
-    slsVersion = '1.0'
-}
+const serverlessVersion = require(path.join(path.dirname(process.mainModule.filename), '../package.json')).version
 
 let exported
 
-if (slsVersion === '1.0') {
-    exported = require('./lib/ServerlessBuildPlugin')
-} else {
+if (semver.satisfies(serverlessVersion, '^0.5.0')) {
     exported = function(S) {
         return require('./lib/ServerlessBuildPlugin-0.5')(S)
     }
+} else {
+    exported = require('./lib/ServerlessBuildPlugin')
 }
 module.exports = exported
