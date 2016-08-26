@@ -43,6 +43,29 @@ There are three ways to configure the plugin:
 - The commandline
     - `sls deploy function -f one --file=./buildFile.js`
 
+```yaml
+# ./serverless.build.yml
+
+method: "bundle"
+
+sourceMaps : true
+babel      : true # Will use ./.babelrc
+uglify     : true # Will use defaults
+
+exclude:
+  - "*" # Ignores the root directory
+
+functions:
+  one:
+    include:
+      - "functions/one/**"
+      - "lib/one/**"
+
+    exclude:
+      - "**/*.json"
+```
+
+
 ### OPTIONS
 - `babel`
     - Can be `true`, will search for a `.babelrc` in the project directory
