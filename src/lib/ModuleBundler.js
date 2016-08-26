@@ -30,9 +30,7 @@ export default class ModuleBundler {
      *  inside the artifact.
      */
     async bundle({ include = [], exclude = [] }) {
-        include = include.filter((packageName) => exclude.indexOf(packageName) < 0)
-
-        const modules = await this._resolveDependencies(this.config.servicePath, { include })
+        const modules = await this._resolveDependencies(this.config.servicePath, { include, exclude })
 
         const transforms = await this._createTransforms()
 
@@ -103,22 +101,27 @@ export default class ModuleBundler {
      *  @returns {Array}
      *      [ { name, packagePath, packagePath } ]
      */
-    async _resolveDependencies(initialPackageDir, { include = [] } = {}) {
+    async _resolveDependencies(initialPackageDir, { include = [], exclude = [] } = {}) {
         const resolvedDeps = []
         const cache        = {}
         const seperator    = `${sep}node_modules${sep}`
-
+        console.log({ include, exclude })
         /**
          *  Resolves packages to their package root directory & also resolves dependant packages recursively.
          *  - Will also ignore the input package in the results
          */
-        async function recurse(packageDir, _include = []) {
+        async function recurse(packageDir, _include = [], _exclude = []) {
             const packageJson = require( path.join(packageDir, './package.json') )
 
             const { name, dependencies } = packageJson
 
             for ( let packageName in dependencies ) {
-                if ( _include.length && _include.indexOf(packageName) === -1 ) continue
+                /**
+                 *  Skips on exclude matches, if set
+                 *  Skips on include mis-matches, if set
+                 */
+                if ( _exclude.length && _exclude.indexOf(packageName) > -1 ) continue
+                if ( _include.length && _include.indexOf(packageName) < 0 ) continue
 
                 const resolvedDir  = resolvePackage(packageName, { cwd: packageDir })
                 const relativePath = path.join( 'node_modules', resolvedDir.split(`${seperator}`).slice(1).join(seperator) )
@@ -137,7 +140,7 @@ export default class ModuleBundler {
             }
         }
 
-        await recurse(initialPackageDir, include)
+        await recurse(initialPackageDir, include, exclude)
 
         return resolvedDeps
     }

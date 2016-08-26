@@ -44,8 +44,9 @@
     },
 
     "scripts": {
-        "build" : "babel ./src --out-dir ./dist",
-        "prepublish": "npm run build"
+        "build"      : "babel $BABEL_OPTIONS ./src --out-dir ./dist",
+        "dev"        : "BABEL_OPTIONS=--watch npm run build",
+        "prepublish" : "npm run build"
     },
 
     "repository": {

@@ -5,19 +5,16 @@
   "scripts": {
     "redeploy": "sls remove && sls deploy"
   },
-  "externalDependencies": [
-    "aws-sdk"
-  ],
   "dependencies": {
     "source-map-support" : "^0.4.2",
     "bluebird"           : "latest",
+    "aws-sdk"            : "latest",
     "babel-runtime"      : "latest",
     "lutils"             : "^1.2.1"
   },
   "devDependencies": {
     "json-loader"  : "^0.5.4",
     "babel-loader" : "^6.2.0",
-    "aws-sdk"      : "latest",
     "webpack"      : "~2.1.0-beta.20",
 
     "babel-preset-es2015-node4"                           : "latest",

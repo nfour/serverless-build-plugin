@@ -119,3 +119,4 @@ functions:
     - [ ] Change transforms to write to file instead of memory
         - This could bloat memory quite a bit as it stands
     - [ ] Make `webpack` and `babel-core` peer dependencies
+    - [ ] Inline source maps for uglifyjs

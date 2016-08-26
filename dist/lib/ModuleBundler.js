@@ -62,11 +62,7 @@ class ModuleBundler {
         var _ref$exclude = _ref.exclude;
         let exclude = _ref$exclude === undefined ? [] : _ref$exclude;
         return (0, _bluebird.coroutine)(function* () {
-            include = include.filter(function (packageName) {
-                return exclude.indexOf(packageName) < 0;
-            });
-
-            const modules = yield _this._resolveDependencies(_this.config.servicePath, { include: include });
+            const modules = yield _this._resolveDependencies(_this.config.servicePath, { include: include, exclude: exclude });
 
             const transforms = yield _this._createTransforms();
 
@@ -157,8 +153,9 @@ class ModuleBundler {
 
         var _ref5$include = _ref5.include;
         let include = _ref5$include === undefined ? [] : _ref5$include;
+        var _ref5$exclude = _ref5.exclude;
+        let exclude = _ref5$exclude === undefined ? [] : _ref5$exclude;
         return (0, _bluebird.coroutine)(function* () {
-
             /**
              *  Resolves packages to their package root directory & also resolves dependant packages recursively.
              *  - Will also ignore the input package in the results
@@ -167,6 +164,8 @@ class ModuleBundler {
                 var _ref6 = (0, _bluebird.coroutine)(function* (packageDir) {
                     let _include = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
 
+                    let _exclude = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+
                     const packageJson = require(_path2.default.join(packageDir, './package.json'));
 
                     const name = packageJson.name;
@@ -174,7 +173,12 @@ class ModuleBundler {
 
 
                     for (let packageName in dependencies) {
-                        if (_include.length && _include.indexOf(packageName) === -1) continue;
+                        /**
+                         *  Skips on exclude matches, if set
+                         *  Skips on include mis-matches, if set
+                         */
+                        if (_exclude.length && _exclude.indexOf(packageName) > -1) continue;
+                        if (_include.length && _include.indexOf(packageName) < 0) continue;
 
                         const resolvedDir = (0, _resolvePkg2.default)(packageName, { cwd: packageDir });
                         const relativePath = _path2.default.join('node_modules', resolvedDir.split(`${ seperator }`).slice(1).join(seperator));
@@ -193,7 +197,7 @@ class ModuleBundler {
                     };
                 });
 
-                return function recurse(_x7, _x8) {
+                return function recurse(_x7, _x8, _x9) {
                     return _ref6.apply(this, arguments);
                 };
             })();
@@ -201,8 +205,9 @@ class ModuleBundler {
             const resolvedDeps = [];
             const cache = {};
             const seperator = `${ _path.sep }node_modules${ _path.sep }`;
+            console.log({ include: include, exclude: exclude });
 
-            yield recurse(initialPackageDir, include);
+            yield recurse(initialPackageDir, include, exclude);
 
             return resolvedDeps;
         })();

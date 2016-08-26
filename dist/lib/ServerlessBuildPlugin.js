@@ -63,8 +63,11 @@ class ServerlessBuildPlugin {
         let options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
         this.config = {
             tryFiles: ["webpack.config.js"],
-            excludedExternals: ['aws-sdk'],
             baseExclude: [/\bnode_modules\b/],
+
+            modules: {
+                exclude: ['aws-sdk']
+            },
 
             exclude: [],
             include: [],
@@ -229,7 +232,7 @@ class ServerlessBuildPlugin {
                 servicePath: _this2.servicePath
             }), artifact).bundle({
                 include: moduleIncludes,
-                exclude: _this2.config.excludedExternals
+                exclude: _this2.config.modules.exclude
             });
 
             yield _this2._completeArtifact(artifact);

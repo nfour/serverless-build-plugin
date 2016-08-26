@@ -16,9 +16,12 @@ console.inspect = (val, ...args) => console.log( require('util').inspect(val, { 
 
 export default class ServerlessBuildPlugin {
     config = {
-        tryFiles          : [ "webpack.config.js" ],
-        excludedExternals : [ 'aws-sdk' ],
-        baseExclude      : [ /\bnode_modules\b/ ],
+        tryFiles    : [ "webpack.config.js" ],
+        baseExclude : [ /\bnode_modules\b/ ],
+
+        modules: {
+            exclude: [ 'aws-sdk' ]
+        },
 
         exclude : [],
         include : [],
@@ -199,7 +202,7 @@ export default class ServerlessBuildPlugin {
             servicePath : this.servicePath
         }, artifact).bundle({
             include: moduleIncludes,
-            exclude: this.config.excludedExternals
+            exclude: this.config.modules.exclude
         })
 
         await this._completeArtifact(artifact)

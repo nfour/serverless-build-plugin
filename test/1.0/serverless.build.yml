@@ -2,7 +2,12 @@ method: "bundle"
 
 sourceMaps : true
 babel      : true
-uglify     : true
+uglify     : false # Wont make a big difference on small projects
+
+modules:
+  exclude: # These will be excluded from the zipped node_modules
+    - aws-sdk
+    - babel-runtime
 
 exclude:
   - "*" # Ignores the root directory
@@ -15,6 +20,10 @@ functions:
 
     exclude:
       - "**/*.json"
+
+    modules:
+        exclude:
+            - 'aws-sdk'
 
   two:
     exclude:
