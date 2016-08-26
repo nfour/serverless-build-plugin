@@ -62,6 +62,10 @@ There are three ways to configure the plugin:
     - [#1777](https://github.com/serverless/serverless/issues/1777)
 
 ## TODO
+- [ ] `sls deploy` currently broken
+    - Awaiting upstream bug fix
+- [ ] Make ServerlessBuildPlugin work on a per-function workflow
+    - Awaiting upstream pull requests
 - [x] Bundling based builds
     - [x] Source code
         - [x] Minified with uglifyjs, includes .map
@@ -86,7 +90,6 @@ There are three ways to configure the plugin:
         - [x] Webpack
         - [x] Babel
         - [x] Uglify
-    - [ ] Make ServerlessBuildPlugin work on a per-function workflow
     - [ ] Change transforms to write to file instead of memory
         - This could bloat memory quite a bit as it stands
     - [ ] Make `webpack` and `babel-core` peer dependencies
