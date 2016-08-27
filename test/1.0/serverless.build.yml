@@ -5,12 +5,14 @@ babel      : true
 uglify     : false # Wont make a big difference on small projects
 
 modules:
-  exclude: # These will be excluded from the zipped node_modules
+  exclude: # excluded from the root node_modules
     - aws-sdk
-    - babel-runtime
+
+  deepExclude: # excluded from nested node_modules
+    - aws-sdk
 
 exclude:
-  - "*" # Ignores the root directory
+    - "*" # Ignores the root directory
 
 functions:
   one:
@@ -22,8 +24,8 @@ functions:
       - "**/*.json"
 
     modules:
-        exclude:
-            - 'aws-sdk'
+      exclude:
+        - 'aws-sdk'
 
   two:
     exclude:

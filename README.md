@@ -55,6 +55,13 @@ uglify     : true # Will use defaults
 exclude:
   - "*" # Ignores the root directory
 
+modules:
+  exclude: # excluded from the root node_modules
+    - aws-sdk
+
+  deepExclude: # excluded from nested node_modules
+    - aws-sdk
+
 functions:
   one:
     include:
