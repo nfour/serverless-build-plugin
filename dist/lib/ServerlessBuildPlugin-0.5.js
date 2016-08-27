@@ -28,8 +28,11 @@ exports.default = function (S) {
             super();
             this.config = {
                 tryFiles: ["webpack.config.js"],
-                excludedExternals: ['aws-sdk'],
                 baseExclude: [/\bnode_modules\b/],
+
+                modules: {
+                    exclude: ['aws-sdk']
+                },
 
                 exclude: [],
                 include: [],
@@ -91,7 +94,7 @@ exports.default = function (S) {
                  *  - serverless.yml functions.<fn>.package
                  *  - serverless.build.yml functions.<fn>
                  *
-                 *  to generate includes, excludes
+                 *  in order to generate `include`, `exclude`
                  */
                 _this.functions = selectedFunctions.reduce(function (obj, fnKey) {
                     const fnCfg = functions[fnKey];
@@ -160,8 +163,8 @@ exports.default = function (S) {
 
                 const method = _this4.config.method;
 
-
                 let moduleIncludes = [];
+                let moduleExcludes = [];
 
                 // Set build paths
                 _this4.tmpDir = e.options.pathDist;
@@ -217,12 +220,19 @@ exports.default = function (S) {
                     throw new Error("Unknown build method under `custom.build.method`");
                 }
 
+                let funcModuleExcludes = [];
+                if (_this4.functions[e.options.name].package.modules) {
+                    funcModuleExcludes = _this4.functions[e.options.name].package.modules.exclude || [];
+                }
+
+                moduleExcludes = [].concat(_toConsumableArray(_this4.config.modules.exclude), _toConsumableArray(funcModuleExcludes));
+
                 yield new _ModuleBundler2.default(_extends({}, _this4.config, {
                     uglify: _this4.config.uglifyModules ? _this4.config.uglify : undefined,
                     servicePath: S.config.projectPath
                 }), artifact).bundle({
                     include: moduleIncludes,
-                    exclude: _this4.config.excludedExternals
+                    exclude: moduleExcludes
                 });
 
                 // Serverless 0.5 hack, rebuild a _serverless_handler.js file while still keeping env vars
