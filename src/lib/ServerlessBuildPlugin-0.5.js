@@ -23,11 +23,14 @@ export default function (S) {
 
 
         config = {
-            tryFiles          : [ "webpack.config.js" ],
-            excludedExternals : [ 'aws-sdk' ],
-            baseExclude       : [ /\bnode_modules\b/ ],
+            tryFiles    : [ "webpack.config.js" ],
+            baseExclude : [ /\bnode_modules\b/ ],
 
-            exclude: [],
+            modules: {
+                exclude: [ 'aws-sdk' ]
+            },
+
+            exclude : [],
             include : [],
 
             uglify        : true,
@@ -99,7 +102,7 @@ export default function (S) {
              *  - serverless.yml functions.<fn>.package
              *  - serverless.build.yml functions.<fn>
              *
-             *  to generate includes, excludes
+             *  in order to generate `include`, `exclude`
              */
             this.functions = selectedFunctions.reduce((obj, fnKey) => {
                 const fnCfg      = functions[fnKey]
@@ -166,15 +169,15 @@ export default function (S) {
 
             this.serverless.cli.log(`Serverless Build triggered for ${e.options.name}...`)
 
-            const { method } = this.config
-
+            const { method }   = this.config
             let moduleIncludes = []
+            let moduleExcludes = []
 
             // Set build paths
             this.tmpDir         = e.options.pathDist
             this.buildTmpDir    = path.join(this.tmpDir, './build')
             this.artifactTmpDir = path.join(e.options.pathDist, './artifacts')
-            this.deployTmpDir = path.join(e.options.pathDist, './deploy')
+            this.deployTmpDir   = path.join(e.options.pathDist, './deploy')
 
             await fs.ensureDirAsync(this.buildTmpDir)
             await fs.ensureDirAsync(this.artifactTmpDir)
@@ -226,13 +229,20 @@ export default function (S) {
                 throw new Error("Unknown build method under `custom.build.method`")
             }
 
+            let funcModuleExcludes = []
+            if (this.functions[e.options.name].package.modules) {
+                funcModuleExcludes = this.functions[e.options.name].package.modules.exclude || []
+            }
+
+            moduleExcludes = [ ...this.config.modules.exclude, ...funcModuleExcludes ]
+
             await new ModuleBundler({
                 ...this.config,
                 uglify      : this.config.uglifyModules ? this.config.uglify : undefined,
                 servicePath : S.config.projectPath
             }, artifact).bundle({
                 include: moduleIncludes,
-                exclude: this.config.excludedExternals
+                exclude: moduleExcludes
             })
 
             // Serverless 0.5 hack, rebuild a _serverless_handler.js file while still keeping env vars
