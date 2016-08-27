@@ -20,7 +20,8 @@ export default class ServerlessBuildPlugin {
         baseExclude : [ /\bnode_modules\b/ ],
 
         modules: {
-            exclude: [ 'aws-sdk' ]
+            exclude     : [ 'aws-sdk' ], // These match root dependencies
+            deepExclude : [ 'aws-sdk' ], // These match deep dependencies
         },
 
         exclude : [],
@@ -202,7 +203,7 @@ export default class ServerlessBuildPlugin {
             servicePath : this.servicePath
         }, artifact).bundle({
             include: moduleIncludes,
-            exclude: this.config.modules.exclude
+            ...this.config.modules
         })
 
         await this._completeArtifact(artifact)

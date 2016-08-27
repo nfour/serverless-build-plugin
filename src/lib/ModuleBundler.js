@@ -3,7 +3,7 @@ import path, { sep } from 'path'
 import fs from 'fs-extra'
 import resolvePackage from 'resolve-pkg'
 
-import { walker } from './utils'
+import { walker, handleFile } from './utils'
 import UglifyTransform from './transforms/Uglify'
 
 Promise.promisifyAll(fs)
@@ -29,46 +29,26 @@ export default class ModuleBundler {
      *  Determines module locations then adds them into ./node_modules
      *  inside the artifact.
      */
-    async bundle({ include = [], exclude = [] }) {
-        const modules = await this._resolveDependencies(this.config.servicePath, { include, exclude })
+    async bundle({ include = [], exclude = [], deepExclude = [] }) {
+        const modules = await this._resolveDependencies(this.config.servicePath, { include, exclude, deepExclude })
 
         const transforms = await this._createTransforms()
 
         await Promise.map(modules, async ({ packagePath, relativePath }) => {
-            const onFile = async (root, stats, next) => {
+            const onFile = async (basePath, stats, next) => {
                 const relPath = path.join(
-                    relativePath, root.split(relativePath)[1], stats.name
+                    relativePath, basePath.split(relativePath)[1], stats.name
                 ).replace(/^\/|\/$/g, '')
 
-                const filePath = path.join(root, stats.name)
+                const filePath = path.join(basePath, stats.name)
 
-                if ( /\.(js)$/i.test(filePath) ) {
-                    //
-                    // JAVASCRIPT MODULES, transformable
-                    //
-
-                    let code = await fs.readFileAsync(filePath, 'utf8')
-                    let map = ''
-
-                    /**
-                     *  Runs transforms against the code, mutating it.
-                     *  Excludes source maps for modules.
-                     */
-                    if ( transforms.length )
-                        for ( let transformer of transforms ) {
-                            let result = transformer.run({ code, map, filePath })
-
-                            if ( result.code ) code = result.code
-                        }
-
-                    this.artifact.addBuffer( new Buffer(code), relPath, this.config.zip )
-                } else {
-                    //
-                    // ARBITRARY FILES
-                    //
-
-                    this.artifact.addFile(filePath, relPath, this.config.zip)
-                }
+                await handleFile({
+                    filePath, relPath, transforms,
+                    transformExtensions : ['js', 'jsx'],
+                    useSourceMaps       : false,
+                    artifact            : this.artifact,
+                    zipConfig           : this.config.zip,
+                })
 
                 next()
             }
@@ -101,11 +81,11 @@ export default class ModuleBundler {
      *  @returns {Array}
      *      [ { name, packagePath, packagePath } ]
      */
-    async _resolveDependencies(initialPackageDir, { include = [], exclude = [] } = {}) {
+    async _resolveDependencies(initialPackageDir, { include = [], exclude = [], deepExclude = [] } = {}) {
         const resolvedDeps = []
         const cache        = {}
         const seperator    = `${sep}node_modules${sep}`
-        console.log({ include, exclude })
+
         /**
          *  Resolves packages to their package root directory & also resolves dependant packages recursively.
          *  - Will also ignore the input package in the results
@@ -130,7 +110,7 @@ export default class ModuleBundler {
 
                 cache[relativePath] = true
 
-                const result = await recurse(resolvedDir)
+                const result = await recurse(resolvedDir, undefined, deepExclude)
 
                 resolvedDeps.push({ ...result, relativePath })
             }

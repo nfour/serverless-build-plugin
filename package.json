@@ -4,20 +4,21 @@
     "main"    : "./dist/index",
 
     "dependencies": {
-        "is-stream"   : "~1.1.0",
-        "yazl"        : "~2.4.1",
-        "yauzl"       : "~2.6.0",
-        "bluebird"    : "~3.4.0",
-        "fs-extra"    : "~0.26.0",
-        "mkdirp"      : "~0.5.1",
-        "semver"      : "^5.3.0",
-        "resolve-pkg" : "~0.2.0",
-        "walk"        : "~2.3.9",
-        "minimatch"   : "~3.0.3",
-        "js-yaml"     : "~3.6.1",
-        "uglify-js"   : "~2.7.0",
-        "babel-core"  : "~6.13.0",
-        "lutils"      : "^1.1.0"
+        "is-stream"          : "~1.1.0",
+        "yazl"               : "~2.4.1",
+        "yauzl"              : "~2.6.0",
+        "bluebird"           : "~3.4.0",
+        "fs-extra"           : "~0.26.0",
+        "mkdirp"             : "~0.5.1",
+        "semver"             : "^5.3.0",
+        "resolve-pkg"        : "~0.2.0",
+        "walk"               : "~2.3.9",
+        "minimatch"          : "~3.0.3",
+        "js-yaml"            : "~3.6.1",
+        "uglify-js"          : "~2.7.0",
+        "babel-core"         : "~6.13.0",
+        "source-map-support" : "latest",
+        "lutils"             : "^1.1.0"
     },
 
     "devDependencies": {
@@ -44,7 +45,7 @@
     },
 
     "scripts": {
-        "build"      : "babel $BABEL_OPTIONS ./src --out-dir ./dist",
+        "build"      : "babel $BABEL_OPTIONS --source-maps inline ./src --out-dir ./dist",
         "dev"        : "BABEL_OPTIONS=--watch npm run build",
         "prepublish" : "npm run build"
     },

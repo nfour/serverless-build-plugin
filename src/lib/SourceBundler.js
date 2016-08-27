@@ -4,7 +4,7 @@ import fs from 'fs-extra'
 import { typeOf } from 'lutils'
 import glob from 'minimatch'
 
-import { walker } from './utils'
+import { walker, handleFile } from './utils'
 import BabelTransform from './transforms/Babel'
 import UglifyTransform from './transforms/Uglify'
 
@@ -37,16 +37,16 @@ export default class SourceBundler {
 
         // await this._findFilterFiles(servicePath)
 
-        const onFile = async (rootPath, stats, next) => {
+        const onFile = async (basePath, stats, next) => {
             /**
              *  A relative path to the servicePath
              *  @example ./functions/test/handler.js
              */
             const relPath = path.join(
-                rootPath.split(this.config.servicePath)[1], stats.name
+                basePath.split(this.config.servicePath)[1], stats.name
             ).replace(/^\/|\/$/g, '')
 
-            const filePath = path.join(rootPath, stats.name)
+            const filePath = path.join(basePath, stats.name)
 
             const testPattern = (pattern) =>
                 typeOf.RegExp(pattern)
@@ -60,42 +60,13 @@ export default class SourceBundler {
             if ( exclude.some(testPattern) ) return next()
             if ( ! include.some(testPattern) ) return next()
 
-            if ( /\.(jsx?)$/i.test(filePath) ) {
-                //
-                // JAVASCRIPT
-                //
-
-                let code = await fs.readFileAsync(filePath, 'utf8')
-                let map  = ''
-
-                /**
-                 *  Runs transforms against the code, mutating the code & map
-                 *  with each iteration, optionally producing source maps
-                 */
-                if ( transforms.length )
-                    for ( let transformer of transforms ) {
-                        let result = transformer.run({ code, map, filePath, relPath })
-
-                        if ( result.code ) {
-                            code = result.code
-                            if ( result.map ) map = result.map
-                        }
-                    }
-
-                this.artifact.addBuffer( new Buffer(code), relPath, this.config.zip )
-
-                if ( this.config.sourceMaps && map ) {
-                    if ( typeOf.Object(map) ) map = JSON.stringify(map)
-
-                    this.artifact.addBuffer( new Buffer(map), `${relPath}.map`, this.config.zip )
-                }
-            } else {
-                //
-                // ARBITRARY FILES
-                //
-
-                this.artifact.addFile(filePath, relPath, this.config.zip)
-            }
+            await handleFile({
+                filePath, relPath, transforms,
+                transformExtensions : ['js', 'jsx'],
+                useSourceMaps       : this.config.sourceMaps,
+                artifact            : this.artifact,
+                zipConfig           : this.config.zip,
+            })
 
             next()
         }

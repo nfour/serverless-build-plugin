@@ -1,3 +1,4 @@
+import 'source-map-support/register'
 import path from 'path'
 import semver from 'semver'
 
