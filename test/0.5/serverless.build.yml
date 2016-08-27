@@ -16,6 +16,10 @@ functions:
     exclude:
       - "**/*.json"
 
+    modules:
+        exclude:
+            - 'aws-sdk'
+
   blah:
     include:
       - "blah/**"
