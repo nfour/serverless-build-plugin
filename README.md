@@ -1,6 +1,6 @@
 # SERVERLESS BUILD PLUGIN
 
-`*** WARNING ***` This is a `beta` release under heavy development, use with caution. 
+`*** WARNING ***` This is a `beta` release under heavy development, use with caution.
 
 This plugin is intended to add flexibility to the serverless build process for nodejs, under serverless 1.0.
 
@@ -16,11 +16,8 @@ sls invoke -f one --log
 sls deploy function -f one --method=file
 sls invoke -f one --log
 ```
-`sls deploy` will currently take a while due to packaging everything for the first deployment.
-This is a bug due to not being able to hook into it.
 
-After running the above you should have build the `one` function via bundling and via webpack to compare.
-
+After running the above you should have built the same function in each of the two methods successfully.
 
 ## METHODS
 
@@ -90,6 +87,8 @@ functions:
 - serverless 1.0 still doesn't support packaging single functions
     - [#1719](https://github.com/serverless/serverless/issues/1719)
     - [#1777](https://github.com/serverless/serverless/issues/1777)
+- `sls deploy` will currently take a while due to packaging everything for the first deployment.
+    - This is a bug due to not being able to hook into it.
 
 ## TODO
 - [x] Serverless@0.5 support
