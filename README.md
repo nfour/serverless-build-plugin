@@ -1,6 +1,6 @@
 # SERVERLESS BUILD PLUGIN
 
-`*** WARNING ***` This is a development release, do not use outside of experimentation.
+`*** WARNING ***` This is a `beta` release under heavy development, use with caution. 
 
 This plugin is intended to add flexibility to the serverless build process for nodejs, under serverless 1.0.
 
