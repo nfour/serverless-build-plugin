@@ -27,7 +27,8 @@ export default function (S) {
             baseExclude : [ /\bnode_modules\b/ ],
 
             modules: {
-                exclude: [ 'aws-sdk' ]
+                exclude     : [ 'aws-sdk' ], // These match root dependencies
+                deepExclude : [ 'aws-sdk' ], // These match deep dependencies
             },
 
             exclude : [],
@@ -173,6 +174,9 @@ export default function (S) {
             let moduleIncludes = []
             let moduleExcludes = []
 
+            const funcObj = S.getProject().getFunction(e.options.name)
+            const funcPath = path.relative(S.config.projectPath, funcObj.getRootPath())
+
             // Set build paths
             this.tmpDir         = e.options.pathDist
             this.buildTmpDir    = path.join(this.tmpDir, './build')
@@ -203,6 +207,11 @@ export default function (S) {
 
                         // Synchronous for now, but can be parellel
                         config.package.exclude.push('_meta')
+
+                        // If no includes are specified for function, then default to using the function folder
+                        if (config.package.include.length < 1) {
+                            config.package.include.push(`${funcPath}/**`)
+                        }
 
                         await sourceBundler.bundle({
                             exclude : config.package.exclude,
@@ -242,13 +251,11 @@ export default function (S) {
                 servicePath : S.config.projectPath
             }, artifact).bundle({
                 include: moduleIncludes,
-                exclude: moduleExcludes
+                exclude: moduleExcludes,
+                deepExclude: this.config.modules.deepExclude
             })
 
             // Serverless 0.5 hack, rebuild a _serverless_handler.js file while still keeping env vars
-
-            const funcObj = S.getProject().getFunction(e.options.name)
-            const funcPath = path.relative(S.config.projectPath, funcObj.getRootPath())
 
             const [ handlerFile, handlerFunc ] = this.functions[e.options.name].handler.split('.')
             // Read existing handler from fs
