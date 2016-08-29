@@ -3,7 +3,7 @@ import path from 'path'
 export default class BabelTransform {
     constructor(config = {}, options = {}) {
         this.options = {
-            skipOnError: true, // When false, errors will halt execution
+            skipOnError: false, // When false, errors will halt execution
             logErrors: true,
             ...options
         }
