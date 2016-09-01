@@ -17,6 +17,7 @@
         "js-yaml"            : "~3.6.1",
         "uglify-js"          : "~2.7.0",
         "babel-core"         : "~6.13.0",
+        "babel-preset-babili": "latest",
         "source-map-support" : "latest",
         "lutils"             : "^1.1.0"
     },
@@ -32,14 +33,14 @@
         "babel-loader" : "^6.2.0",
 
         "babel-preset-es2015-node4"                           : "latest",
-        "babel-preset-stage-1"                                : "^6.0.0",
+        "babel-preset-stage-1"                                : "^6.13.0",
         "babel-plugin-transform-async-to-module-method"       : "latest",
         "babel-plugin-transform-inline-environment-variables" : "latest",
         "babel-plugin-add-module-exports"                     : "^0.2.0",
         "babel-plugin-transform-runtime"                      : "latest",
         "babel-polyfill"                                      : "latest",
-        "babel-core"                                          : "^6.11.0",
-        "babel-cli"                                           : "^6.1.0",
+        "babel-core"                                          : "^6.14.0",
+        "babel-cli"                                           : "^6.14.0",
 
         "webpack" : "~2.1.0-beta.20"
     },
