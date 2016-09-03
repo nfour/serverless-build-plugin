@@ -57,8 +57,10 @@ export default class SourceBundler {
              *  When a pattern matches an exclude, it skips
              *  When a pattern doesnt match an include, it skips
              */
-            if ( exclude.some(testPattern) ) return next()
-            if ( ! include.some(testPattern) ) return next()
+            const included = include.some(testPattern)
+            const excluded = exclude.some(testPattern)
+            if ( ! included || ( excluded && ! included ) ) return next()
+
 
             await handleFile({
                 filePath, relPath, transforms,
