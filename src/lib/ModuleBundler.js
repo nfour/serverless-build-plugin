@@ -104,6 +104,9 @@ export default class ModuleBundler {
                 if ( _include.length && _include.indexOf(packageName) < 0 ) continue
 
                 const resolvedDir  = resolvePackage(packageName, { cwd: packageDir })
+
+                if ( ! resolvedDir ) continue
+                
                 const relativePath = path.join( 'node_modules', resolvedDir.split(`${seperator}`).slice(1).join(seperator) )
 
                 if ( relativePath in cache ) continue
