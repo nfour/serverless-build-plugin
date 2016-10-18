@@ -1,3 +1,4 @@
 /admin.env
 /node_modules
 /dist
+/npm-*
