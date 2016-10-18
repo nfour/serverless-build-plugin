@@ -4,7 +4,7 @@ import Yazl from 'yazl'
 import Yauzl from 'yauzl'
 import mkdirp from 'mkdirp'
 import fs from 'fs-extra'
-import { typeOf } from 'lutils'
+import { merge, typeOf } from 'lutils'
 import Yaml from 'js-yaml'
 
 import ModuleBundler from './ModuleBundler'
@@ -178,13 +178,18 @@ export default function (S) {
             const funcPath = path.relative(S.config.projectPath, funcObj.getRootPath())
 
             // Set build paths
-            this.tmpDir         = e.options.pathDist
-            this.buildTmpDir    = path.join(this.tmpDir, './build')
-            this.artifactTmpDir = path.join(e.options.pathDist, './artifacts')
-            this.deployTmpDir   = path.join(e.options.pathDist, './deploy')
+            const deployConfig = {
+                tmpDir         : e.options.pathDist,
+                buildTmpDir    : path.join(e.options.pathDist, './build'),
+                artifactTmpDir : path.join(e.options.pathDist, './artifacts'),
+                deployTmpDir   : path.join(e.options.pathDist, './deploy'),
+            }
 
-            await fs.ensureDirAsync(this.buildTmpDir)
-            await fs.ensureDirAsync(this.artifactTmpDir)
+            // Merge Deploy Config into event object
+            merge(e, deployConfig)
+
+            await fs.ensureDirAsync(deployConfig.buildTmpDir)
+            await fs.ensureDirAsync(deployConfig.artifactTmpDir)
 
             const artifact = new Yazl.ZipFile()
 
@@ -228,7 +233,7 @@ export default function (S) {
                 const fileBuild = await new FileBuild({
                     ...this.config,
                     servicePath : S.config.projectPath,
-                    buildTmpDir : this.buildTmpDir,
+                    buildTmpDir : deployConfig.buildTmpDir,
                     functions   : this.functions,
                     serverless  : this.serverless
                 }, artifact).build()
@@ -273,19 +278,16 @@ export default function (S) {
 
         async completeArtifact(e) {
             this.serverless.cli.log('Compiling deployment artifact')
-            await this._completeArtifact({
+            const zipPath = await this._completeArtifact({
                 artifact: e.options.artifact,
                 functionName: e.options.name,
-                artifactTmpDir: `${e.options.pathDist}/artifacts`
+                artifactTmpDir: e.artifactTmpDir,
+                buildTmpDir: e.buildTmpDir,
             })
-
-            const zipPath = this.serverless.service.package.artifact
-
-            const deployTmpDir = path.join(e.options.pathDist, './deploy')
 
             await this._unpackZip({
                 zipPath,
-                deployTmpDir
+                deployTmpDir: e.deployTmpDir,
             })
 
             e.options.pathDist = deployTmpDir
@@ -333,7 +335,7 @@ export default function (S) {
         /**
          *  Writes the `artifact` and attaches it to serverless
          */
-        async _completeArtifact({ artifact, functionName, artifactTmpDir }) {
+        async _completeArtifact({ artifact, functionName, artifactTmpDir, buildTmpDir }) {
             // Purge existing artifacts
             if ( ! this.config.keep )
                 await fs.emptyDirAsync(artifactTmpDir)
@@ -348,11 +350,11 @@ export default function (S) {
                 artifact.end()
             })
 
-            this.serverless.service.package.artifact = zipPath
-
             // Purge build dir
             if ( ! this.config.keep )
-                await fs.emptyDirAsync(this.buildTmpDir)
+                await fs.emptyDirAsync(buildTmpDir)
+
+            return zipPath
         }
 
     }
