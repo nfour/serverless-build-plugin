@@ -1,6 +1,6 @@
 {
   "name": "serverless-build-plugin",
-  "version": "0.2.3",
+  "version": "0.2.2-beta",
   "main": "./dist/index",
   "dependencies": {
     "is-stream": "~1.1.0",
