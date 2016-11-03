@@ -1,7 +1,7 @@
-import number from '../../lib/two'
+import number from '../../lib/two';
 
 export function handler(event, context, done) {
-    console.log({ number })
+  console.log({ number });
 
-    done(null, { message: number })
+  done(null, { message: number });
 }

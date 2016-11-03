@@ -1,0 +1,94 @@
+extends:
+  - airbnb
+
+rules:
+  #
+  # DISABLED RULES
+  #
+
+  # Allows ForIn
+  no-restricted-syntax:
+    - error
+    - LabeledStatement
+    - WithStatement
+  # - ForInStatement
+  no-continue            : 0 # Because ForIn
+  guard-for-in           : 0 # Because ForIn
+  arrow-body-style       : 0 # Doesn't let you have single statement block functions
+  no-param-reassign      : 0 # Variable names are hard
+  class-methods-use-this : 0 # Somewhat reasonable, but coupling stateless functions in classes is helpful
+
+  no-underscore-dangle: 0 # Good for decalaring "private"
+  no-multi-spaces:
+    - 0
+    - exceptions:
+        VariableDeclarator: true
+
+  no-unused-vars: # Can be helpful to define params for verbosity
+    - error
+    - args: none
+
+  # This allows devDependencies to be imported for build files
+  # This can be applied to specific files when eslint supports that feature later
+  import/no-extraneous-dependencies:
+    - error
+    - devDependencies: true
+  import/no-named-as-default: 0 # Limiting for a valid usecase
+
+  jsx-a11y/img-has-alt                    : 0 # Waste of my time
+  jsx-a11y/no-static-element-interactions : 0 # Limiting, needlessly
+
+  #
+  # DISABLE BECAUSE OF ERRORS
+  #
+  generator-star-spacing : 0 # This produces an error on async/await
+  require-yield          : 0 # This produces an error on async/await
+  arrow-parens           : 0 # This produces an error on async/await
+
+  #
+  # CHANGES (ERRORS)
+  #
+
+  # ...
+
+  #
+  # WARNINGS (WARNINGS)
+  #
+
+  key-spacing:
+    - 1
+    -
+      align:
+        beforeColon: true
+        afterColon: true
+        on: colon
+        mode: strict
+      multiLine:
+        beforeColon: false
+        afterColon: true
+        mode: minimum
+      singleLine:
+        beforeColon: false
+        afterColon: true
+        mode: strict
+
+  global-require: 1 # Limiting, but useful
+
+  react/prefer-stateless-function : 1
+  react/forbid-prop-types         : 1
+
+  import/prefer-default-export    : 1 # Limits multi-export files when they aren't populated
+
+env:
+  mocha   : true
+  browser : true
+  node    : true
+  es6     : true
+
+parserOptions:
+  ecmaVersion: 8
+  sourceType: "module"
+  ecmaFeatures:
+    jsx: true
+
+parser: babel-eslint

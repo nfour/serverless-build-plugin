@@ -1,24 +1,20 @@
 # For full config options, check the docs: v1.docs.serverless.com
 
-service: v1test3
+service: v1test5
 
 provider:
   name: aws
   runtime: nodejs4.3
+  profile: dev
+  stage: dev
+  region: ap-southeast-2
 
 plugins:
   - serverless-build-plugin
 
-custom:
-  build:
-
-defaults:
- stage: dev
- region: ap-southeast-2
-
 package:
-    exclude:
-        - node_modules
+  exclude:
+    - node_modules
 
 functions:
   one:

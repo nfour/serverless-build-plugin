@@ -290,7 +290,7 @@ export default function (S) {
                 deployTmpDir: e.deployTmpDir,
             })
 
-            e.options.pathDist = deployTmpDir
+            e.options.pathDist = e.deployTmpDir
             return e
         }
 

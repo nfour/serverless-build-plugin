@@ -12,7 +12,7 @@ modules:
     - aws-sdk
 
 exclude:
-    - "*" # Ignores the root directory
+  - "*" # Ignores the root directory
 
 functions:
   one:
@@ -20,13 +20,18 @@ functions:
       - "functions/one/**"
       - "lib/one/**"
 
-    exclude:
-      - "**/*.json"
+  exclude:
+    - "**/*.json"
 
-    modules:
-      exclude:
-        - 'aws-sdk'
+  modules:
+    exclude:
+      - 'aws-sdk'
 
   two:
+    include:
+      - "functions/**"
+      - "lib/**"
+      - ".babelrc"
     exclude:
+      - "function/one/**"
       - "lib/one/**"
