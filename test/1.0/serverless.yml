@@ -3,22 +3,21 @@
 service: v1test5
 
 provider:
-  name: aws
-  runtime: nodejs4.3
-  profile: dev
-  stage: dev
-  region: ap-southeast-2
+  name    : aws
+  runtime : nodejs4.3
+  profile : dev
+  stage   : dev
+  region  : ap-southeast-2
 
 plugins:
   - serverless-build-plugin
 
-package:
-  exclude:
-    - node_modules
-
 functions:
   one:
     handler: functions/one/handler.handler
+
+    events:
+      - http: get func/one
 
   two:
     handler: functions/two/handler.handler
