@@ -30,7 +30,7 @@ method: bundle
 #
 # Each file can be babel transpiled:
 # - When this is an object, it is treated as a babel config
-# - When true, any `.babelrc` in the service directory is used
+# - When true, a `.babelrc` in the service directory is used
 babel: true
 
 # uglify
