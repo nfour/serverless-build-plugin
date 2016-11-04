@@ -12,6 +12,10 @@ Serverless build can be configured in two locations (or both):
 - Use a `serverless.build.yml`
 - Use `custom.build` in your `serverless.yml`
 
+There are two ways to build:
+- `bundle`, this will bundle your functions and keep their directory structure based on globbing and module dependency resolution
+- `file`, this can be a webpack.config.js, or any file which builds your functions leaving it up to you
+
 ### BUNDLE METHOD CONFIG
 
 A config for bundling needs to define globs, transforms etc.
