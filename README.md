@@ -1,6 +1,6 @@
 ![Serverless Build Plugin](http://i.imgur.com/UfNQs5G.png)
 
-`serverless-build-plugin` is **Node.js** focused build plugin for serverless.
+A **Node.js** focused build plugin for serverless.
 
 ```yaml
 # serverless.build.yml
