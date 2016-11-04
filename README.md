@@ -5,7 +5,7 @@ A **Node.js** focused build plugin for serverless.
 ```yaml
 # serverless.build.yml
 
-method: bundle
+method     : bundle
 sourceMaps : true
 babel      : true
 uglify     : false
