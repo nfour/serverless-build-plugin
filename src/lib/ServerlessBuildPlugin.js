@@ -13,6 +13,8 @@ Promise.promisifyAll(fs);
 
 export default class ServerlessBuildPlugin {
   config = {
+    method: 'bundle',
+
     tryFiles    : ['webpack.config.js'],
     baseExclude : [/\bnode_modules\b/],
 
@@ -31,15 +33,12 @@ export default class ServerlessBuildPlugin {
     babel      : null,
     sourceMaps : true,
 
-        // Passed to `yazl` as options
+    // Passed to `yazl` as options
     zip: { compress: true },
-
-    method : 'bundle',
-    file   : null,
 
     functions: {},
 
-    async: false,
+    synchronous: true,
   }
 
   constructor(serverless, options = {}) {
@@ -163,7 +162,7 @@ export default class ServerlessBuildPlugin {
 
       return this.buildFunction(name, config);
     }, {
-      concurrency: this.config.async ? Infinity : 1,
+      concurrency: this.config.synchronous ? 1 : Infinity,
     });
 
     this.log('');
