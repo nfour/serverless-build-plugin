@@ -50,6 +50,8 @@ modules:
 
 ## DOCUMENTATION
 
+_The documentation is currently WIP_
+
 - [Installation](./docs/Installation.md)
 - [Usage & Configuration](./docs/Usage.md)
 
