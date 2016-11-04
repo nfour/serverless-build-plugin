@@ -1,4 +1,4 @@
-method: "bundle"
+method: bundle
 
 sourceMaps : true
 babel      : true
@@ -19,19 +19,19 @@ functions:
     include:
       - "functions/one/**"
       - "lib/one/**"
-
-  exclude:
-    - "**/*.json"
-
-  modules:
     exclude:
-      - 'aws-sdk'
+      - "**/*.json"
+
+    # modules:
+    #   exclude:
+    #     - lutils
 
   two:
     include:
       - "functions/**"
       - "lib/**"
       - ".babelrc"
+
     exclude:
       - "function/one/**"
       - "lib/one/**"

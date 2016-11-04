@@ -1,7 +1,7 @@
 import 'source-map-support/register';
-import number from '../../lib/one';
 import { typeOf } from 'lutils';
 import Promise from 'bluebird';
+import number from '../../lib/one';
 
 export async function handler(event, context, done) {
   console.log({ number });
@@ -12,5 +12,8 @@ export async function handler(event, context, done) {
   // Uncomment this to emit an error
   // await require('./file')();
 
-  done(null, { message: JSON.stringify({ num: number + typeOf(number) }) });
+  done(null, {
+    statusCode : 200,
+    headers    : { 'content-type': 'application/json' },
+    body       : JSON.stringify({ num: number + typeOf(number) }) });
 }
