@@ -28,6 +28,7 @@ If you'd like to test out a preconfigured project...
 git clone git@github.com:nfour/serverless-build-plugin
 cd serverless-build-plugin
 npm i
+npm run build
 cd test/1.0
 
 sls deploy
