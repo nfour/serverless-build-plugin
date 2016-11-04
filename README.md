@@ -1,6 +1,6 @@
 ![Serverless Build Plugin](https://i.imgur.com/6ARU4Xm.png)
 
-A **Node.js** focused build plugin for serverless.
+A **Node.js** focused build optimizer plugin for serverless.
 
 ```yaml
 # serverless.build.yml
@@ -36,17 +36,17 @@ modules:
 
 ### Method: `bundle`
 
-- Node.JS optimized version of the [package](https://github.com/serverless/serverless/blob/master/docs/providers/aws/guide/packaging.md) built-in serverless plugin
-- Per file transforms, with source maps:
+- Node.JS optimized version of the [package](https://github.com/serverless/serverless/blob/master/docs/providers/aws/guide/packaging.md) built-in plugin
+- Each file can be, optionally, transpiled with:
   - **babel**
   - **uglify**
-- Modules whitelisted based on the `package.json` `dependencies`, resolved recursively and reliably
-- Glob based file matching for arbitrary files
+  - **babeli** (soon, WIP)
+- `node_modules` are whitelisted based on the `package.json` `dependencies`, resolved recursively and reliably
 
 ### Method: `file`
 
-- Use a build file to generate functions
-- Use a `webpack.config.js` or a file which returns a webpack config
+- Use a build file to generate functions entirely
+- Use `webpack` instead, by exporting a webpack config
 
 ## DOCUMENTATION
 
@@ -61,7 +61,7 @@ _The documentation is currently WIP_
 - Make sure you set an AWS profile first
 
 ```
-git clone git@github.com/nfour/serverless-build-plugin
+git clone git@github.com:nfour/serverless-build-plugin
 cd serverless-build-plugin
 npm i
 cd test/1.0
