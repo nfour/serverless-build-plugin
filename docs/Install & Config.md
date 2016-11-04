@@ -12,7 +12,7 @@ Serverless build can be configured in two locations (or both):
 - Use a `serverless.build.yml`
 - Use `custom.build` in your `serverless.yml`
 
-#### BUNDLE METHOD CONFIG
+### BUNDLE METHOD CONFIG
 
 A config for bundling needs to define globs, transforms etc.
 
@@ -30,7 +30,7 @@ method: bundle
 #
 # Each file can be babel transpiled:
 # - When this is an object, it is treated as a babel config
-# - When true, a `.babelrc` is checked for in the directory and used
+# - When true, a `.babelrc` in the service directory is used
 babel: true
 
 # uglify
@@ -98,7 +98,7 @@ exclude:
   - "*" # Ignores the root directory
 ```
 
-#### FILE METHOD CONFIG
+### FILE METHOD CONFIG
 
 A file method config offloads to the build file.
 
@@ -117,7 +117,7 @@ tryFiles:
   - 'webpack.config.js'
 ```
 
-#### SHARED OPTIONS
+### SHARED OPTIONS
 ```yaml
 # modules
 #
