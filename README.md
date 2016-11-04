@@ -4,8 +4,7 @@ A **Node.js** focused build optimizer plugin for [serverless](https://github.com
 
 `serverless-build-plugin` replaces packaging functionality for functions, allowing for:
 - Bundling of functions in a Node.js friendly way
-- Building via `webpack` or any arbitrary build file
-
+- Or, building via `webpack` and any arbitrary build file
 
 - [Installation & Configuration](https://github.com/nfour/serverless-build-plugin/blob/master/docs/Install%20&%20Config.md)
 - [Usage](https://github.com/nfour/serverless-build-plugin/blob/master/docs/Usage.md)
