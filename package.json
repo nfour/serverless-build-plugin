@@ -1,6 +1,6 @@
 {
   "name"        : "serverless-build-plugin",
-  "version"     : "0.3.6-beta",
+  "version"     : "0.3.7-beta",
   "main"        : "./dist/index",
   "description" : "A Node.js focused build optimizer plugin for serverless",
 
