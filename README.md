@@ -10,9 +10,6 @@ sourceMaps : true
 babel      : true
 uglify     : false
 
-exclude:
-  - "*" # Ignores the root directory
-
 functions:
   one:
     include:
@@ -24,6 +21,9 @@ functions:
     modules:
       exclude:
         - lutils
+
+exclude:
+  - "*" # Ignores the root directory
 
 modules:
   exclude: # Excluded from the root node_modules
