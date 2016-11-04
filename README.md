@@ -1,4 +1,4 @@
-![Serverless Build Plugin](http://i.imgur.com/UfNQs5G.png)
+![Serverless Build Plugin](https://i.imgur.com/6ARU4Xm.png)
 
 A **Node.js** focused build plugin for serverless.
 
