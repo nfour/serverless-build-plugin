@@ -55,18 +55,16 @@ export default class ServerlessBuildPlugin {
       );
     }
 
-    // This causes the `package` plugin to skip
-    this.serverless.service.package.artifact = true;
-
-    // Ensurence
+    // This causes the `package` plugin to be skipped
+    this.serverless.service.package.artifact     = true;
     this.serverless.service.package.individually = true;
 
     this.hooks = {
-      'before:deploy:createDeploymentArtifacts' : async (...args) => this.build(...args),
+      'before:deploy:function:deploy'           : this.build,
+      'before:deploy:createDeploymentArtifacts' : this.build,
       'after:deploy:createDeploymentArtifacts'  : () => {
         this.serverless.service.package.artifact = null;
       },
-      'before:deploy:function:deploy': (...args) => this.build(...args),
     };
 
     //
@@ -152,7 +150,7 @@ export default class ServerlessBuildPlugin {
   /**
    *  Builds either from file or through the babel optimizer.
    */
-  async build() {
+  build = async () => {
     this.log('Builds triggered');
 
     await fs.ensureDirAsync(this.buildTmpDir);
