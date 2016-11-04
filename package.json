@@ -1,7 +1,8 @@
 {
-  "name"    : "serverless-build-plugin",
-  "version" : "0.3.2-beta",
-  "main"    : "./dist/index",
+  "name"        : "serverless-build-plugin",
+  "version"     : "0.3.3-beta",
+  "main"        : "./dist/index",
+  "description" : "A Node.js focused build optimizer plugin for serverless",
 
   "scripts": {
     "build"      : "babel $BABEL_OPTIONS --source-maps inline ./src --out-dir ./dist",

@@ -2,9 +2,10 @@
 
 A **Node.js** focused build optimizer plugin for [serverless](https://github.com/serverless/serverless).
 
-## DOCUMENTATION
+Serverless build plugin replace packaging functionality for functions, allowing for:
+- Bundling of functions in a Node.js friendly way
+- Building via `webpack` or any arbitrary build file
 
-_The documentation is currently WIP_
 
 - [Installation & Configuration](./docs/Install%20&%20Config.md)
 - [Usage](./docs/Usage.md)

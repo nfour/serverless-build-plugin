@@ -3,7 +3,7 @@
 Serverless build is uses the `sls deploy` and `sls deploy function` CLI commands, overriding the standard build
 functionality.
 
-- [Configure serverless build](./Installation%20&%20Config.md)
+- [Configure serverless build](./Install%20&%20Config.md)
 - [Configure serverless with AWS credentials](https://serverless.com/framework/docs/providers/aws/guide/credentials/)
 - `sls deploy` to deploy your resources and all functions at once
 - `sls invoke -l -f <fnName>` to invoke a deployed function
