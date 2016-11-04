@@ -7,5 +7,5 @@ A **Node.js** focused build optimizer plugin for [serverless](https://github.com
 - Building via `webpack` or any arbitrary build file
 
 
-- [Installation & Configuration](./docs/Install%20&%20Config.md)
-- [Usage](./docs/Usage.md)
+- [Installation & Configuration](https://github.com/nfour/serverless-build-plugin/blob/master/docs/Install%20&%20Config.md)
+- [Usage](https://github.com/nfour/serverless-build-plugin/blob/master/docs/Usage.md)
