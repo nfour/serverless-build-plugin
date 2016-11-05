@@ -1,6 +1,8 @@
-method: file
-tryFiles:
-  - webpack.config.js
+# method: file
+# tryFiles:
+#   - webpack.config.js
+
+method: bundle
 
 sourceMaps : true
 babel      : true
