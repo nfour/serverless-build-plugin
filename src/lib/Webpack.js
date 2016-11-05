@@ -24,18 +24,16 @@ export default class WebpackBuilder {
       ...config.output,
       libraryTarget : 'commonjs',
       path          : this.config.buildTmpDir,
-      filename      : 'handler.js',
-      // TODO: ensure source map name is reliable
     };
 
     /**
      *  TODO: normalize the externals to an array of module names, or else errors.
      */
-    this.externals = config.externals;
+    this.externals = config.externals || [];
 
     const logs = await this._runWebpack(config);
 
-    this.log('[webpack]');
+    this.log('[WEBPACK]');
     this.log(logs);
 
     return this;

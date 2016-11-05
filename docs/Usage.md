@@ -29,7 +29,9 @@ git clone git@github.com:nfour/serverless-build-plugin
 cd serverless-build-plugin
 npm i
 npm run build
+npm link
 cd test/1.0
+npm link serverless-build-plugin
 
 sls deploy
 sls invoke -f one -l

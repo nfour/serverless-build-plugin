@@ -14,19 +14,18 @@ Serverless build can be configured in two locations (or both):
 
 There are two ways to build:
 - `bundle`, this will bundle your functions and keep their directory structure based on globbing and module dependency resolution
-- `file`, this can be a webpack.config.js, or any file which builds your functions leaving it up to you
+- `file`, this can be a `webpack.config.js` or any file which builds your functions, allowing fexibility
 
 See [test/1.0](./test/1.0) for an example project.
 
 ### BUNDLE METHOD CONFIG
-
-A config for bundling needs to define globs, transforms etc.
 
 - Node.JS optimized version of the [package](https://github.com/serverless/serverless/blob/master/docs/providers/aws/guide/packaging.md) built-in plugin
 - Each file can be, optionally, transpiled with:
   - **babel**
   - **uglify**
   - **babeli** (soon, WIP)
+  - _custom transforms_ (soon, WIP)
 - `node_modules` are whitelisted based on the `package.json` `dependencies`, resolved recursively and reliably
 
 ```yaml
@@ -106,10 +105,8 @@ exclude:
 
 ### FILE METHOD CONFIG
 
-A file method config offloads to the build file.
-
-- Use a build file to generate functions entirely
-- Use `webpack` instead, by exporting a webpack config
+- Use a build file to package functions
+- Use `webpack`, by exporting a webpack config
 
 ```yaml
 method: file
@@ -121,6 +118,33 @@ method: file
 # selecting a build file.
 tryFiles:
   - 'webpack.config.js'
+```
+
+The build file handles the `default export` with this logic:
+
+- First resolves any `Function` or `Promise` to its value
+- When `Object`:
+  - Treat as a `webpack.config.js` config
+  - Uses your projects version of `webpack` (peer dependency)
+  - `externals` are recognizes as node_modules to bundle up seperately
+  - `entry` can be used, and will be concat with the `handler.js`
+  - Creates a `handler.js` and `handler.map.js` for the current function
+- When `String` or `Buffer` or `ReadStream`:
+  - Creates a `handler.js` for the current function
+  - NOTE: Best to use a `ReadStream` for memory usage
+
+Build files are triggered with these params:
+
+```js
+/**
+ *  @param fnConfig {Object}
+ *  @param serverlessBuild {ServerlessBuildPlugin}
+ */
+export default async function myBuildFn(fnConfig, serverlessBuild) {
+  // ... do stuff, any stuff
+
+  return "console.log('it works');"
+}
 ```
 
 ### SHARED OPTIONS
@@ -152,5 +176,4 @@ synchronous: true
 # Options to pass to the `yazl` zipping instances
 zip:
   compress: true
-
 ```

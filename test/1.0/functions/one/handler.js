@@ -3,11 +3,11 @@ import { typeOf } from 'lutils';
 import Promise from 'bluebird';
 import number from '../../lib/one';
 
-export async function handler(event, context, done) {
+export const handler = async (event, context, done) => {
   console.log({ number });
   console.log({ env: process.env });
 
-  await Promise.delay(200);
+  // await Promise.delay(200);
 
   // Uncomment this to emit an error
   // await require('./file')();
@@ -16,4 +16,4 @@ export async function handler(event, context, done) {
     statusCode : 200,
     headers    : { 'content-type': 'application/json' },
     body       : JSON.stringify({ num: number + typeOf(number) }) });
-}
+};
