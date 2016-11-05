@@ -16,6 +16,8 @@ There are two ways to build:
 - `bundle`, this will bundle your functions and keep their directory structure based on globbing and module dependency resolution
 - `file`, this can be a webpack.config.js, or any file which builds your functions leaving it up to you
 
+See [test/1.0](./test/1.0) for an example project.
+
 ### BUNDLE METHOD CONFIG
 
 A config for bundling needs to define globs, transforms etc.
