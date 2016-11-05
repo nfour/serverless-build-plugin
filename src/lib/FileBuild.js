@@ -63,8 +63,6 @@ export default class FileBuild {
 
       const entryPoint = `./${fnConfig.handler.split(/\.[^\.]+$/)[0]}.js`;
 
-      console.log({ entryPoint });
-
       const webpackFilename = `${fnConfig.name}.js`;
 
       merge(
@@ -94,8 +92,6 @@ export default class FileBuild {
         const filePath = path.resolve(this.config.buildTmpDir, file);
 
         const stats = await fs.statAsync(filePath);
-
-        console.log({ filePath, file });
 
         // Ensure file exists first
         if (stats.isFile()) {

@@ -42,8 +42,6 @@ const config = {
   },
 };
 
-console.log(JSON.parse(fs.readFileSync(path.join(__dirname, './.babelrc'), 'UTF8')));
-
 module.exports = () => {
   return config;
 };

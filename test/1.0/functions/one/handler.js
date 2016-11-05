@@ -1,3 +1,4 @@
+import 'babel-polyfill';
 import 'source-map-support/register';
 import { typeOf } from 'lutils';
 import Promise from 'bluebird';
@@ -7,7 +8,7 @@ export const handler = async (event, context, done) => {
   console.log({ number });
   console.log({ env: process.env });
 
-  // await Promise.delay(200);
+  await Promise.delay(200);
 
   // Uncomment this to emit an error
   // await require('./file')();
