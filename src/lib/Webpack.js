@@ -1,5 +1,6 @@
 import Promise from 'bluebird';
 import path from 'path';
+import { typeOf } from 'lutils';
 
 export default class WebpackBuilder {
   constructor(config = {}) {
@@ -26,10 +27,7 @@ export default class WebpackBuilder {
       path          : this.config.buildTmpDir,
     };
 
-    /**
-     *  TODO: normalize the externals to an array of module names, or else errors.
-     */
-    this.externals = config.externals || [];
+    this.externals = this._normalizeExternals(config.externals || []);
 
     const logs = await this._runWebpack(config);
 
@@ -37,6 +35,31 @@ export default class WebpackBuilder {
     this.log(logs);
 
     return this;
+  }
+
+  /**
+   *  Normalizes webpacks externals into an array of strings.
+   *  This is fairly rough, could be better.
+   *
+   *  @return [ "moduleName" ]
+   */
+  _normalizeExternals(externals) {
+    return externals.reduce((arr, external) => {
+      const type = typeOf(external);
+
+      if (type === 'string') {
+        arr.push(external);
+      } else
+      if (type === 'object') {
+        for (const key in external) {
+          const val = external[val];
+
+          if (val === true) arr.push(key);
+        }
+      }
+
+      return arr;
+    }, []);
   }
 
   _runWebpack(config, webpack = this.webpack) {

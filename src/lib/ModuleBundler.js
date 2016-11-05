@@ -27,19 +27,19 @@ export default class ModuleBundler {
     this.artifact = artifact;
   }
 
-    /**
-     *  Determines module locations then adds them into ./node_modules
-     *  inside the artifact.
-     */
+  /**
+   *  Determines module locations then adds them into ./node_modules
+   *  inside the artifact.
+   */
   async bundle({ include = [], exclude = [], deepExclude = [] }) {
-    const modules = await this._resolveDependencies(
+    this.modules = await this._resolveDependencies(
       this.config.servicePath,
       { include, exclude, deepExclude }
     );
 
     const transforms = await this._createTransforms();
 
-    await Promise.map(modules, async ({ packagePath, relativePath }) => {
+    await Promise.map(this.modules, async ({ packagePath, relativePath }) => {
       const onFile = async (basePath, stats, next) => {
         const relPath = path.join(
           relativePath, basePath.split(relativePath)[1], stats.name

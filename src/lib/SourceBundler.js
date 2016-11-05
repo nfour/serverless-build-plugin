@@ -55,13 +55,13 @@ export default class SourceBundler {
             : glob(relPath, pattern, { dot: true });
       };
 
-      /**
-       *  When a pattern matches an exclude, it skips
-       *  When a pattern doesnt match an include, it skips
-       */
       const included = include.some(testPattern);
       const excluded = exclude.some(testPattern);
 
+      /**
+      *  When a pattern matches an exclude, it skips
+      *  When a pattern doesnt match an include, it skips
+      */
       if (!included || (excluded && !included)) return next();
 
       await handleFile({

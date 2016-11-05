@@ -1,6 +1,6 @@
 {
   "name"        : "serverless-build-plugin",
-  "version"     : "0.3.10",
+  "version"     : "0.3.11",
   "main"        : "./dist/index",
   "description" : "A Node.js focused build optimizer plugin for serverless",
 
@@ -8,7 +8,7 @@
     "build"      : "babel $BABEL_OPTIONS --source-maps inline ./src --out-dir ./dist",
     "dev"        : "BABEL_OPTIONS=--watch npm run build",
     "prepublish" : "npm run build",
-    "test"       : "nyc mocha -r babel-register test"
+    "test"       : "mocha -r babel-register test"
   },
 
   "dependencies": {
