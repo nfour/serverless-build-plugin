@@ -1,3 +1,7 @@
+# method: file
+# tryFiles:
+#   - webpack.config.js
+
 method: bundle
 
 sourceMaps : true

@@ -1,9 +1,10 @@
+import 'babel-polyfill';
 import 'source-map-support/register';
 import { typeOf } from 'lutils';
 import Promise from 'bluebird';
 import number from '../../lib/one';
 
-export async function handler(event, context, done) {
+export const handler = async (event, context, done) => {
   console.log({ number });
   console.log({ env: process.env });
 
@@ -16,4 +17,4 @@ export async function handler(event, context, done) {
     statusCode : 200,
     headers    : { 'content-type': 'application/json' },
     body       : JSON.stringify({ num: number + typeOf(number) }) });
-}
+};

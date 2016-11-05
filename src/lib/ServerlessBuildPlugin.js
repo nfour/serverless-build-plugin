@@ -215,8 +215,7 @@ export default class ServerlessBuildPlugin {
         servicePath : this.servicePath,
         buildTmpDir : this.buildTmpDir,
         serverless  : this.serverless,
-        function    : fnConfig,
-      }, artifact).build();
+      }, artifact).build(fnConfig);
 
       moduleIncludes.push(...fileBuild.externals);
     } else {

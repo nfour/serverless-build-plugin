@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import path from 'path';
-import { typeOf } from 'lutils';
+import { typeOf, merge, clone } from 'lutils';
 import fs from 'fs-extra';
 import isStream from 'is-stream';
 
@@ -14,7 +14,6 @@ export default class FileBuild {
       servicePath : '',   // ./
       buildTmpDir : '',   // ./.serverless/build
       zip         : null, // Yazl zip options
-      functions   : {},   // Realized function configs
       tryFiles    : [],   // Array of relative paths to test for a build file
       ...config,
     };
@@ -28,7 +27,7 @@ export default class FileBuild {
   /**
    *  Handles building from a build file's output.
    */
-  async build() {
+  async build(fnConfig) {
     //
     // RESOLVE BUILD FILE
     //
@@ -45,7 +44,7 @@ export default class FileBuild {
 
     // Resolve any functions...
     if (typeOf.Function(result)) {
-      result = await Promise.try(() => result(this));
+      result = await Promise.try(() => result(fnConfig, this));
     }
 
     //
@@ -60,27 +59,43 @@ export default class FileBuild {
       // WEBPACK CONFIG
       //
 
-      const entryPoints = [
-        this.config.function.handler.split(/\.[^\.]+$/)[0] || '',
-      ].map((filePath) => `./${filePath}.js`);
+      const webpackConfig = clone(result);
 
-      result.entry = [...(result.entry || []), ...entryPoints];
+      const entryPoint = `./${fnConfig.handler.split(/\.[^\.]+$/)[0]}.js`;
 
-      const { externals } = await new WebpackBuilder(this.config).build(result);
+      const webpackFilename = `${fnConfig.name}.js`;
+
+      merge(
+        webpackConfig,
+        {
+          entry  : [...(webpackConfig.entry || []), entryPoint],
+          output : {
+            filename: webpackFilename,
+          },
+        }
+      );
+
+      const { externals } = await new WebpackBuilder(this.config).build(webpackConfig);
 
       externals.forEach((ext) => this.externals.add(ext));
 
-      [
-        'handler.js',
-        'handler.js.map',
-      ].map(async (relPath) => {
-        const filePath = path.resolve(this.config.buildTmpDir, relPath);
+      await Promise.each([
+        {
+          file  : webpackFilename,
+          entry : entryPoint,
+        },
+        {
+          file  : `${webpackFilename}.map`,
+          entry : `${entryPoint}.map`,
+        },
+      ], async ({ file, entry }) => {
+        const filePath = path.resolve(this.config.buildTmpDir, file);
 
         const stats = await fs.statAsync(filePath);
 
         // Ensure file exists first
         if (stats.isFile()) {
-          this.artifact.addFile(filePath, relPath, this.config.zip);
+          this.artifact.addFile(filePath, entry, this.config.zip);
         }
       });
     } else
