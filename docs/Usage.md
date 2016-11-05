@@ -35,6 +35,14 @@ npm link serverless-build-plugin
 
 sls deploy
 sls invoke -f one -l
-sls deploy function -f two -l
+sls deploy function -f two
 sls invoke -f two -l
 ```
+
+If you want to take audit the built zip in a test run, add the `--debug` option
+
+```
+sls deploy function -f two --debug
+```
+
+Then check the `./.serverless/artifacts` directory
