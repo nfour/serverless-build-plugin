@@ -1,3 +1,3 @@
-describe('Serverless Build Plugin', function() {
-    require('./ModuleBundler')
-})
+describe('Serverless Build Plugin', () => {
+  require('./ModuleBundler');
+});

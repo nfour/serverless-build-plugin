@@ -8,7 +8,7 @@
     "build"      : "babel $BABEL_OPTIONS --source-maps inline ./src --out-dir ./dist",
     "dev"        : "BABEL_OPTIONS=--watch npm run build",
     "prepublish" : "npm run build",
-    "test"       : "nyc mocha -r babel-register test"
+    "test"       : "mocha -r babel-register test"
   },
 
   "dependencies": {
