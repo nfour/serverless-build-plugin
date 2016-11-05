@@ -18,7 +18,7 @@ There are two ways to build:
 
 See [test/1.0](./test/1.0) for an example project.
 
-### BUNDLE METHOD CONFIG
+### BUNDLE METHOD OPTIONS
 
 - Node.JS optimized version of the [package](https://github.com/serverless/serverless/blob/master/docs/providers/aws/guide/packaging.md) built-in plugin
 - Each file can be, optionally, transpiled with:
@@ -103,7 +103,7 @@ exclude:
   - "*" # Ignores the root directory
 ```
 
-### FILE METHOD CONFIG
+### FILE METHOD OPTIONS
 
 - Use a build file to package functions
 - Use `webpack`, by exporting a webpack config
@@ -176,4 +176,10 @@ synchronous: true
 # Options to pass to the `yazl` zipping instances
 zip:
   compress: true
+
+# deploy
+#
+# Whether to deploy.
+# Specify --no-deploy in the CLI to disable this and do a dry run
+deploy: true
 ```

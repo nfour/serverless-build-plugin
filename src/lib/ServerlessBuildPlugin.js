@@ -169,7 +169,7 @@ export default class ServerlessBuildPlugin {
     this.log('Builds complete');
     this.log('');
 
-    if (this.config.debug) throw new Error('DEBUGGING STOP');
+    if (!this.config.deploy) process.exit();
   }
 
   async buildFunction(fnName, fnConfig) {
