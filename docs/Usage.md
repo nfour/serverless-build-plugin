@@ -39,10 +39,10 @@ sls deploy function -f two
 sls invoke -f two -l
 ```
 
-If you want to take audit the built zip in a test run, add the `--debug` option
+If you want to audit the built zip in a test run, add the `--no-deploy` option
 
 ```
-sls deploy function -f two --debug
+sls deploy function -f two --no-deploy
 ```
 
 Then check the `./.serverless/artifacts` directory
