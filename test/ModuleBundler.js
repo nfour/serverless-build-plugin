@@ -22,8 +22,7 @@ describe('ModuleBundler', async function () {
   for (const dep in dependencies) {
     it(`Has bundled dependency ${dep}`, async () => {
       assert(
-        moduleBundler.modules.some(({ name }) => name === dep),
-        `Has dependency ${dep}`
+        moduleBundler.modules.some(({ name }) => name === dep)
       );
     });
   }
