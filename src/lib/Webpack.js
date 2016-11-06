@@ -52,7 +52,7 @@ export default class WebpackBuilder {
       } else
       if (type === 'object') {
         for (const key in external) {
-          const val = external[val];
+          const val = external[key];
 
           if (val === true) arr.push(key);
         }

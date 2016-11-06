@@ -14,7 +14,7 @@ const config = {
   resolve: {
     extensions: ['.js', '.json'],
   },
-  devtool : PRODUCTION ? null : 'source-map',
+  devtool : PRODUCTION ? undefined : 'source-map',
   plugins : PRODUCTION ? [
     new webpack.optimize.DedupePlugin(),
     new webpack.optimize.UglifyJsPlugin({
