@@ -1,6 +1,6 @@
 # USAGE
 
-Serverless build is uses the `sls deploy` and `sls deploy function` CLI commands, overriding the standard build
+Serverless build uses the `sls deploy` and `sls deploy function` CLI commands, overriding the standard build
 functionality.
 
 - [Configure serverless build](./Install%20&%20Config.md)
