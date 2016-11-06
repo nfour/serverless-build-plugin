@@ -91,7 +91,7 @@ export default class FileBuild {
       ], async ({ file, entry }) => {
         const filePath = path.resolve(this.config.buildTmpDir, file);
 
-        try { await fs.statAsync(filePath); }
+        try { await fs.accessAsync(filePath); }
         catch (err) { return; }
 
         this.artifact.addFile(filePath, entry, this.config.zip);
