@@ -32,6 +32,7 @@ npm i
 npm run build
 npm link
 cd test/1.0
+npm i
 npm link serverless-build-plugin
 
 sls deploy
