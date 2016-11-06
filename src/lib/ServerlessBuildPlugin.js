@@ -38,7 +38,8 @@ export default class ServerlessBuildPlugin {
 
     functions: {},
 
-    synchronous: true,
+    synchronous : true,
+    deploy      : true,
   }
 
   constructor(serverless, options = {}) {
@@ -169,7 +170,7 @@ export default class ServerlessBuildPlugin {
     this.log('Builds complete');
     this.log('');
 
-    if (!this.config.deploy) process.exit();
+    if (this.config.deploy === false) process.exit();
   }
 
   async buildFunction(fnName, fnConfig) {

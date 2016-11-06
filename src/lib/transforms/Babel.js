@@ -1,16 +1,15 @@
 export default class BabelTransform {
   constructor(config = {}, options = {}) {
-    this.options = {
-      skipOnError : false, // When false, errors will halt execution
-      logErrors   : true,
-      ...options,
-    };
-
     this.config = {
       sourceMaps: 'both',
       ...config,
     };
 
+    this.options = {
+      skipOnError : false, // When false, errors will halt execution
+      logErrors   : true,
+      ...options,
+    };
 
     this.babel = require('babel-core'); // eslint-disable-line
   }
