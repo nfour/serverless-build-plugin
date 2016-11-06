@@ -9,23 +9,23 @@
     "source-map-support" : "latest",
     "bluebird"           : "latest",
     "aws-sdk"            : "latest",
-    "babel-runtime"      : "^6.0.0",
+    "babel-runtime"      : "~6.18.0",
+    "babel-polyfill"     : "~6.16.0",
     "lutils"             : "latest"
   },
   "devDependencies": {
-    "json-loader"   : "~0.5.0",
-    "babel-loader"  : "^6.2.4",
-    "webpack"      : "2.1.0-beta.22",
+    "json-loader"  : "~0.5.0",
+    "babel-loader" : "^6.2.4",
+    "webpack"      : "2.1.0-beta.24",
 
-    "babel-polyfill"                                : "latest",
+    "babel-core"                                    : "~6.18.0",
     "babel-preset-es2015"                           : "^6.0.0",
+    "babel-register"                                : "~6.18.0",
+    "babel-preset-env"                              : "latest",
     "babel-preset-es2015-node4"                     : "latest",
-    "babel-preset-es2015-node6"                     : "latest",
-    "babel-preset-stage-1"                          : "^6.0.0",
-    "babel-plugin-transform-async-to-module-method" : "latest",
+    "babel-preset-stage-1"                          : "~6.16.0",
+    "babel-plugin-transform-async-to-module-method" : "~6.16.0",
     "babel-plugin-add-module-exports"               : "^0.2.0",
-    "babel-plugin-transform-runtime"                : "latest",
-    "babel-register"                                : "^6.9.0",
-    "babel-core"                                    : "^6.11.0"
+    "babel-plugin-transform-runtime"                : "~6.15.0"
   }
 }

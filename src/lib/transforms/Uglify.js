@@ -2,17 +2,17 @@ import path from 'path';
 
 export default class UglifyTransform {
   constructor(config = {}, options = {}) {
-    this.options = {
-      skipOnError : true, // When false, errors will halt execution
-      logErrors   : false,
-      ...options,
-    };
-
     this.config = {
       dead_code : true,
       unsafe    : false,
 
       ...config,
+    };
+
+    this.options = {
+      skipOnError : true, // When false, errors will halt execution
+      logErrors   : false,
+      ...options,
     };
 
     this.uglify = require('uglify-js'); // eslint-disable-line
