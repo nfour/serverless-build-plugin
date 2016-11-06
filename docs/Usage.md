@@ -8,6 +8,7 @@ functionality.
 - `sls deploy` to deploy your resources and all functions at once
 - `sls invoke -l -f <fnName>` to invoke a deployed function
 - `sls deploy function -f <fnName>` to deploy a single function
+- `NODE_ENV=production sls deploy function -f <fnName>` when your build process cares about `process.env.NODE_ENV`
 
 Try adding this to your npm scripts, to both deploy and run at once:
 ```json
