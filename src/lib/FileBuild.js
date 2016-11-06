@@ -91,12 +91,10 @@ export default class FileBuild {
       ], async ({ file, entry }) => {
         const filePath = path.resolve(this.config.buildTmpDir, file);
 
-        const stats = await fs.statAsync(filePath);
+        try { await fs.statAsync(filePath); }
+        catch (err) { return; }
 
-        // Ensure file exists first
-        if (stats.isFile()) {
-          this.artifact.addFile(filePath, entry, this.config.zip);
-        }
+        this.artifact.addFile(filePath, entry, this.config.zip);
       });
     } else
     if (typeOf.String(result) || result instanceof Buffer) {
