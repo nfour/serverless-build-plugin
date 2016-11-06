@@ -54,6 +54,9 @@ export default class FileBuild {
     // - Webpack Config:             executed and output files are zipped
     //
 
+    const entryPoint    = `./${fnConfig.handler.split(/\.[^\.]+$/)[0]}.js`;
+    const buildFilename = `${fnConfig.name}.js`;
+
     if (typeOf.Object(result)) {
       //
       // WEBPACK CONFIG
@@ -61,16 +64,12 @@ export default class FileBuild {
 
       const webpackConfig = clone(result);
 
-      const entryPoint = `./${fnConfig.handler.split(/\.[^\.]+$/)[0]}.js`;
-
-      const webpackFilename = `${fnConfig.name}.js`;
-
       merge(
         webpackConfig,
         {
           entry  : [...(webpackConfig.entry || []), entryPoint],
           output : {
-            filename: webpackFilename,
+            filename: buildFilename,
           },
         }
       );
@@ -81,18 +80,19 @@ export default class FileBuild {
 
       await Promise.each([
         {
-          file  : webpackFilename,
+          file  : buildFilename,
           entry : entryPoint,
         },
         {
-          file  : `${webpackFilename}.map`,
+          file  : `${buildFilename}.map`,
           entry : `${entryPoint}.map`,
         },
       ], async ({ file, entry }) => {
         const filePath = path.resolve(this.config.buildTmpDir, file);
 
-        try { await fs.statAsync(filePath); }
-        catch (err) { return; }
+        try {
+          await fs.accessAsync(filePath);
+        } catch (err) { return; }
 
         this.artifact.addFile(filePath, entry, this.config.zip);
       });
@@ -104,14 +104,14 @@ export default class FileBuild {
 
       if (typeOf.String(result)) result = new Buffer(result);
 
-      this.artifact.addBuffer(result, 'handler.js', this.config.zip);
+      this.artifact.addBuffer(result, entryPoint, this.config.zip);
     } else
     if (isStream(result)) {
       //
       // STREAMS
       //
 
-      this.artifact.addReadStream(result, 'handler.js', this.config.zip);
+      this.artifact.addReadStream(result, entryPoint, this.config.zip);
     } else {
       throw new Error('Unrecognized build output');
     }
