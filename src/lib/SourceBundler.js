@@ -98,7 +98,13 @@ export default class SourceBundler {
 
         babelQuery = fs.existsSync(babelrcPath)
           ? JSON.parse(await fs.readFileAsync(babelrcPath))
-          : babelQuery;
+          : {};
+      }
+
+      // If `sourceMaps` are switched off by the plugin's configuration,
+      // ensure that is passed down to the babel transformer too.
+      if (this.config.sourceMaps === false) {
+        babelQuery.sourceMaps = false;
       }
 
       transforms.push(new BabelTransform(babelQuery));
