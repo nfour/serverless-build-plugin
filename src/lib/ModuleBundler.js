@@ -61,6 +61,10 @@ export default class ModuleBundler {
       };
 
       await walker(packagePath)
+        .on('directory', (dirPath, stats, next) => {
+          console.log({ directory: /node_modules$/.test(dirPath) });
+          next();
+        })
         .on('file', onFile)
         .end();
     });
@@ -118,7 +122,7 @@ export default class ModuleBundler {
 
         if (!resolvedDir) continue;
 
-        const relativePath = path.join('node_modules', resolvedDir.split(`${seperator}`).slice(1).join(seperator));
+        const relativePath = path.join('node_modules', resolvedDir.split(seperator).slice(1).join(seperator));
 
         if (relativePath in cache) continue;
 
