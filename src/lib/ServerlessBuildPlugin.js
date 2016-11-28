@@ -60,7 +60,7 @@ export default class ServerlessBuildPlugin {
     this.serverless.service.package.individually = true;
 
     this.hooks = {
-      'before:deploy:function:deploy'           : this.build,
+      'before:deploy:function:initialize'       : this.build,
       'before:deploy:createDeploymentArtifacts' : this.build,
       'after:deploy:createDeploymentArtifacts'  : () => {
         this.serverless.service.package.artifact = null;
