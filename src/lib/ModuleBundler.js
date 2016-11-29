@@ -61,10 +61,6 @@ export default class ModuleBundler {
       };
 
       await walker(packagePath)
-        .on('directory', (dirPath, stats, next) => {
-          // console.log({ directory: /\bnode_modules\/[^\/]+\/node_modules\b/.test(dirPath) });
-          next();
-        })
         .on('file', onFile)
         .end();
     });
