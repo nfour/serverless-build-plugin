@@ -1,6 +1,6 @@
 {
   "name": "serverless-build-plugin",
-  "version": "0.4.1",
+  "version": "0.5.0-alpha.1",
   "main": "./dist/index",
   "description": "A Node.js focused build optimizer plugin for serverless",
   "scripts": {
@@ -21,7 +21,7 @@
     "minimatch": "~3.0.3",
     "mkdirp": "~0.5.1",
     "resolve-pkg": "~0.2.0",
-    "source-map-support": "latest",
+    "source-map-support": "~0.4.6",
     "uglify-js": "~2.7.0",
     "walk": "~2.3.9",
     "yauzl": "~2.6.0",
@@ -32,8 +32,7 @@
     "babel-eslint": "~6.1.2",
     "babel-plugin-add-module-exports": "^0.2.0",
     "babel-plugin-transform-async-to-module-method": "~6.16.0",
-    "babel-plugin-transform-runtime": "~6.15.0",
-    "babel-preset-es2015-node4": "latest",
+    "babel-preset-es2015-node4": "~2.1.0",
     "babel-preset-stage-1": "~6.16.0",
     "chai": "~3.5.0",
     "eslint": "^3.11.1",

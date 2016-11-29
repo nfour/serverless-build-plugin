@@ -61,6 +61,20 @@ export default class ModuleBundler {
       };
 
       await walker(packagePath)
+        .on('directory', (dirPath, stats, next) => {
+          if (stats.isDirectory()) {
+            const endParts = dirPath.split('/').slice(-2);
+
+            // When a directory is a package and matches a deep exclude pattern
+            // Then skip it
+            if (
+              endParts[0] === 'node_modules' &&
+              deepExclude.indexOf(endParts[1]) !== -1
+            ) return;
+          }
+
+          next();
+        })
         .on('file', onFile)
         .end();
     });
