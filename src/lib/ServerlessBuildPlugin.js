@@ -19,8 +19,8 @@ export default class ServerlessBuildPlugin {
     baseExclude : [/\bnode_modules\b/],
 
     modules: {
-      exclude     : ['aws-sdk'], // These match root dependencies
-      deepExclude : ['aws-sdk'], // These match deep dependencies
+      exclude     : [], // These match root dependencies
+      deepExclude : [], // These match deep dependencies
     },
 
     exclude : [],

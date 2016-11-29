@@ -61,6 +61,10 @@ export default class ModuleBundler {
       };
 
       await walker(packagePath)
+        .on('directory', (dirPath, stats, next) => {
+          // console.log({ directory: /\bnode_modules\/[^\/]+\/node_modules\b/.test(dirPath) });
+          next();
+        })
         .on('file', onFile)
         .end();
     });
@@ -118,13 +122,13 @@ export default class ModuleBundler {
 
         if (!resolvedDir) continue;
 
-        const relativePath = path.join('node_modules', resolvedDir.split(`${seperator}`).slice(1).join(seperator));
+        const relativePath = path.join('node_modules', resolvedDir.split(seperator).slice(1).join(seperator));
 
         if (relativePath in cache) continue;
 
         cache[relativePath] = true;
 
-        this.log(`[MODULE] ${packageName}`);
+        this.log(`[MODULE] ${relativePath}`);
 
         const result = await recurse(resolvedDir, undefined, deepExclude);
 

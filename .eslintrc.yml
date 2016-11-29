@@ -35,9 +35,6 @@ rules:
     - devDependencies: true
   import/no-named-as-default: 0 # Limiting for a valid usecase
 
-  jsx-a11y/img-has-alt                    : 0 # Waste of my time
-  jsx-a11y/no-static-element-interactions : 0 # Limiting, needlessly
-
   #
   # DISABLE BECAUSE OF ERRORS
   #
@@ -72,12 +69,8 @@ rules:
         afterColon: true
         mode: strict
 
-  global-require: 1 # Limiting, but useful
-
-  react/prefer-stateless-function : 1
-  react/forbid-prop-types         : 1
-
-  import/prefer-default-export    : 1 # Limits multi-export files when they aren't populated
+  global-require               : 1 # Limiting, but useful
+  import/prefer-default-export : 1 # Limits multi-export files when they aren't populated
 
 env:
   mocha   : true
