@@ -1,6 +1,6 @@
 {
   "name": "serverless-build-plugin",
-  "version": "0.3.17",
+  "version": "0.4.0",
   "main": "./dist/index",
   "description": "A Node.js focused build optimizer plugin for serverless",
   "scripts": {
@@ -36,14 +36,12 @@
     "babel-preset-es2015-node4": "latest",
     "babel-preset-stage-1": "~6.16.0",
     "chai": "~3.5.0",
-    "eslint": "~3.6.0",
-    "eslint-config-airbnb": "^11.0.0",
-    "eslint-plugin-import": "^1.16.0",
-    "eslint-plugin-jsx-a11y": "^2.2.2",
-    "eslint-plugin-react": "~6.3.0",
+    "eslint": "^3.11.1",
+    "eslint-config-airbnb-base": "^10.0.1",
+    "eslint-plugin-import": "^2.2.0",
     "mocha": "~2.4.5",
-    "webpack": "2.1.0-beta.24",
-    "nyc": "~6.2.1"
+    "nyc": "~6.2.1",
+    "webpack": "2.1.0-beta.24"
   },
   "repository": {
     "type": "git",

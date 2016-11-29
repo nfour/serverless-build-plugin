@@ -10,11 +10,11 @@ babel      : true
 uglify     : false # Wont make a big difference on small projects
 
 modules:
-  exclude: # excluded from the root node_modules
-    - aws-sdk
+  exclude: [] # excluded from the root node_modules
 
   deepExclude: # excluded from nested node_modules
-    - aws-sdk
+    - xmlbuilder
+    - punycode
 
 exclude:
   - "*" # Ignores the root directory

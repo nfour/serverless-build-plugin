@@ -1,12 +1,12 @@
 # For full config options, check the docs: v1.docs.serverless.com
 
-service: v1test5
+service: slsBuildTest
 
 provider:
   name    : aws
   runtime : nodejs4.3
   # profile : dev
-  stage   : dev
+  stage   : samslsbuild
   region  : ap-southeast-2
 
 plugins:
@@ -17,7 +17,9 @@ functions:
     handler: functions/one/handler.handler
 
     events:
-      - http: get func/one
+      - http:
+          method: get
+          path: func/one
 
   two:
     handler: functions/two/handler.handler
