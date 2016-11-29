@@ -59,11 +59,12 @@ export default class ModuleBundler {
 
         next();
       };
-
       await walker(packagePath)
         .on('directory', (dirPath, stats, next) => {
           if (stats.isDirectory()) {
-            const endParts = dirPath.split('/').slice(-2);
+            // This pulls ['node_modules', 'pack'] out of
+            // .../node_modules/package/node_modules/pack
+            const endParts = dirPath.split(packagePath)[1].split('/').slice(-2);
 
             // When a directory is a package and matches a deep exclude pattern
             // Then skip it
