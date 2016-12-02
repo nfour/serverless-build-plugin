@@ -238,8 +238,6 @@ export default class ServerlessBuildPlugin {
       ...this.config.modules,
     }).catch(console.error);
 
-    console.log({ compiled: true });
-
     return await this._completeFunctionArtifact(fnName, artifact);
   }
 
