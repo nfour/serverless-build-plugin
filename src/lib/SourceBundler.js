@@ -38,50 +38,44 @@ export default class SourceBundler {
   async bundle({ exclude = [], include = [] }) {
     const transforms = await this._createTransforms();
 
-    const onFile = async (basePath, stats, next) => {
-      /**
-       *  A relative path to the servicePath
-       *  @example ./functions/test/handler.js
-       */
-      const relPath = path.join(
-        basePath.split(this.config.servicePath)[1], stats.name
-      ).replace(/^\/|\/$/g, '');
-
-      const filePath = path.join(basePath, stats.name);
-
-      const testPattern = (pattern) => {
-        return typeOf.RegExp(pattern)
-            ? pattern.test(relPath)
-            : glob(relPath, pattern, { dot: true });
-      };
-
-      const included = include.some(testPattern);
-      const excluded = exclude.some(testPattern);
-
-      /**
-      *  When a pattern matches an exclude, it skips
-      *  When a pattern doesnt match an include, it skips
-      */
-      if (!included || (excluded && !included)) return next();
-
-      await handleFile({
-        filePath,
-        relPath,
-        transforms,
-        transformExtensions : ['js', 'jsx'],
-        useSourceMaps       : this.config.sourceMaps,
-        artifact            : this.artifact,
-        zipConfig           : this.config.zip,
-      });
-
-      this.log(`[SOURCE] ${relPath}`);
-
-      return next();
-    };
-
     // We never want node_modules here
     await walker(this.config.servicePath, { filters: [/\/node_modules\//i] })
-      .on('file', onFile)
+      .on('file', async (filePath, stats, stop) => {
+        /**
+         *  A relative path to the servicePath
+         *  @example ./functions/test/handler.js
+         */
+        const relPath = path.join(
+          filePath.split(this.config.servicePath)[1],
+        ).replace(/^\/|\/$/g, '');
+
+        const testPattern = (pattern) => {
+          return typeOf.RegExp(pattern)
+              ? pattern.test(relPath)
+              : glob(relPath, pattern, { dot: true });
+        };
+
+        const included = include.some(testPattern);
+        const excluded = exclude.some(testPattern);
+
+        /**
+        *  When a pattern matches an exclude, it skips
+        *  When a pattern doesnt match an include, it skips
+        */
+        if (!included || (excluded && !included)) return;
+
+        await handleFile({
+          filePath,
+          relPath,
+          transforms,
+          transformExtensions : ['js', 'jsx'],
+          useSourceMaps       : this.config.sourceMaps,
+          artifact            : this.artifact,
+          zipConfig           : this.config.zip,
+        });
+
+        this.log(`[SOURCE] ${relPath}`);
+      })
       .end();
 
     return this.artifact;

@@ -3,8 +3,8 @@ import path from 'path';
 import Yazl from 'yazl';
 import fs from 'fs-extra';
 import { typeOf, merge, clone } from 'lutils';
-import Yaml from 'js-yaml';
 
+import { loadFile } from './utils';
 import ModuleBundler from './ModuleBundler';
 import SourceBundler from './SourceBundler';
 import FileBuild from './FileBuild';
@@ -51,7 +51,7 @@ export default class ServerlessBuildPlugin {
 
     if (!this.serverless.getVersion().startsWith('1')) {
       throw new this.serverless.classes.Error(
-        'serverless-build-plugin requires serverless@1.x.x'
+        'serverless-build-plugin requires serverless@1.x.x',
       );
     }
 
@@ -60,6 +60,7 @@ export default class ServerlessBuildPlugin {
     this.serverless.service.package.individually = true;
 
     this.hooks = {
+      'before:deploy:function:deploy'           : this.build, // Deprecated
       'before:deploy:function:initialize'       : this.build,
       'before:deploy:createDeploymentArtifacts' : this.build,
       'after:deploy:createDeploymentArtifacts'  : () => {
@@ -76,12 +77,8 @@ export default class ServerlessBuildPlugin {
     this.buildTmpDir    = path.join(this.tmpDir, './build');
     this.artifactTmpDir = path.join(this.tmpDir, './artifacts');
 
-    const buildConfigPath = path.join(this.servicePath, './serverless.build.yml');
-
-    const buildConfig = fs.existsSync(buildConfigPath)
-      ? Yaml.load(fs.readFileSync(buildConfigPath))
-      : {};
-
+    const buildConfigPath  = path.join(this.servicePath, './serverless.build.yml');
+    const buildConfig      = loadFile(buildConfigPath) || {};
     const serverlessCustom = this.serverless.service.custom || {};
 
     // The config inherits from multiple sources
@@ -235,13 +232,15 @@ export default class ServerlessBuildPlugin {
 
         servicePath: this.servicePath,
       },
-      artifact
+      artifact,
     ).bundle({
       include: moduleIncludes,
       ...this.config.modules,
-    });
+    }).catch(console.error);
 
-    await this._completeFunctionArtifact(fnName, artifact);
+    console.log({ compiled: true });
+
+    return await this._completeFunctionArtifact(fnName, artifact);
   }
 
   /**
@@ -261,8 +260,8 @@ export default class ServerlessBuildPlugin {
     const fnConfig = this.serverless.service.functions[fnName];
 
     fnConfig.artifact         = zipPath;
-
     fnConfig.package          = fnConfig.package || {};
     fnConfig.package.artifact = zipPath;
   }
+
 }

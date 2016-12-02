@@ -13,8 +13,8 @@ modules:
   exclude: [] # excluded from the root node_modules
 
   deepExclude: # excluded from nested node_modules
-    - xmlbuilder
-    - punycode
+    - xmlbuilder # this breaks the build
+    - punycode # this breaks the build
 
 exclude:
   - "*" # Ignores the root directory

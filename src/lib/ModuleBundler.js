@@ -34,33 +34,14 @@ export default class ModuleBundler {
   async bundle({ include = [], exclude = [], deepExclude = [] }) {
     this.modules = await this._resolveDependencies(
       this.config.servicePath,
-      { include, exclude, deepExclude }
+      { include, exclude, deepExclude },
     );
 
     const transforms = await this._createTransforms();
 
     await Promise.map(this.modules, async ({ packagePath, relativePath }) => {
-      const onFile = async (basePath, stats, next) => {
-        const relPath = path.join(
-          relativePath, basePath.split(relativePath)[1] || '', stats.name
-        ).replace(/^\/|\/$/g, '');
-
-        const filePath = path.join(basePath, stats.name);
-
-        await handleFile({
-          filePath,
-          relPath,
-          transforms,
-          transformExtensions : ['js', 'jsx'],
-          useSourceMaps       : false,
-          artifact            : this.artifact,
-          zipConfig           : this.config.zip,
-        });
-
-        next();
-      };
       await walker(packagePath)
-        .on('directory', (dirPath, stats, next) => {
+        .on('directory', (dirPath, stats, stop) => {
           if (stats.isDirectory()) {
             // This pulls ['node_modules', 'pack'] out of
             // .../node_modules/package/node_modules/pack
@@ -71,12 +52,26 @@ export default class ModuleBundler {
             if (
               endParts[0] === 'node_modules' &&
               deepExclude.indexOf(endParts[1]) !== -1
-            ) return;
+            ) return stop();
           }
 
-          next();
+          return null;
         })
-        .on('file', onFile)
+        .on('file', async (filePath, stats, next) => {
+          const relPath = path.join(
+            relativePath, filePath.split(relativePath)[1] || '',
+          ).replace(/^\/|\/$/g, '');
+
+          await handleFile({
+            filePath,
+            relPath,
+            transforms,
+            transformExtensions : ['js', 'jsx'],
+            useSourceMaps       : false,
+            artifact            : this.artifact,
+            zipConfig           : this.config.zip,
+          });
+        })
         .end();
     });
 
@@ -105,7 +100,7 @@ export default class ModuleBundler {
    */
   async _resolveDependencies(
     initialPackageDir,
-    { include = [], exclude = [], deepExclude = [] } = {}
+    { include = [], exclude = [], deepExclude = [] } = {},
   ) {
     const resolvedDeps = [];
     const cache        = {};
@@ -117,7 +112,7 @@ export default class ModuleBundler {
      *  - Will also ignore the input package in the results
      */
     const recurse = async (packageDir, _include = [], _exclude = []) => {
-      const packageJson = require(path.join(packageDir, './package.json'));
+      const packageJson = require(path.join(packageDir, './package.json')); // eslint-disable-line
 
       const { name, dependencies } = packageJson;
 
