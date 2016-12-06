@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import { typeOf } from 'lutils';
 import glob from 'minimatch';
 
-import { walker, handleFile } from './utils';
+import { walker, handleFile, colorizePathBase } from './utils';
 import BabelTransform from './transforms/Babel';
 import UglifyTransform from './transforms/Uglify';
 
@@ -74,7 +74,7 @@ export default class SourceBundler {
           zipConfig           : this.config.zip,
         });
 
-        this.log(`[SOURCE] ${relPath}`);
+        this.log(`[SOURCE] ${colorizePathBase(relPath)}`);
       })
       .end();
 
@@ -113,64 +113,5 @@ export default class SourceBundler {
     }
 
     return transforms;
-  }
-
-  //
-  // FIXME: UNSUED CODE BELOW
-  //
-
-  /**
-   *  Finds both .serverless-include and .serverless-exclude files
-   *  Generates a concatenated exclude and include list.
-   *
-   *  All pathing is resolved to the servicePath, so that "*"
-   *  in <servicePath>/lib/.serverless-exclude
-   *  will be converted to "./lib/*", a relative path.
-   *
-   *  @returns {Object}
-   *      {
-   *          include: [ "./lib/**", ... ],
-   *          exclude: [ ".git", "*", ... ]
-   *      }
-   *
-   */
-  async _findFilterFiles(rootPath) {
-    const include = [];
-    const exclude = [];
-
-    const parseFile = async (filePath) => {
-      const parentDir = path.dirname(filePath);
-
-      const file = await fs.readFileAsync(filePath, 'utf8');
-
-      return file.split('\n')
-        .filter((line) => /\S/.test(line))
-        .map((line) => {
-          line = line.trim();
-          line = path.join(parentDir.split(rootPath)[1] || '', line)
-                .replace(/^\/|\/$/g, '');
-
-          return `./${line}`;
-        });
-    };
-
-    await walker(rootPath, { filters: ['node_modules'] })
-      .on('file', async (root, { name }, next) => {
-        const filePath = path.join(root, name);
-
-        if (name === '.serverless-exclude') {
-          const lines = await parseFile(filePath);
-          exclude.push(...lines);
-        } else
-          if (name === '.serverless-include') {
-            const lines = await parseFile(filePath);
-            include.push(...lines);
-          }
-
-        next();
-      })
-      .end();
-
-    return { include, exclude };
   }
 }

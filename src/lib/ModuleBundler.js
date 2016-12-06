@@ -3,7 +3,7 @@ import path, { sep } from 'path';
 import fs from 'fs-extra';
 import resolvePackage from 'resolve-pkg';
 
-import { walker, handleFile } from './utils';
+import { walker, handleFile, colorizePathBase } from './utils';
 import UglifyTransform from './transforms/Uglify';
 
 Promise.promisifyAll(fs);
@@ -73,6 +73,8 @@ export default class ModuleBundler {
           });
         })
         .end();
+
+      this.log(`[MODULE] ${colorizePathBase(relativePath)}`);
     });
 
     return this;
@@ -104,7 +106,7 @@ export default class ModuleBundler {
   ) {
     const resolvedDeps = [];
     const cache        = {};
-    const seperator    = `${sep}node_modules${sep}`;
+    const separator    = `${sep}node_modules${sep}`;
 
     /**
      *  Resolves packages to their package root directory &
@@ -128,13 +130,11 @@ export default class ModuleBundler {
 
         if (!resolvedDir) continue;
 
-        const relativePath = path.join('node_modules', resolvedDir.split(seperator).slice(1).join(seperator));
+        const relativePath = path.join('node_modules', resolvedDir.split(separator).slice(1).join(separator));
 
         if (relativePath in cache) continue;
 
         cache[relativePath] = true;
-
-        this.log(`[MODULE] ${relativePath}`);
 
         const result = await recurse(resolvedDir, undefined, deepExclude);
 

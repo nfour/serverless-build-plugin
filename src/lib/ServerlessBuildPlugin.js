@@ -3,8 +3,9 @@ import path from 'path';
 import Yazl from 'yazl';
 import fs from 'fs-extra';
 import { typeOf, merge, clone } from 'lutils';
+import c from 'chalk';
 
-import { loadFile } from './utils';
+import { loadFile, colorizeConfig } from './utils';
 import ModuleBundler from './ModuleBundler';
 import SourceBundler from './SourceBundler';
 import FileBuild from './FileBuild';
@@ -26,7 +27,7 @@ export default class ServerlessBuildPlugin {
     exclude : [],
     include : [],
 
-    uglify        : true,
+    uglify        : false,
     uglifySource  : false,
     uglifyModules : true,
 
@@ -60,10 +61,10 @@ export default class ServerlessBuildPlugin {
     this.serverless.service.package.individually = true;
 
     this.hooks = {
-      'before:deploy:function:deploy'           : this.build, // Deprecated
-      'before:deploy:function:initialize'       : this.build,
-      'before:deploy:createDeploymentArtifacts' : this.build,
-      'after:deploy:createDeploymentArtifacts'  : () => {
+      // 'before:deploy:function:deploy'           : this.build, // Deprecated
+      'after:deploy:function:initialize'       : this.build,
+      'after:deploy:initialize'                : this.build,
+      'after:deploy:createDeploymentArtifacts' : () => {
         this.serverless.service.package.artifact = null;
       },
     };
@@ -148,13 +149,28 @@ export default class ServerlessBuildPlugin {
    *  Builds either from file or through the babel optimizer.
    */
   build = async () => {
-    this.log('Builds triggered');
+    this.log('[BUILD] Builds triggered');
+
+    const { method } = this.config;
+
+    if (method === 'bundle') {
+      const { uglify, babel, sourceMaps } = this.config;
+      this.log(`[BUILD] ${colorizeConfig({ method, uglify, babel, sourceMaps })}`);
+    } else {
+      const { tryFiles } = this.config;
+      this.log(`[BUILD] ${colorizeConfig({ method, tryFiles })}`);
+    }
+
+    // Ensure directories
 
     await fs.ensureDirAsync(this.buildTmpDir);
     await fs.ensureDirAsync(this.artifactTmpDir);
 
     if (!this.config.keep) await fs.emptyDirAsync(this.artifactTmpDir);
 
+    /**
+     * Iterate functions and run builds either synchronously or concurrently
+     */
     await Promise.map(Object.keys(this.functions), (name) => {
       const config = this.functions[name];
 
@@ -164,12 +180,17 @@ export default class ServerlessBuildPlugin {
     });
 
     this.log('');
-    this.log('Builds complete');
+    this.log('[BUILD] Builds complete');
     this.log('');
 
     if (this.config.deploy === false) process.exit();
   }
 
+  /**
+   * Builds a function into an streaming zip artifact
+   * and sets it in `serverless.yml:functions[fnName].artifact`
+   * in order for `serverless` to consume it.
+   */
   async buildFunction(fnName, fnConfig) {
     const artifact = new Yazl.ZipFile();
     const moduleIncludes = [];
@@ -177,7 +198,7 @@ export default class ServerlessBuildPlugin {
     const { method } = this.config;
 
     this.log('');
-    this.log(`[FUNCTION] ${fnName}`);
+    this.log(`[FUNCTION] ${c.reset.bold(fnName)}`);
 
     if (method === 'bundle') {
       //
@@ -236,7 +257,7 @@ export default class ServerlessBuildPlugin {
     ).bundle({
       include: moduleIncludes,
       ...this.config.modules,
-    }).catch(console.error);
+    });
 
     return await this._completeFunctionArtifact(fnName, artifact);
   }

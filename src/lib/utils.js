@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import { typeOf } from 'lutils';
 import path from 'path';
 import YAML from 'js-yaml';
+import c from 'chalk';
 
 export function walker(...args) {
   const w = walk(...args);
@@ -97,4 +98,18 @@ export async function handleFile({
   }
 
   return artifact;
+}
+
+export function colorizePathBase(filePath) {
+  const basename = path.basename(filePath);
+  return c.grey(
+    filePath.replace(basename, `${c.reset(basename)}`),
+  );
+}
+
+export function colorizeConfig(config) {
+  return c.grey(`{ ${Object.keys(config).map((key) => {
+    const val = config[key];
+    return `${c.white(key)}: ${val ? c.green(val) : c.yellow(val)}`;
+  }).join(', ')} }`);
 }
