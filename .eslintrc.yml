@@ -73,7 +73,7 @@ rules:
   import/prefer-default-export : 1 # Limits multi-export files when they aren't populated
 
 env:
-  mocha   : true
+  jest   : true
   browser : true
   node    : true
   es6     : true

@@ -27,6 +27,7 @@ export default class ServerlessBuildPlugin {
     exclude : [],
     include : [],
 
+    babili        : false,
     uglify        : false,
     uglifySource  : false,
     uglifyModules : true,
@@ -154,8 +155,8 @@ export default class ServerlessBuildPlugin {
     const { method } = this.config;
 
     if (method === 'bundle') {
-      const { uglify, babel, sourceMaps } = this.config;
-      this.log(`[BUILD] ${colorizeConfig({ method, uglify, babel, sourceMaps })}`);
+      const { uglify, babel, sourceMaps, babili } = this.config;
+      this.log(`[BUILD] ${colorizeConfig({ method, uglify, babel, babili, sourceMaps })}`);
     } else {
       const { tryFiles } = this.config;
       this.log(`[BUILD] ${colorizeConfig({ method, tryFiles })}`);

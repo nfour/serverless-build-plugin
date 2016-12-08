@@ -3,7 +3,7 @@ import path, { sep } from 'path';
 import fs from 'fs-extra';
 import resolvePackage from 'resolve-pkg';
 
-import { walker, handleFile, colorizePathBase } from './utils';
+import { walker, handleFile, displayModule } from './utils';
 import UglifyTransform from './transforms/Uglify';
 
 Promise.promisifyAll(fs);
@@ -39,7 +39,7 @@ export default class ModuleBundler {
 
     const transforms = await this._createTransforms();
 
-    await Promise.map(this.modules, async ({ packagePath, relativePath }) => {
+    await Promise.map(this.modules, async ({ packagePath, relativePath, packageJson }) => {
       await walker(packagePath)
         .on('directory', (dirPath, stats, stop) => {
           if (stats.isDirectory()) {
@@ -74,7 +74,7 @@ export default class ModuleBundler {
         })
         .end();
 
-      this.log(`[MODULE] ${colorizePathBase(relativePath)}`);
+      this.log(`[MODULE] ${displayModule({ filePath: relativePath, packageJson })}`);
     });
 
     return this;
@@ -128,6 +128,11 @@ export default class ModuleBundler {
 
         const resolvedDir  = resolvePackage(packageName, { cwd: packageDir });
 
+        const childPackageJsonPath = path.join(resolvedDir, './package.json');
+
+        let childPackageJson;
+        if (fs.existsSync(childPackageJsonPath)) childPackageJson = require(childPackageJsonPath); // eslint-disable-line
+
         if (!resolvedDir) continue;
 
         const relativePath = path.join('node_modules', resolvedDir.split(separator).slice(1).join(separator));
@@ -138,7 +143,7 @@ export default class ModuleBundler {
 
         const result = await recurse(resolvedDir, undefined, deepExclude);
 
-        resolvedDeps.push({ ...result, relativePath });
+        resolvedDeps.push({ ...result, relativePath, packageJson: childPackageJson });
       }
 
       return {

@@ -1,3 +1,10 @@
+## 0.6.0
+- Added `babili` option,ES6+ aware minification of source code
+  - Set this to true to augment your existing babel tranform with minification
+
+## 0.5.2 - Dec 07
+- Added version to verbose module logging
+
 ## 0.5.1
 - Added coloring and config output through logging
 - Changed deploy hooks, single function fixed

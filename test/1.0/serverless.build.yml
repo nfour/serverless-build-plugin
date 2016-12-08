@@ -7,6 +7,7 @@ method: bundle
 
 sourceMaps : true
 babel      : true
+babili     : true
 uglify     : false # Wont make a big difference on small projects
 
 modules:

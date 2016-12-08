@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import { typeOf } from 'lutils';
 import glob from 'minimatch';
 
-import { walker, handleFile, colorizePathBase } from './utils';
+import { walker, handleFile, displayModule } from './utils';
 import BabelTransform from './transforms/Babel';
 import UglifyTransform from './transforms/Uglify';
 
@@ -20,6 +20,7 @@ export default class SourceBundler {
     this.config = {
       servicePath : '',        // serverless.config.servicePath
       babel       : null,      // Babel options
+      babili      : false,      // Babel options
       uglify      : null,      // UglifyJS options
       sourceMaps  : false,     // Whether to add source maps
       zip         : null,      // Yazl zip options
@@ -74,7 +75,7 @@ export default class SourceBundler {
           zipConfig           : this.config.zip,
         });
 
-        this.log(`[SOURCE] ${colorizePathBase(relPath)}`);
+        this.log(`[SOURCE] ${displayModule({ filePath: relPath })}`);
       })
       .end();
 
@@ -101,7 +102,7 @@ export default class SourceBundler {
         babelQuery.sourceMaps = false;
       }
 
-      transforms.push(new BabelTransform(babelQuery));
+      transforms.push(new BabelTransform(babelQuery, this.config));
     }
 
     let uglifyConfig = this.config.uglify;

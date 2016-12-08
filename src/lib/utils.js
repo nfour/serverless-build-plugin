@@ -100,11 +100,16 @@ export async function handleFile({
   return artifact;
 }
 
-export function colorizePathBase(filePath) {
+export function displayModule({ filePath, packageJson = '' }) {
   const basename = path.basename(filePath);
-  return c.grey(
-    filePath.replace(basename, `${c.reset(basename)}`),
-  );
+
+  return `${
+    packageJson && c.grey(`${packageJson.version}\t`)
+  }${
+    c.grey(
+      filePath.replace(basename, `${c.reset(basename)}`),
+    )
+  }`;
 }
 
 export function colorizeConfig(config) {
