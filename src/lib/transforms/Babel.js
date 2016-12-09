@@ -26,8 +26,6 @@ export default class BabelTransform {
         sourceFileName  : relPath,
         sourceMapTarget : relPath,
       });
-
-      console.log(result.code);
     } catch (err) {
       if (this.options.logErrors) console.error(err); // eslint-disable-line
       if (!this.options.skipOnError) throw err;
