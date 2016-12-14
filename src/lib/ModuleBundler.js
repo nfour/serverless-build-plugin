@@ -3,7 +3,7 @@ import path, { sep } from 'path';
 import fs from 'fs-extra';
 import resolvePackage from 'resolve-pkg';
 
-import { walker, handleFile } from './utils';
+import { walker, handleFile, displayModule } from './utils';
 import UglifyTransform from './transforms/Uglify';
 
 Promise.promisifyAll(fs);
@@ -34,35 +34,47 @@ export default class ModuleBundler {
   async bundle({ include = [], exclude = [], deepExclude = [] }) {
     this.modules = await this._resolveDependencies(
       this.config.servicePath,
-      { include, exclude, deepExclude }
+      { include, exclude, deepExclude },
     );
 
     const transforms = await this._createTransforms();
 
-    await Promise.map(this.modules, async ({ packagePath, relativePath }) => {
-      const onFile = async (basePath, stats, next) => {
-        const relPath = path.join(
-          relativePath, basePath.split(relativePath)[1] || '', stats.name
-        ).replace(/^\/|\/$/g, '');
-
-        const filePath = path.join(basePath, stats.name);
-
-        await handleFile({
-          filePath,
-          relPath,
-          transforms,
-          transformExtensions : ['js', 'jsx'],
-          useSourceMaps       : false,
-          artifact            : this.artifact,
-          zipConfig           : this.config.zip,
-        });
-
-        next();
-      };
-
+    await Promise.map(this.modules, async ({ packagePath, relativePath, packageJson }) => {
       await walker(packagePath)
-        .on('file', onFile)
+        .on('directory', (dirPath, stats, stop) => {
+          if (stats.isDirectory()) {
+            // This pulls ['node_modules', 'pack'] out of
+            // .../node_modules/package/node_modules/pack
+            const endParts = dirPath.split(packagePath)[1].split('/').slice(-2);
+
+            // When a directory is a package and matches a deep exclude pattern
+            // Then skip it
+            if (
+              endParts[0] === 'node_modules' &&
+              deepExclude.indexOf(endParts[1]) !== -1
+            ) return stop();
+          }
+
+          return null;
+        })
+        .on('file', async (filePath, stats, next) => {
+          const relPath = path.join(
+            relativePath, filePath.split(relativePath)[1] || '',
+          ).replace(/^\/|\/$/g, '');
+
+          await handleFile({
+            filePath,
+            relPath,
+            transforms,
+            transformExtensions : ['js', 'jsx'],
+            useSourceMaps       : false,
+            artifact            : this.artifact,
+            zipConfig           : this.config.zip,
+          });
+        })
         .end();
+
+      this.log(`[MODULE] ${displayModule({ filePath: relativePath, packageJson })}`);
     });
 
     return this;
@@ -90,11 +102,11 @@ export default class ModuleBundler {
    */
   async _resolveDependencies(
     initialPackageDir,
-    { include = [], exclude = [], deepExclude = [] } = {}
+    { include = [], exclude = [], deepExclude = [] } = {},
   ) {
     const resolvedDeps = [];
     const cache        = {};
-    const seperator    = `${sep}node_modules${sep}`;
+    const separator    = `${sep}node_modules${sep}`;
 
     /**
      *  Resolves packages to their package root directory &
@@ -102,7 +114,7 @@ export default class ModuleBundler {
      *  - Will also ignore the input package in the results
      */
     const recurse = async (packageDir, _include = [], _exclude = []) => {
-      const packageJson = require(path.join(packageDir, './package.json'));
+      const packageJson = require(path.join(packageDir, './package.json')); // eslint-disable-line
 
       const { name, dependencies } = packageJson;
 
@@ -116,19 +128,22 @@ export default class ModuleBundler {
 
         const resolvedDir  = resolvePackage(packageName, { cwd: packageDir });
 
+        const childPackageJsonPath = path.join(resolvedDir, './package.json');
+
+        let childPackageJson;
+        if (fs.existsSync(childPackageJsonPath)) childPackageJson = require(childPackageJsonPath); // eslint-disable-line
+
         if (!resolvedDir) continue;
 
-        const relativePath = path.join('node_modules', resolvedDir.split(seperator).slice(1).join(seperator));
+        const relativePath = path.join('node_modules', resolvedDir.split(separator).slice(1).join(separator));
 
         if (relativePath in cache) continue;
 
         cache[relativePath] = true;
 
-        this.log(`[MODULE] ${relativePath}`);
-
         const result = await recurse(resolvedDir, undefined, deepExclude);
 
-        resolvedDeps.push({ ...result, relativePath });
+        resolvedDeps.push({ ...result, relativePath, packageJson: childPackageJson });
       }
 
       return {

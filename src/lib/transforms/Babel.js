@@ -8,8 +8,11 @@ export default class BabelTransform {
     this.options = {
       skipOnError : false, // When false, errors will halt execution
       logErrors   : true,
+      babili      : false,
       ...options,
     };
+
+    if (options.babili) this.config.presets.push('babili');
 
     this.babel = require('babel-core'); // eslint-disable-line
   }

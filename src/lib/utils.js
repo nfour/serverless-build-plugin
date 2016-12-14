@@ -1,17 +1,48 @@
-import walk from 'walk';
+import walk from 'findit';
 import fs from 'fs-extra';
 import { typeOf } from 'lutils';
 import path from 'path';
+import YAML from 'js-yaml';
+import c from 'chalk';
 
 export function walker(...args) {
-  const w = walk.walk(...args);
+  const w = walk(...args);
 
   w.end = () => new Promise((resolve, reject) => {
     w.on('error', reject);
+    w.on('stop', resolve);
     w.on('end', resolve);
   });
 
   return w;
+}
+
+
+/**
+ * Read any of:
+ * - .json
+ * - .yml / .yaml
+ * - .js
+ *
+ * @param {String} fileLookup
+ * @returns {any} config
+ */
+export function loadFile(fileLookup) {
+  const tryExts = ['.yml', '.yaml', ''];
+
+  for (const ext of tryExts) {
+    try {
+      const filePath = require.resolve(`${fileLookup}${ext}`);
+
+      if (/\.ya?ml$/i.test(filePath)) {
+        return YAML.load(fs.readFileSync(filePath));
+      }
+
+      return require(filePath); // eslint-disable-line
+    } catch (err) { /* */ }
+  }
+
+  return null;
 }
 
 /**
@@ -67,4 +98,23 @@ export async function handleFile({
   }
 
   return artifact;
+}
+
+export function displayModule({ filePath, packageJson = '' }) {
+  const basename = path.basename(filePath);
+
+  return `${
+    packageJson && c.grey(`${packageJson.version}\t`)
+  }${
+    c.grey(
+      filePath.replace(basename, `${c.reset(basename)}`),
+    )
+  }`;
+}
+
+export function colorizeConfig(config) {
+  return c.grey(`{ ${Object.keys(config).map((key) => {
+    const val = config[key];
+    return `${c.white(key)}: ${val ? c.green(val) : c.yellow(val)}`;
+  }).join(', ')} }`);
 }
