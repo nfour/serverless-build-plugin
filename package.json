@@ -1,6 +1,6 @@
 {
   "name": "serverless-build-plugin",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "main": "./dist/index",
   "description": "A Node.js focused build optimizer plugin for serverless",
   "scripts": {
@@ -15,6 +15,7 @@
     "babel-preset-babili": "latest",
     "bluebird": "~3.4.0",
     "fs-extra": "~0.26.0",
+    "graceful-fs": "^4.1.11",
     "is-stream": "~1.1.0",
     "js-yaml": "~3.6.1",
     "lutils": "^1.1.0",
