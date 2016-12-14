@@ -1,6 +1,8 @@
-## 0.6.3
-- Add `graceful-fs` to implement incremental backoff based on EMFILE (see [graceful-fs](https://github.com/isaacs/node-graceful-fs)).
-## 0.6.0
+## 0.6.3 - Dec 14
+- Add `graceful-fs` dependency to implement incremental backoff
+based on EMFILE (see [graceful-fs](https://github.com/isaacs/node-graceful-fs)).
+
+## 0.6.0 - Dec 08
 - Added `babili` option,ES6+ aware minification of source code
   - Set this to true to augment your existing babel tranform with minification
 
