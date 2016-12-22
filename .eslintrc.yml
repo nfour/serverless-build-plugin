@@ -35,15 +35,12 @@ rules:
     - devDependencies: true
   import/no-named-as-default: 0 # Limiting for a valid usecase
 
-  #
-  # DISABLE BECAUSE OF ERRORS
-  #
   generator-star-spacing : 0 # This produces an error on async/await
   require-yield          : 0 # This produces an error on async/await
   arrow-parens           : 0 # This produces an error on async/await
 
   #
-  # WARNINGS (WARNINGS)
+  # WARNINGS
   #
 
   key-spacing:
