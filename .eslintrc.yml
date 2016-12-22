@@ -6,14 +6,14 @@ rules:
   # DISABLED RULES
   #
 
-  # Allows ForIn
+  # Allows ForOf
   no-restricted-syntax:
     - error
     - LabeledStatement
     - WithStatement
-  # - ForInStatement
-  no-continue            : 0 # Because ForIn
-  guard-for-in           : 0 # Because ForIn
+    - ForInStatement
+  no-continue            : 0 # Because ForOf
+  guard-for-in           : 0 # Because ForOf
   arrow-body-style       : 0 # Doesn't let you have single statement block functions
   no-param-reassign      : 0 # Variable names are hard
   class-methods-use-this : 0 # Somewhat reasonable, but coupling stateless functions in classes is helpful
@@ -41,12 +41,6 @@ rules:
   generator-star-spacing : 0 # This produces an error on async/await
   require-yield          : 0 # This produces an error on async/await
   arrow-parens           : 0 # This produces an error on async/await
-
-  #
-  # CHANGES (ERRORS)
-  #
-
-  # ...
 
   #
   # WARNINGS (WARNINGS)
@@ -77,11 +71,5 @@ env:
   browser : true
   node    : true
   es6     : true
-
-parserOptions:
-  ecmaVersion: 8
-  sourceType: "module"
-  ecmaFeatures:
-    jsx: true
 
 parser: babel-eslint
