@@ -25,6 +25,7 @@ functions:
     include:
       - "functions/one/**"
       - "lib/one/**"
+
     exclude:
       - "**/*.json"
 
