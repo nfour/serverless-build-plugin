@@ -1,12 +1,16 @@
-## 0.6.3 - Dec 14
+## 0.7.0 - Dec 31 2016
+- @arabold #22 fixes #16 - Invalid artifact paths
+- Dependency updates
+
+## 0.6.3 - Dec 14 2016
 - Add `graceful-fs` dependency to implement incremental backoff
 based on EMFILE (see [graceful-fs](https://github.com/isaacs/node-graceful-fs)).
 
-## 0.6.0 - Dec 08
+## 0.6.0 - Dec 08 2016
 - Added `babili` option,ES6+ aware minification of source code
   - Set this to true to augment your existing babel tranform with minification
 
-## 0.5.2 - Dec 07
+## 0.5.2 - Dec 07 2016
 - Added version to verbose module logging
 
 ## 0.5.1
