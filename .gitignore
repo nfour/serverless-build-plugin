@@ -4,3 +4,4 @@
 /npm-*
 .nyc*
 yarn.lock
+/coverage
