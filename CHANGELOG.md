@@ -1,3 +1,8 @@
+## 0.8.0 - Dec 31 2016
+- Module bundler concurrency changes
+- Linting fixes
+- Dependency updates
+
 ## 0.7.0 - Dec 31 2016
 - @arabold #22 fixes #16 - Invalid artifact paths
 - Dependency updates
