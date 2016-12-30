@@ -1,3 +1,4 @@
+/* eslint-disable */
 import Promise from 'bluebird'
 import path from 'path'
 import Yazl from 'yazl'

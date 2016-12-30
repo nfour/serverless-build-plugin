@@ -260,7 +260,7 @@ export default class ServerlessBuildPlugin {
       ...this.config.modules,
     });
 
-    return await this._completeFunctionArtifact(fnName, artifact);
+    await this._completeFunctionArtifact(fnName, artifact);
   }
 
   /**
@@ -283,5 +283,4 @@ export default class ServerlessBuildPlugin {
     fnConfig.package          = fnConfig.package || {};
     fnConfig.package.artifact = zipPath;
   }
-
 }

@@ -16,11 +16,11 @@ describe('ModuleBundler', () => {
     await moduleBundler.bundle({});
   });
 
-  for (const dep in dependencies) {
+  Object.keys(dependencies).forEach((dep) => {
     it(`Has bundled dependency ${dep}`, async () => {
       expect(
         moduleBundler.modules.some(({ name }) => name === dep),
       ).toBeTruthy();
     });
-  }
+  });
 });

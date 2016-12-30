@@ -10,7 +10,8 @@
     "test:unit": "npm run test:jest -- --testPathPattern='\\/[^\\/\\.]+\\.test\\.jsx?$'",
     "test:integration": "npm run test:jest -- --testPathPattern='\\.int\\.test\\.jsx?$'",
     "test:jest": "jest --config ./.jestrc",
-    "test": "npm run test:unit",
+    "test": "npm run lint; npm run test:unit",
+    "lint": "eslint src",
     "coverage": "npm run test:jest -- --coverage"
   },
   "dependencies": {

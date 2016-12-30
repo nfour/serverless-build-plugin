@@ -113,16 +113,22 @@ export default class ModuleBundler {
      */
     const recurse = async (packageDir, _include = [], _exclude = []) => {
       const packageJson = require(path.join(packageDir, './package.json')); // eslint-disable-line
-
       const { name, dependencies } = packageJson;
 
-      for (const packageName in dependencies) {
+      const result = {
+        name,
+        packagePath: packageDir,
+      };
+
+      if (!dependencies) return result;
+
+      await Promise.map(Object.keys(dependencies), async (packageName) => {
         /**
          *  Skips on exclude matches, if set
          *  Skips on include mis-matches, if set
          */
-        if (_exclude.length && _exclude.indexOf(packageName) > -1) continue;
-        if (_include.length && _include.indexOf(packageName) < 0) continue;
+        if (_exclude.length && _exclude.indexOf(packageName) > -1) return;
+        if (_include.length && _include.indexOf(packageName) < 0) return;
 
         const resolvedDir  = resolvePackage(packageName, { cwd: packageDir });
 
@@ -131,22 +137,20 @@ export default class ModuleBundler {
         let childPackageJson;
         if (fs.existsSync(childPackageJsonPath)) childPackageJson = require(childPackageJsonPath); // eslint-disable-line
 
-        if (!resolvedDir) continue;
+        if (!resolvedDir) return;
 
         const relativePath = path.join('node_modules', resolvedDir.split(separator).slice(1).join(separator));
 
-        if (relativePath in cache) continue;
+        if (relativePath in cache) return;
 
         cache[relativePath] = true;
 
-        const result = await recurse(resolvedDir, undefined, deepExclude);
+        const childResult = await recurse(resolvedDir, undefined, deepExclude);
 
-        resolvedDeps.push({ ...result, relativePath, packageJson: childPackageJson });
-      }
+        resolvedDeps.push({ ...childResult, relativePath, packageJson: childPackageJson });
+      });
 
-      return {
-        name, packagePath: packageDir,
-      };
+      return result;
     };
 
     await recurse(initialPackageDir, include, exclude);
