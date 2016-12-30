@@ -58,9 +58,7 @@ export default class ModuleBundler {
           return null;
         })
         .on('file', async (filePath, stats, next) => {
-          const relPath = path.join(
-            relativePath, filePath.split(relativePath)[1] || '',
-          ).replace(/^\/|\/$/g, '');
+          const relPath = filePath.substr(filePath.indexOf(relativePath)).replace(/^\/|\/$/g, '');
 
           await handleFile({
             filePath,
