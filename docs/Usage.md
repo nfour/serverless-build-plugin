@@ -10,17 +10,6 @@ functionality.
 - `sls deploy function -f <fnName>` to deploy a single function
 - `NODE_ENV=production sls deploy function -f <fnName>` when your build process cares about `process.env.NODE_ENV`
 
-Try adding this to your npm scripts, to both deploy and run at once:
-```json
-{
-    "scripts": {
-        "function": "sls deploy function -f $FUNCTION && sls invoke -l -f $FUNCTION"
-    }
-}
-```
-
-And running `FUNCTION=myFn npm run function`
-
 ## TEST IT OUT
 
 If you'd like to test out a preconfigured project...
@@ -47,4 +36,4 @@ If you want to audit the built zip in a test run, add the `--no-deploy` option
 sls deploy function -f two --no-deploy
 ```
 
-Then check the `./.serverless/artifacts` directory
+Then check the `.serverless/artifacts` directory
