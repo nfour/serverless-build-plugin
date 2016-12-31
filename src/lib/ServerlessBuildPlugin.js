@@ -27,13 +27,14 @@ export default class ServerlessBuildPlugin {
     exclude : [],
     include : [],
 
-    babili        : false,
     uglify        : false,
     uglifySource  : false,
     uglifyModules : true,
 
-    babel      : null,
-    sourceMaps : true,
+    babel             : null,
+    babili            : false,
+    normalizeBabelExt : false,
+    sourceMaps        : true,
 
     // Passed to `yazl` as options
     zip: { compress: true },

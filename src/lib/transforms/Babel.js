@@ -6,9 +6,10 @@ export default class BabelTransform {
     };
 
     this.options = {
-      skipOnError : false, // When false, errors will halt execution
-      logErrors   : true,
-      babili      : false,
+      skipOnError       : false, // When false, errors will halt execution
+      logErrors         : true,
+      babili            : false,
+      normalizeBabelExt : false,
       ...options,
     };
 
@@ -18,14 +19,22 @@ export default class BabelTransform {
   }
 
   run({ code, map, relPath }) {
-    let result = { code, map };
+    let result = { code, map, relPath };
 
     try {
-      result = this.babel.transform(code, {
+      const transformed = this.babel.transform(code, {
         ...this.config,
         sourceFileName  : relPath,
         sourceMapTarget : relPath,
       });
+
+      result = {
+        ...result,
+        ...transformed,
+        relPath: this.options.normalizeBabelExt
+          ? relPath.replace(/\.[^.]+$/, '.js')
+          : relPath,
+      };
     } catch (err) {
       if (this.options.logErrors) console.error(err); // eslint-disable-line
       if (!this.options.skipOnError) throw err;
