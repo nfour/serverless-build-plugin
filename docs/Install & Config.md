@@ -40,10 +40,17 @@ method: bundle
 # - When true, a `.babelrc` in the service directory is used
 babel: true
 
+# babili
+#
+# To minify each file with a babili transform.
+# - Requires `babel` to be true
+babili: false
+
 # uglify
 #
 # To minify each file.
 uglify: false
+
 
 # uglifyModules
 #
