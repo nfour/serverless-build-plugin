@@ -26,7 +26,7 @@ The bundle build method.
 - Node.JS optimized version of the [package](https://github.com/serverless/serverless/blob/master/docs/providers/aws/guide/packaging.md) built-in plugin
 - Each file can be, optionally, transpiled with:
   - **babel**
-    - With **babeli**
+  - **babili**
   - **uglify**
 - `node_modules` are whitelisted based on the `package.json` `dependencies`, resolved recursively and reliably
 
