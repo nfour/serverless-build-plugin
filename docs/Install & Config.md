@@ -12,20 +12,22 @@ Serverless build can be configured in two locations (or both):
 - Use a `serverless.build.yml`
 - Use `custom.build` in your `serverless.yml`
 
-There are two ways to build:
-- `bundle`, this will bundle your functions and keep their directory structure based on globbing and module dependency resolution
-- `file`, this can be a `webpack.config.js` or any file which builds your functions, allowing fexibility
+There are two methods to build:
+- `bundle`
+  - Bundle your functions, keeping their directory structure based on globbing and module dependency resolution
+- `file`
+  - Can be a `webpack.config.js` or any file which builds your functions, allowing fexibility
 
 See [test/1.0](./test/1.0) for an example project.
 
-### BUNDLE METHOD OPTIONS
+### `bundle`
+The bundle build method.
 
 - Node.JS optimized version of the [package](https://github.com/serverless/serverless/blob/master/docs/providers/aws/guide/packaging.md) built-in plugin
 - Each file can be, optionally, transpiled with:
   - **babel**
+    - With **babeli**
   - **uglify**
-  - **babeli** (soon, WIP)
-  - _custom transforms_ (soon, WIP)
 - `node_modules` are whitelisted based on the `package.json` `dependencies`, resolved recursively and reliably
 
 ```yaml
@@ -103,7 +105,9 @@ exclude:
   - "*" # Ignores the root directory
 ```
 
-### FILE METHOD OPTIONS
+### `file`
+
+The file build method.
 
 - Use a build file to package functions
 - Use `webpack`, by exporting a webpack config
