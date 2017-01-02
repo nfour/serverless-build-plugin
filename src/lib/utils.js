@@ -64,8 +64,9 @@ export async function handleFile({
     // JAVASCRIPT
     //
 
-    let code = await fs.readFileAsync(filePath, 'utf8');
-    let map  = '';
+    let code        = await fs.readFileAsync(filePath, 'utf8');
+    let map         = '';
+    let destRelPath = relPath;
 
     /**
      *  Runs transforms against the code, mutating the code & map
@@ -78,16 +79,17 @@ export async function handleFile({
         if (result.code) {
           code = result.code;
           if (result.map) map = result.map;
+          if (result.relPath) destRelPath = result.relPath;
         }
       }
     }
 
-    artifact.addBuffer(new Buffer(code), relPath, zipConfig);
+    artifact.addBuffer(new Buffer(code), destRelPath, zipConfig);
 
     if (useSourceMaps && map) {
       if (typeOf.Object(map)) map = JSON.stringify(map);
 
-      artifact.addBuffer(new Buffer(map), `${relPath}.map`, zipConfig);
+      artifact.addBuffer(new Buffer(map), `${destRelPath}.map`, zipConfig);
     }
   } else {
     //
