@@ -1,3 +1,7 @@
+## 0.9.0 - Jan 2 2017
+- Added option `normalizeBabelExt` (boolean) (default: `false`)
+  - When `true`, `.jsx` files are renamed to `.js` for babel compiled source 
+
 ## 0.8.0 - Dec 31 2016
 - Module bundler concurrency changes
 - Linting fixes
