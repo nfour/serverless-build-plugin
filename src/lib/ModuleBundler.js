@@ -86,7 +86,7 @@ export default class ModuleBundler {
     if (uglifyConfig) {
       if (uglifyConfig === true) uglifyConfig = null;
 
-      transforms.push(new UglifyTransform(uglifyConfig));
+      transforms.push(new UglifyTransform(uglifyConfig, this.config));
     }
 
     return transforms;

@@ -1,4 +1,5 @@
 import path from 'path';
+import requireResolve from 'resolve-pkg';
 
 export default class UglifyTransform {
   constructor(config = {}, options = {}) {
@@ -10,12 +11,18 @@ export default class UglifyTransform {
     };
 
     this.options = {
+      servicePath : '',
       skipOnError : true, // When false, errors will halt execution
       logErrors   : false,
       ...options,
     };
 
-    this.uglify = require('uglify-js'); // eslint-disable-line
+    const { servicePath } = this.options;
+
+    // eslint-disable-next-line
+    this.uglify = require(
+      requireResolve('uglify-js', { cwd: servicePath }),
+    );
   }
 
   run({ code, map, filePath }) {

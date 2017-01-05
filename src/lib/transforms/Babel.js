@@ -1,3 +1,5 @@
+import requireResolve from 'resolve-pkg';
+
 export default class BabelTransform {
   constructor(config = {}, options = {}) {
     this.config = {
@@ -6,6 +8,7 @@ export default class BabelTransform {
     };
 
     this.options = {
+      servicePath       : '',
       skipOnError       : false, // When false, errors will halt execution
       logErrors         : true,
       babili            : false,
@@ -13,9 +16,14 @@ export default class BabelTransform {
       ...options,
     };
 
-    if (options.babili) this.config.presets.push('babili');
+    const { babili, servicePath } = this.options;
 
-    this.babel = require('babel-core'); // eslint-disable-line
+    if (babili) this.config.presets.push('babili');
+
+    // eslint-disable-next-line
+    this.babel = require(
+      requireResolve('babel-core', { cwd: servicePath }),
+    );
   }
 
   run({ code, map, relPath }) {

@@ -110,7 +110,7 @@ export default class SourceBundler {
     if (uglifyConfig) {
       if (!typeOf.Object(uglifyConfig)) uglifyConfig = null;
 
-      transforms.push(new UglifyTransform(uglifyConfig, { logErrors: true }));
+      transforms.push(new UglifyTransform(uglifyConfig, { ...this.config, logErrors: true }));
     }
 
     return transforms;

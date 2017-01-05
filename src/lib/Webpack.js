@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
-import path from 'path';
 import { typeOf } from 'lutils';
+import requireResolve from 'resolve-pkg';
 
 export default class WebpackBuilder {
   constructor(config = {}) {
@@ -12,7 +12,10 @@ export default class WebpackBuilder {
 
     this.log = this.config.log || (() => {});
 
-    this.webpack = require('webpack');
+    // eslint-disable-next-line
+    this.webpack = require(
+      requireResolve('webpack', { cwd: this.config.servicePath }),
+    );
   }
 
   /**
@@ -31,7 +34,9 @@ export default class WebpackBuilder {
 
     const logs = await this._runWebpack(config);
 
+    this.log('');
     this.log('[WEBPACK]');
+    this.log('');
     this.log(logs);
 
     return this;
@@ -51,11 +56,11 @@ export default class WebpackBuilder {
         arr.push(external);
       } else
       if (type === 'object') {
-        for (const key in external) {
+        Object.keys(external).forEach((key) => {
           const val = external[key];
 
           if (val === true) arr.push(key);
-        }
+        });
       }
 
       return arr;
@@ -77,58 +82,4 @@ export default class WebpackBuilder {
       });
     });
   }
-
-
-  //
-  // FIXME: UNSUED CODE BELOW
-  //
-
-
-  /**
-   *  Declarative build method, potentially used in bundling.
-   */
-  standardBuild(pathFrom, pathTo, { babel, devtool = true, optimize = false } = {}) {
-    const config = {
-      entry   : [pathFrom],
-      context : this.config.servicePath,
-      output  : {
-        libraryTarget : 'commonjs',
-        path          : path.dirname(pathTo),
-        filename      : path.basename(pathTo),
-      },
-    };
-
-    if (devtool) config.devtool = 'source-map';
-
-    if (optimize) {
-      config.plugins = [
-        ...config.plugins,
-        new this.webpack.optimize.DedupePlugin(),
-        new this.webpack.optimize.UglifyJsPlugin({
-          compress: {
-            unused        : true,
-            dead_code     : true,
-            warnings      : false,
-            drop_debugger : true,
-          },
-        }),
-      ];
-    }
-
-    if (babel) {
-      config.module = {
-        loaders: [
-          {
-            test    : /\.js$/,
-            loader  : 'babel',
-            exclude : /node_modules/,
-            query   : babel,
-          },
-        ],
-      };
-    }
-
-    return this._runWebpack(config);
-  }
-
 }
