@@ -40,6 +40,7 @@ export default class FileBuild {
 
     builderFilePath = path.resolve(this.config.servicePath, builderFilePath);
 
+    // eslint-disable-next-line
     let result = require(builderFilePath);
 
     // Resolve any functions...
@@ -54,7 +55,7 @@ export default class FileBuild {
     // - Webpack Config:             executed and output files are zipped
     //
 
-    const entryPoint    = `./${fnConfig.handler.split(/\.[^\.]+$/)[0]}.js`;
+    const entryPoint    = `./${fnConfig.handler.split(/\.[^.]+$/)[0]}.js`;
     const buildFilename = `${fnConfig.name}.js`;
 
     if (typeOf.Object(result)) {
@@ -71,12 +72,12 @@ export default class FileBuild {
           output : {
             filename: buildFilename,
           },
-        }
+        },
       );
 
       const { externals } = await new WebpackBuilder(this.config).build(webpackConfig);
 
-      externals.forEach((ext) => this.externals.add(ext));
+      externals.forEach(ext => this.externals.add(ext));
 
       await Promise.each([
         {
@@ -124,7 +125,7 @@ export default class FileBuild {
    */
   async _tryBuildFiles() {
     for (const fileName of this.config.tryFiles) {
-      const exists = await fs.statAsync(fileName).then((stat) => stat.isFile());
+      const exists = await fs.statAsync(fileName).then(stat => stat.isFile());
 
       if (exists) return fileName;
     }

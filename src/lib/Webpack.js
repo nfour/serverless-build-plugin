@@ -30,9 +30,9 @@ export default class WebpackBuilder {
       path          : this.config.buildTmpDir,
     };
 
-    this.externals = this._normalizeExternals(config.externals || []);
+    this.externals = WebpackBuilder.normalizeExternals(config.externals || []);
 
-    const logs = await this._runWebpack(config);
+    const logs = await WebpackBuilder.runWebpack(config);
 
     this.log('');
     this.log('[WEBPACK]');
@@ -48,7 +48,7 @@ export default class WebpackBuilder {
    *
    *  @return [ "moduleName" ]
    */
-  _normalizeExternals(externals) {
+  static normalizeExternals(externals) {
     return externals.reduce((arr, external) => {
       const type = typeOf(external);
 
@@ -67,7 +67,7 @@ export default class WebpackBuilder {
     }, []);
   }
 
-  _runWebpack(config, webpack = this.webpack) {
+  static runWebpack(config, webpack = this.webpack) {
     return new Promise((resolve, reject) => {
       webpack(config).run((err, stats) => {
         if (err) return reject(err);

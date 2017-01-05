@@ -50,11 +50,11 @@ export default class SourceBundler {
           filePath.split(this.config.servicePath)[1],
         ).replace(/^\/|\/$/g, '');
 
-        const testPattern = (pattern) => {
-          return typeOf.RegExp(pattern)
-              ? pattern.test(relPath)
-              : glob(relPath, pattern, { dot: true });
-        };
+        const testPattern = pattern => (
+          typeOf.RegExp(pattern)
+            ? pattern.test(relPath)
+            : glob(relPath, pattern, { dot: true })
+        );
 
         const included = include.some(testPattern);
         const excluded = exclude.some(testPattern);

@@ -32,7 +32,7 @@ export default class ModuleBundler {
    *  inside the artifact.
    */
   async bundle({ include = [], exclude = [], deepExclude = [] }) {
-    this.modules = await this._resolveDependencies(
+    this.modules = await ModuleBundler.resolveDependencies(
       this.config.servicePath,
       { include, exclude, deepExclude },
     );
@@ -98,7 +98,7 @@ export default class ModuleBundler {
    *  @returns {Array}
    *      [ { name, packagePath, packagePath } ]
    */
-  async _resolveDependencies(
+  static async resolveDependencies(
     initialPackageDir,
     { include = [], exclude = [], deepExclude = [] } = {},
   ) {

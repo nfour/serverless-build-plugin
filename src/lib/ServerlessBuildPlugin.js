@@ -101,7 +101,7 @@ export default class ServerlessBuildPlugin {
       ? functionSelection
       : [functionSelection];
 
-    selectedFunctions = selectedFunctions.filter((key) => key in functions);
+    selectedFunctions = selectedFunctions.filter(key => key in functions);
     selectedFunctions = selectedFunctions.length ? selectedFunctions : Object.keys(functions);
 
     /**

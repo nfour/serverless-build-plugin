@@ -6,5 +6,5 @@ const serverlessVersion = require( // eslint-disable-line
 ).version;
 
 module.exports = /0\.5\./.test(serverlessVersion)
-  ? (S) => require('./lib/ServerlessBuildPlugin-0.5')(S)
+  ? S => require('./lib/ServerlessBuildPlugin-0.5')(S)
   : require('./lib/ServerlessBuildPlugin');

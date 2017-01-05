@@ -55,7 +55,7 @@ export async function handleFile({
     transformExtensions, transforms,
 }) {
   const extname         = path.extname(filePath);
-  const isTransformable = transformExtensions.some((ext) => `.${ext}` === extname.toLowerCase());
+  const isTransformable = transformExtensions.some(ext => `.${ext}` === extname.toLowerCase());
 
   // TODO: make each transformer check extensions itself, and concat their
   // extension whitelist to check here.
