@@ -1,13 +1,13 @@
-method: file
-tryFiles:
-  - webpack.config.js
-  - gulpfile.babel.js
+# method: file
+# tryFiles:
+#   - webpack.config.js
+#   - gulpfile.babel.js
 
-# method: bundle
+method: bundle
 
 sourceMaps : true
 babel      : true
-babili     : true
+babili     : false
 uglify     : false # Wont make a big difference on small projects
 
 modules:
@@ -16,9 +16,6 @@ modules:
   deepExclude: # excluded from nested node_modules
     - xmlbuilder # this breaks the build
     - punycode # this breaks the build
-
-exclude:
-  - "*" # Ignores the root directory
 
 functions:
   one:
@@ -29,9 +26,9 @@ functions:
     exclude:
       - "**/*.json"
 
-    # modules:
-    #   exclude:
-    #     - lutils
+    modules:
+      exclude:
+        - lutils-clone
 
   two:
     include:
