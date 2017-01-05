@@ -63,7 +63,7 @@ export default class SourceBundler {
         *  When a pattern matches an exclude, it skips
         *  When a pattern doesnt match an include, it skips
         */
-        if (!included || (excluded && !included)) return;
+        if (!included || excluded) return;
 
         await handleFile({
           filePath,

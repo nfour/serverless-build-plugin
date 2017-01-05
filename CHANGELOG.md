@@ -1,3 +1,9 @@
+## 1.0.0 - Jan 5 2017
+- [BREAKING] Made `excludes` file globs actually override `includes`
+  - This means if you have a global exclude like `**/*.js` you can't include .js files
+  - This also means if you include `myFolder` you can exclude a `__tests__` folder within it
+- Update deps
+
 ## 0.9.0 - Jan 2 2017
 - Added option `normalizeBabelExt` (boolean) (default: `false`)
   - When `true`, `.jsx` files are renamed to `.js` for babel compiled source 
