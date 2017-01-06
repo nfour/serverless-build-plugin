@@ -32,7 +32,7 @@ export default class WebpackBuilder {
 
     this.externals = WebpackBuilder.normalizeExternals(config.externals || []);
 
-    const logs = await WebpackBuilder.runWebpack(config);
+    const logs = await this.runWebpack(config);
 
     this.log('');
     this.log('[WEBPACK]');
@@ -67,9 +67,9 @@ export default class WebpackBuilder {
     }, []);
   }
 
-  static runWebpack(config, webpack = this.webpack) {
+  runWebpack(config) {
     return new Promise((resolve, reject) => {
-      webpack(config).run((err, stats) => {
+      this.webpack(config).run((err, stats) => {
         if (err) return reject(err);
 
         return resolve(stats.toString({
