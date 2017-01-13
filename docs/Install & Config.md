@@ -18,7 +18,7 @@ There are two methods to build:
 - `file`
   - Can be a `webpack.config.js` or any file which builds your functions, allowing fexibility
 
-See [test/1.0](./test/1.0) for an example project.
+See [test/1.0](../test/1.0) for an example project.
 
 ### `bundle`
 The bundle build method.
