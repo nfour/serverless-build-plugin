@@ -5,6 +5,8 @@ import fs from 'fs-extra'
 import { typeOf } from 'lutils'
 import Yaml from 'js-yaml'
 
+import AdmZip from 'adm-zip';
+
 import ModuleBundler from './ModuleBundler'
 import SourceBundler from './SourceBundler'
 import FileBuild from './FileBuild'
@@ -56,10 +58,11 @@ export default class ServerlessBuildPlugin {
             )
 
         this.hooks = {
-            'deploy'                                  : (...args) => console.log('wew'), // doesn't fire
-            'before:deploy:createDeploymentArtifacts' : (...args) => this.build(...args), // doesn't fire
-            'deploy:createDeploymentArtifacts'        : (...args) => this.build(...args), // doesn't fire
-            'before:deploy:function:deploy'           : (...args) => this.build(...args),
+          //  'deploy'                                  : (...args) => console.log('wew'), // doesn't fire
+            'before:invoke:local:invoke'              :(...args)=>{console.log('Executing before:invoke:local:invoke'); return this.build(true)},
+            'before:deploy:createDeploymentArtifacts' : (...args) => {console.log('Executing before:deploy:createDeploymentArtifacts');return this.build(false)}, // doesn't fire
+           // 'deploy:createDeploymentArtifacts'        : (...args) => this.build(...args), // doesn't fire
+            'before:deploy:function:deploy'           : (...args) => {console.log('Executing before:deploy:function:deploy'); return this.build(false)},
         }
 
         //
@@ -80,7 +83,7 @@ export default class ServerlessBuildPlugin {
         // The config inherits from multiple sources
         this.config = {
             ...this.config,
-            ...( this.serverless.service.custom.build || {} ),
+            ...( (this.serverless.service.custom?this.serverless.service.custom.build || {}:{}) ),
             ...buildConfig,
             ...options,
         }
@@ -140,12 +143,13 @@ export default class ServerlessBuildPlugin {
     /**
      *  Builds either from file or through the babel optimizer.
      */
-    async build() {
+    async build(isInvokeCall) {
         // TODO in the future:
         // - create seperate zips
         // - modify artifact completion process, splitting builds up into seperate artifacts
 
         this.serverless.cli.log("Serverless Build triggered...")
+
 
         const { method }   = this.config
         let moduleIncludes = []
@@ -153,7 +157,8 @@ export default class ServerlessBuildPlugin {
         await fs.ensureDirAsync(this.buildTmpDir)
         await fs.ensureDirAsync(this.artifactTmpDir)
 
-        const artifact = new Yazl.ZipFile()
+       // const artifact = new Yazl.ZipFile()
+       const artifact = new AdmZip();
 
         if ( method === 'bundle' ) {
             //
@@ -163,7 +168,8 @@ export default class ServerlessBuildPlugin {
             const sourceBundler = new SourceBundler({
                 ...this.config,
                 uglify      : this.config.uglifySource ? this.config.uglify : undefined,
-                servicePath : this.servicePath
+                servicePath : this.servicePath,
+                isInvokeCall: isInvokeCall
             }, artifact)
 
             for ( const fnKey in this.functions ) {
@@ -206,7 +212,7 @@ export default class ServerlessBuildPlugin {
             ...this.config.modules
         })
 
-        await this._completeArtifact(artifact)
+        await this._completeArtifact(artifact,isInvokeCall)
 
         if ( this.config.test )
             throw new Error("--test mode, DEBUGGING STOP")
@@ -215,25 +221,50 @@ export default class ServerlessBuildPlugin {
     /**
      *  Writes the `artifact` and attaches it to serverless
      */
-    async _completeArtifact(artifact) {
+    async _completeArtifact(artifact, isInvokeCall) {
         // Purge existing artifacts
-        if ( ! this.config.keep )
-            await fs.emptyDirAsync(this.artifactTmpDir)
 
-        const zipPath = path.resolve(this.artifactTmpDir, `./${this.serverless.service.service}-${new Date().getTime()}.zip`)
-
-        await new Promise((resolve, reject) => {
-            artifact.outputStream.pipe( fs.createWriteStream(zipPath) )
-                .on("error", reject)
-                .on("close", resolve)
-
-            artifact.end()
-        })
-
-        this.serverless.service.package.artifact = zipPath
-
-        // Purge build dir
-        if ( ! this.config.keep )
+        if(isInvokeCall){
             await fs.emptyDirAsync(this.buildTmpDir)
+
+            await new Promise((resolve, reject)=>{
+                try{
+                    artifact.extractAllTo(this.buildTmpDir, true)
+                    resolve(true);
+                }catch(e){
+                    reject(e);
+                }
+            });
+
+            this.serverless.config.servicePath = this.buildTmpDir;
+            console.log(this.serverless.config.servicePath);
+        }else{
+            if ( ! this.config.keep )
+                await fs.emptyDirAsync(this.artifactTmpDir)
+
+            const zipPath = path.resolve(this.artifactTmpDir, `./${this.serverless.service.service}-${new Date().getTime()}.zip`)
+
+            await new Promise((resolve, reject) => {
+                try{
+                    artifact.writeZip(zipPath);
+                    resolve(true);
+                }catch(e){
+                    reject(e);
+                }
+                // artifact.outputStream.pipe( fs.createWriteStream(zipPath) )
+                //     .on("error", reject)
+                //     .on("close", resolve)
+                //
+                // artifact.end()
+            })
+
+            this.serverless.service.package.artifact = zipPath
+
+            //Purge build dir
+            if ( ! this.config.keep )
+                await fs.emptyDirAsync(this.buildTmpDir)
+        }
+
+
     }
 }

@@ -51,19 +51,24 @@ export async function handleFile({
             }
         }
 
-        artifact.addBuffer( new Buffer(code), relPath, zipConfig )
+       // artifact.addBuffer( new Buffer(code), relPath, zipConfig )
+
+        artifact.addFile(relPath, new Buffer(code));
+
 
         if ( useSourceMaps && map ) {
             if ( typeOf.Object(map) ) map = JSON.stringify(map)
 
-            artifact.addBuffer( new Buffer(map), `${relPath}.map`, zipConfig )
+           // artifact.addBuffer( new Buffer(map), `${relPath}.map`, zipConfig )
+            artifact.addFile(`${relPath}.map`, new Buffer(map));
         }
     } else {
         //
         // ARBITRARY FILES
         //
 
-        artifact.addFile(filePath, relPath, zipConfig)
+        //artifact.addFile(filePath, relPath, zipConfig)
+        artifact.addLocalFile(filePath, relPath);
     }
 
     return artifact
