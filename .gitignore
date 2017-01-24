@@ -5,3 +5,4 @@
 .nyc*
 yarn.lock
 /coverage
+.vscode
