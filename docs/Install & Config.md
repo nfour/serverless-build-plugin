@@ -51,7 +51,7 @@ babel: true
 # babili
 #
 # To minify each file with a babili transform. Requires `babel` to be `true`.
-# Default is `false`
+# Default is `false`.
 babili: false
 
 # uglify
