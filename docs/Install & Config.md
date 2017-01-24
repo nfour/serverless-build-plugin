@@ -1,72 +1,79 @@
 # INSTALLATION
-```
+
+Serverless build plugin is available as [an NPM module](https://www.npmjs.com/package/serverless-build-plugin).
+
+```sh
 npm i --save serverless-build-plugin
 ```
 
-Then add `serverless-build-plugin` to your serverless plugin registry
+Once installed, add `serverless-build-plugin` to your serverless plugin registry.
 
 ## CONFIGURATION
 
-Serverless build can be configured in two locations (or both):
+Serverless build plugin can be configured by either or both of the following methods:
 
-- Use a `serverless.build.yml`
-- Use `custom.build` in your `serverless.yml`
+- Creating a `serverless.build.yml` file.
+- Setting a `custom.build` section in your project's `serverless.yml` file.
 
-There are two methods to build:
-- `bundle`
-  - Bundle your functions, keeping their directory structure based on globbing and module dependency resolution
-- `file`
-  - Can be a `webpack.config.js` or any file which builds your functions, allowing fexibility
+> If no configuration is found, defaults settings are used.
+
+Serverless projects can be build using one of the following methods:
+
+- [`bundle`](#bundle)
+  - Bundle your functions, keeping their directory structure based on globbing and module dependency resolution.
+- [`file`](#file)
+  - Use a `webpack.config.js` file, or any file which builds your functions, allowing flexibility.
 
 See [test/1.0](../test/1.0) for an example project.
 
 ### `bundle`
+
 The bundle build method.
 
-- Node.JS optimized version of the [package](https://github.com/serverless/serverless/blob/master/docs/providers/aws/guide/packaging.md) built-in plugin
-- Each file can be, optionally, transpiled with:
+- Node.JS optimized version of the [package](https://github.com/serverless/serverless/blob/master/docs/providers/aws/guide/packaging.md) built-in plugin.
+- Each file can be optionally transpiled with:
   - **babel**
   - **babili**
   - **uglify**
-- `node_modules` are whitelisted based on the `package.json` `dependencies`, resolved recursively and reliably
+- `node_modules` are whitelisted based on the `package.json` `dependencies`, resolved recursively and reliably.
 
 ```yaml
 method: bundle
 
 # babel
 #
-# Each file can be babel transpiled:
-# - When this is an object, it is treated as a babel config
-# - When true, a `.babelrc` in the service directory is used
+# Each file can be babel transpiled. When set to:
+#   - An object, the object is parsed as babel configuration.
+#   - `true`, a `.babelrc` in the service's directory is used as babel configuration.
+#  Default is `null` (a null object).
 babel: true
 
 # babili
 #
-# To minify each file with a babili transform.
-# - Requires `babel` to be true
+# To minify each file with a babili transform. Requires `babel` to be `true`.
+# Default is `false`.
 babili: false
 
 # uglify
 #
 # To minify each file.
+# Default is `false`.
 uglify: false
-
 
 # uglifyModules
 #
-# node_modules will be uglified.
-# - Requires `uglify` to be true.
+# `node_modules` will be uglified. Requires `uglify` to be `true`.
 uglifyModules: true
 
 # uglifySource
 #
-# source will be uglified
-# - Requires `uglify` to be true.
+# source will be uglified. Requires `uglify` to be `true`.
 uglifySource: false
 
 # sourceMaps
 #
-# Includes inline source maps for `babel` and `uglify`
+# Includes inline source maps for `babel` and `uglify`.
+# Default is `true`.
 sourceMaps: true
 
 # functions
@@ -159,6 +166,7 @@ export default async function myBuildFn(fnConfig, serverlessBuild) {
 ```
 
 ### SHARED OPTIONS
+
 ```yaml
 # modules
 #
