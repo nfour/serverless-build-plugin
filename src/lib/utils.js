@@ -2,6 +2,9 @@ import walk from 'walk'
 import fs from 'fs-extra'
 import { typeOf } from 'lutils'
 import path from 'path'
+import Promise from 'bluebird'
+
+Promise.promisifyAll(fs)
 
 export function walker(...args) {
     const w = walk.walk(...args)
@@ -19,16 +22,21 @@ export function walker(...args) {
  *  Used by SourceBundler & ModuleBundler.
  */
 export async function handleFile({
-    filePath, relPath,
+    filePath, relPath, isLocalExecution, buildTmpDir,
     artifact, zipConfig, useSourceMaps,
     transformExtensions, transforms
 }) {
+
     const extname         = path.extname(filePath)
     const isTransformable = transformExtensions.some((ext) => `.${ext}` === extname.toLowerCase() )
 
+
+
     // TODO: make each transformer check extensions itself, and concat their
     // extension whitelist to check here.
-    if ( isTransformable ) {
+
+    if ( isTransformable) {
+
         //
         // JAVASCRIPT
         //
@@ -50,25 +58,54 @@ export async function handleFile({
                 }
             }
         }
+        if(isLocalExecution){
+            const filePath = path.join(buildTmpDir, relPath);
 
-       // artifact.addBuffer( new Buffer(code), relPath, zipConfig )
+            return fs.ensureDirAsync(path.dirname(filePath))
+                .then(r=>{
+                    return fs.writeFileAsync(filePath, code);
+                })
+                .then(f=>{
+                    if ( useSourceMaps && map ) {
+                        if ( typeOf.Object(map) ) map = JSON.stringify(map)
+                        return fs.writeFileAsync(`${filePath}.map`, new Buffer(map)).then(()=>Promise.resolve(true));
+                    }else{
+                        return Promise.resolve(true)
+                    }
+                })
+                .catch(err=>{
+                    console.log(err);
+                    return Promise.reject(err);
+                })
 
-        artifact.addFile(relPath, new Buffer(code));
 
 
-        if ( useSourceMaps && map ) {
-            if ( typeOf.Object(map) ) map = JSON.stringify(map)
 
-           // artifact.addBuffer( new Buffer(map), `${relPath}.map`, zipConfig )
-            artifact.addFile(`${relPath}.map`, new Buffer(map));
+
+        }else{
+            artifact.addBuffer( new Buffer(code), relPath, zipConfig )
+            if ( useSourceMaps && map ) {
+                if ( typeOf.Object(map) ) map = JSON.stringify(map)
+                artifact.addBuffer( new Buffer(map), `${relPath}.map`, zipConfig )
+            }
         }
+
     } else {
         //
         // ARBITRARY FILES
         //
 
-        //artifact.addFile(filePath, relPath, zipConfig)
-        artifact.addLocalFile(filePath, relPath);
+        if(isLocalExecution){
+            const filePath = path.join(buildTmpDir, relPath);
+            return fs.ensureDirAsync(path.dirname(filePath))
+                .then(()=>fs.copyAsync(relPath, filePath))
+                .catch(err=>Promise.reject(err))
+        }else{
+            artifact.addFile(filePath, relPath, zipConfig)
+        }
+        return Promise.resolve(true);
+
+
     }
 
     return artifact

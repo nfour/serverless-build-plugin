@@ -47,6 +47,8 @@ export default class ModuleBundler {
                     transformExtensions : ['js', 'jsx'],
                     useSourceMaps       : false,
                     artifact            : this.artifact,
+                    buildTmpDir         : this.config.buildTmpDir,
+                    isLocalExecution        : this.config.isLocalExecution,
                     zipConfig           : this.config.zip,
                 })
 
@@ -106,7 +108,7 @@ export default class ModuleBundler {
                 const resolvedDir  = resolvePackage(packageName, { cwd: packageDir })
 
                 if ( ! resolvedDir ) continue
-                
+
                 const relativePath = path.join( 'node_modules', resolvedDir.split(`${seperator}`).slice(1).join(seperator) )
 
                 if ( relativePath in cache ) continue

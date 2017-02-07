@@ -25,6 +25,8 @@ export default class SourceBundler {
             zip         : null,  // Yazl zip options
             ...config
         }
+
+
         this.artifact = artifact
     }
 
@@ -62,11 +64,15 @@ export default class SourceBundler {
             if ( ! included || ( excluded && ! included ) ) return next()
 
 
+
+
             await handleFile({
                 filePath, relPath, transforms,
                 transformExtensions : ['js', 'jsx'],
                 useSourceMaps       : this.config.sourceMaps,
                 artifact            : this.artifact,
+                buildTmpDir         : this.config.buildTmpDir,
+                isLocalExecution        : this.config.isLocalExecution,
                 zipConfig           : this.config.zip,
             })
 

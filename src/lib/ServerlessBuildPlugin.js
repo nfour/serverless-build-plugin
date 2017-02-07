@@ -5,8 +5,6 @@ import fs from 'fs-extra'
 import { typeOf } from 'lutils'
 import Yaml from 'js-yaml'
 
-import AdmZip from 'adm-zip';
-
 import ModuleBundler from './ModuleBundler'
 import SourceBundler from './SourceBundler'
 import FileBuild from './FileBuild'
@@ -143,7 +141,7 @@ export default class ServerlessBuildPlugin {
     /**
      *  Builds either from file or through the babel optimizer.
      */
-    async build(isInvokeCall) {
+    async build(isLocalExecution) {
         // TODO in the future:
         // - create seperate zips
         // - modify artifact completion process, splitting builds up into seperate artifacts
@@ -157,8 +155,7 @@ export default class ServerlessBuildPlugin {
         await fs.ensureDirAsync(this.buildTmpDir)
         await fs.ensureDirAsync(this.artifactTmpDir)
 
-       // const artifact = new Yazl.ZipFile()
-       const artifact = new AdmZip();
+        const artifact = new Yazl.ZipFile()
 
         if ( method === 'bundle' ) {
             //
@@ -169,7 +166,8 @@ export default class ServerlessBuildPlugin {
                 ...this.config,
                 uglify      : this.config.uglifySource ? this.config.uglify : undefined,
                 servicePath : this.servicePath,
-                isInvokeCall: isInvokeCall
+                isLocalExecution: isLocalExecution,
+                buildTmpDir: this.buildTmpDir
             }, artifact)
 
             for ( const fnKey in this.functions ) {
@@ -195,7 +193,9 @@ export default class ServerlessBuildPlugin {
                 servicePath : this.servicePath,
                 buildTmpDir : this.buildTmpDir,
                 functions   : this.functions,
-                serverless  : this.serverless
+                serverless  : this.serverless,
+                isLocalExecution: isLocalExecution,
+                buildTmpDir: this.buildTmpDir
             }, artifact).build()
 
             moduleIncludes = [ ...fileBuild.externals ] // Spread, for an iterator
@@ -206,13 +206,15 @@ export default class ServerlessBuildPlugin {
         await new ModuleBundler({
             ...this.config,
             uglify      : this.config.uglifyModules ? this.config.uglify : undefined,
-            servicePath : this.servicePath
+            servicePath : this.servicePath,
+            isLocalExecution: isLocalExecution,
+            buildTmpDir: this.buildTmpDir
         }, artifact).bundle({
             include: moduleIncludes,
             ...this.config.modules
         })
 
-        await this._completeArtifact(artifact,isInvokeCall)
+        await this._completeArtifact(artifact,isLocalExecution)
 
         if ( this.config.test )
             throw new Error("--test mode, DEBUGGING STOP")
@@ -221,21 +223,10 @@ export default class ServerlessBuildPlugin {
     /**
      *  Writes the `artifact` and attaches it to serverless
      */
-    async _completeArtifact(artifact, isInvokeCall) {
+    async _completeArtifact(artifact, isLocalExecution) {
         // Purge existing artifacts
 
-        if(isInvokeCall){
-            await fs.emptyDirAsync(this.buildTmpDir)
-
-            await new Promise((resolve, reject)=>{
-                try{
-                    artifact.extractAllTo(this.buildTmpDir, true)
-                    resolve(true);
-                }catch(e){
-                    reject(e);
-                }
-            });
-
+        if(isLocalExecution){
             this.serverless.config.servicePath = this.buildTmpDir;
             console.log(this.serverless.config.servicePath);
         }else{
@@ -245,17 +236,11 @@ export default class ServerlessBuildPlugin {
             const zipPath = path.resolve(this.artifactTmpDir, `./${this.serverless.service.service}-${new Date().getTime()}.zip`)
 
             await new Promise((resolve, reject) => {
-                try{
-                    artifact.writeZip(zipPath);
-                    resolve(true);
-                }catch(e){
-                    reject(e);
-                }
-                // artifact.outputStream.pipe( fs.createWriteStream(zipPath) )
-                //     .on("error", reject)
-                //     .on("close", resolve)
-                //
-                // artifact.end()
+                artifact.outputStream.pipe( fs.createWriteStream(zipPath) )
+                    .on("error", reject)
+                    .on("close", resolve)
+
+                artifact.end()
             })
 
             this.serverless.service.package.artifact = zipPath
