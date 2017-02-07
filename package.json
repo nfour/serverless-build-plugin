@@ -1,6 +1,6 @@
 {
-  "name": "serverless-build-plugin",
-  "version": "0.2.4-beta",
+  "name": "sls-build-plugin",
+  "version": "0.2.5",
   "main": "./dist/index",
   "dependencies": {
     "adm-zip": "^0.4.7",
@@ -48,6 +48,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nfour/serverless-build-plugin"
+    "url": "https://github.com/kagonzalez84/serverless-build-plugin"
   }
 }
