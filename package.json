@@ -1,53 +1,56 @@
 {
-  "name": "sls-build-plugin",
-  "version": "0.2.5",
+  "name": "serverless-build-plugin",
+  "version": "1.1.2",
   "main": "./dist/index",
-  "dependencies": {
-    "adm-zip": "^0.4.7",
-    "babel-core": "~6.13.0",
-    "babel-preset-babili": "latest",
-    "bluebird": "~3.4.0",
-    "colors": "^1.1.2",
-    "fs-extra": "~0.26.0",
-    "is-stream": "~1.1.0",
-    "js-yaml": "~3.6.1",
-    "lutils": "^1.1.0",
-    "minimatch": "~3.0.3",
-    "mkdirp": "~0.5.1",
-    "resolve-pkg": "~0.2.0",
-    "semver": "^5.3.0",
-    "source-map-support": "latest",
-    "uglify-js": "~2.7.0",
-    "walk": "~2.3.9",
-    "yauzl": "~2.6.0",
-    "yazl": "~2.4.1"
-  },
-  "devDependencies": {
-    "eslint": "~2.7.0",
-    "babel-eslint": "~6.0.2",
-    "nyc": "~6.2.1",
-    "mocha": "~2.4.5",
-    "chai": "~3.5.0",
-    "babel-loader": "^6.2.0",
-    "babel-preset-es2015-node4": "latest",
-    "babel-preset-stage-1": "^6.13.0",
-    "babel-plugin-transform-async-to-module-method": "latest",
-    "babel-plugin-transform-inline-environment-variables": "latest",
-    "babel-plugin-add-module-exports": "^0.2.0",
-    "babel-plugin-transform-runtime": "latest",
-    "babel-polyfill": "latest",
-    "babel-core": "^6.14.0",
-    "babel-cli": "^6.14.0",
-    "webpack": "~2.1.0-beta.20"
+  "description": "A Node.js focused build optimizer plugin for serverless",
+  "engines": {
+    "node": ">= 4.3"
   },
   "scripts": {
     "build": "babel $BABEL_OPTIONS --source-maps inline ./src --out-dir ./dist",
     "dev": "BABEL_OPTIONS=--watch npm run build",
     "prepublish": "npm run build",
-    "test": "nyc mocha -r babel-register test"
+    "test:unit": "npm run test:jest -- --testPathPattern='\\/[^\\/\\.]+\\.test\\.jsx?$'",
+    "test:integration": "npm run test:jest -- --testPathPattern='\\.int\\.test\\.jsx?$'",
+    "test:jest": "jest --config ./.jestrc",
+    "test": "npm run lint; npm run test:unit",
+    "lint": "eslint src",
+    "coverage": "npm run test:jest -- --coverage"
+  },
+  "dependencies": {
+    "babel-core": "^6.21.0",
+    "babel-preset-babili": "~0.0.9",
+    "bluebird": "^3.4.7",
+    "chalk": "^1.1.3",
+    "findit": "^2.0.0",
+    "fs-extra": "^1.0.0",
+    "graceful-fs": "~4.1.11",
+    "is-stream": "~1.1.0",
+    "js-yaml": "^3.7.0",
+    "lutils": "^1.1.0",
+    "minimatch": "~3.0.3",
+    "mkdirp": "~0.5.1",
+    "resolve-pkg": "~0.2.0",
+    "source-map-support": "^0.4.8",
+    "uglify-js": "~2.7.0",
+    "yauzl": "^2.7.0",
+    "yazl": "~2.4.1"
+  },
+  "devDependencies": {
+    "babel-cli": "~6.18.0",
+    "babel-eslint": "^7.1.1",
+    "babel-jest": "^18.0.0",
+    "babel-plugin-add-module-exports": "^0.2.0",
+    "babel-plugin-transform-async-to-module-method": "~6.16.0",
+    "babel-preset-es2015-node4": "^2.1.1",
+    "babel-preset-stage-1": "~6.16.0",
+    "eslint": "^3.12.2",
+    "eslint-config-airbnb-base": "^11.0.0",
+    "eslint-plugin-import": "^2.2.0",
+    "jest": "^18.1.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kagonzalez84/serverless-build-plugin"
+    "url": "https://github.com/nfour/serverless-build-plugin"
   }
 }

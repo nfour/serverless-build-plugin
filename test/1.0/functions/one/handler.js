@@ -1,15 +1,20 @@
-import 'source-map-support/register'
-import number from '../../lib/one'
-import { typeOf } from 'lutils'
-import Promise from 'bluebird'
+import 'babel-polyfill';
+import 'source-map-support/register';
+import { typeOf } from 'lutils';
+import Promise from 'bluebird';
+import number from '../../lib/one';
 
-export async function handler(event, context, done) {
-    console.log({ number })
-    console.log({ env: process.env })
+export const handler = async (event, context, done) => {
+  console.log({ number });
+  console.log({ env: process.env });
 
-    await Promise.delay(200)
+  await Promise.delay(200);
 
-    await require('./file')()
+  // Uncomment this to emit an error
+  // await require('./file')();
 
-    done(null, { message: JSON.stringify({ num: number + typeOf(number) }) })
-}
+  done(null, {
+    statusCode : 200,
+    headers    : { 'content-type': 'application/json' },
+    body       : JSON.stringify({ num: number + typeOf(number) }) });
+};

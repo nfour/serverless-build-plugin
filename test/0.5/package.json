@@ -1,5 +1,5 @@
 {
-  "name": "untitled",
+  "name": "sls-build-0.5",
   "private": true,
   "version": "0.0.0",
   "scripts": {
@@ -9,19 +9,19 @@
     "aws-sdk"
   ],
   "dependencies": {
+    "babel-polyfill": "^6.20.0",
     "bluebird": "^3.4.2",
     "lutils": "^1.2.1",
-    "source-map-support": "^0.4.2",
-    "babel-polyfill": "latest"
+    "source-map-support": "^0.4.2"
   },
   "devDependencies": {
     "aws-sdk": "latest",
-    "babel-preset-node6": "latest",
-    "babel-preset-stage-1": "^6.0.0",
+    "babel-core": "^6.11.0",
+    "babel-plugin-add-module-exports": "^0.2.0",
     "babel-plugin-transform-async-to-module-method": "latest",
     "babel-plugin-transform-inline-environment-variables": "latest",
-    "babel-plugin-add-module-exports": "^0.2.0",
     "babel-plugin-transform-runtime": "latest",
-    "babel-core": "^6.11.0"
+    "babel-preset-node6": "latest",
+    "babel-preset-stage-1": "^6.0.0"
   }
 }

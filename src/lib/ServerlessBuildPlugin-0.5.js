@@ -1,3 +1,4 @@
+/* eslint-disable */
 import Promise from 'bluebird'
 import path from 'path'
 import Yazl from 'yazl'
@@ -12,9 +13,6 @@ import SourceBundler from './SourceBundler'
 import FileBuild from './FileBuild'
 
 Promise.promisifyAll(fs)
-
-// FIXME: for debugging, remove later
-console.inspect = (val, ...args) => console.log( require('util').inspect(val, { depth: 6, colors: true, ...args }) )
 
 export default function (S) {
     const SCli = require(S.getServerlessPath('utils/cli')); // eslint-disable-line
@@ -135,9 +133,6 @@ export default function (S) {
 
                 return obj
             }, {})
-
-            // console.inspect({ options: this.config })
-            // console.inspect({ functions: this.functions })
 
             return e
         }

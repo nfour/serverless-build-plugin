@@ -1,28 +1,25 @@
 # For full config options, check the docs: v1.docs.serverless.com
 
-service: v1test3
+service: slsBuildTest
 
 provider:
-  name: aws
-  runtime: nodejs4.3
+  name    : aws
+  runtime : nodejs4.3
+  # profile : dev
+  stage   : samslsbuild
+  region  : ap-southeast-2
 
 plugins:
   - serverless-build-plugin
 
-custom:
-  build:
-
-defaults:
- stage: dev
- region: ap-southeast-2
-
-package:
-    exclude:
-        - node_modules
-
 functions:
   one:
     handler: functions/one/handler.handler
+
+    events:
+      - http:
+          method: get
+          path: func/one
 
   two:
     handler: functions/two/handler.handler

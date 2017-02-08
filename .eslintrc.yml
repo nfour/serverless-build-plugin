@@ -1,0 +1,70 @@
+extends:
+  - airbnb-base
+
+rules:
+  #
+  # MODIFIED
+  #
+
+  arrow-body-style: # Only autofixes as needed
+    - error
+    - as-needed
+
+  global-require               : 1 # Limiting, but useful
+  import/prefer-default-export : 1 # Limits multi-export files when they aren't populated
+
+  import/no-extraneous-dependencies: # Doesnt cry when you import dev deps
+    - error
+    - devDependencies: true
+
+  no-unused-vars: # Lets you redefined parameters, cus names are hard
+    - error
+    - args: none
+
+  no-restricted-syntax: # Allows ForOf
+    - error
+    - LabeledStatement
+    - WithStatement
+    - ForInStatement
+
+  #
+  # DISABLED
+  #
+
+  no-multi-spaces            : 0
+  no-await-in-loop           : 0 # Because ForOf
+  no-continue                : 0 # Because ForOf
+  no-param-reassign          : 0 # Variable names are hard
+  quote-props                : 0 # Busts syntax highlighting on number props
+  no-underscore-dangle       : 0 # Good for decalaring "private" and rando modules while us it
+  import/no-named-as-default : 0 # Limiting for a valid usecase
+
+  #
+  # ADDED
+  #
+
+  key-spacing:
+    - 1
+    -
+      align:
+        beforeColon: true
+        afterColon: true
+        on: colon
+        mode: strict
+      multiLine:
+        beforeColon: false
+        afterColon: true
+        mode: minimum
+      singleLine:
+        beforeColon: false
+        afterColon: true
+        mode: strict
+
+
+env:
+  jest   : true
+  browser : true
+  node    : true
+  es6     : true
+
+parser: babel-eslint

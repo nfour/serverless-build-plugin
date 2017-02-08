@@ -4,7 +4,7 @@
   "description": "Serverless Lambda function for project: sls-test-build",
   "customName": false,
   "customRole": false,
-  "handler": "test.handler",
+  "handler": "test-fn.handler",
   "timeout": 6,
   "memorySize": 1024,
   "authorizer": {},

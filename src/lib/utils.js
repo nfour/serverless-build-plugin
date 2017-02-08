@@ -1,20 +1,54 @@
-import walk from 'walk'
-import fs from 'fs-extra'
-import { typeOf } from 'lutils'
-import path from 'path'
-import Promise from 'bluebird'
 
-Promise.promisifyAll(fs)
+import walk from 'findit';
+import fs from 'fs-extra';
+import { typeOf } from 'lutils';
+import path from 'path';
+import YAML from 'js-yaml';
+import c from 'chalk';
+import Promise from 'bluebird';
+
+Promise.promisifyAll(fs);
+
+
 
 export function walker(...args) {
-    const w = walk.walk(...args)
+  const w = walk(...args);
 
-    w.end = () => new Promise((resolve, reject) => {
-        w.on("error", reject)
-        w.on("end", resolve)
-    })
+  w.end = () => new Promise((resolve, reject) => {
+    w.on('error', reject);
+    w.on('stop', resolve);
+    w.on('end', resolve);
+  });
 
-    return w
+  return w;
+}
+
+
+/**
+ * Read any of:
+ * - .json
+ * - .yml / .yaml
+ * - .js
+ *
+ * @param {String} fileLookup
+ * @returns {any} config
+ */
+export function loadFile(fileLookup) {
+  const tryExts = ['.yml', '.yaml', ''];
+
+  for (const ext of tryExts) {
+    try {
+      const filePath = require.resolve(`${fileLookup}${ext}`);
+
+      if (/\.ya?ml$/i.test(filePath)) {
+        return YAML.load(fs.readFileSync(filePath));
+      }
+
+      return require(filePath); // eslint-disable-line
+    } catch (err) { /* */ }
+  }
+
+  return null;
 }
 
 /**
@@ -22,91 +56,80 @@ export function walker(...args) {
  *  Used by SourceBundler & ModuleBundler.
  */
 export async function handleFile({
-    filePath, relPath, isLocalExecution, buildTmpDir,
+    filePath, relPath, isLocalInvoke, buildTmpDir,
     artifact, zipConfig, useSourceMaps,
-    transformExtensions, transforms
+    transformExtensions, transforms,
 }) {
+  const extname         = path.extname(filePath);
+  const isTransformable = transformExtensions.some(ext => `.${ext}` === extname.toLowerCase());
 
-    const extname         = path.extname(filePath)
-    const isTransformable = transformExtensions.some((ext) => `.${ext}` === extname.toLowerCase() )
+  // TODO: make each transformer check extensions itself, and concat their
+  // extension whitelist to check here.
+  if (isTransformable) {
+    //
+    // JAVASCRIPT
+    //
 
+    let code        = await fs.readFileAsync(filePath, 'utf8');
+    let map         = '';
+    let destRelPath = relPath;
 
+    /**
+     *  Runs transforms against the code, mutating the code & map
+     *  with each iteration, optionally producing source maps
+     */
+    if (transforms.length) {
+      for (const transformer of transforms) {
+        const result = transformer.run({ code, map, filePath, relPath });
 
-    // TODO: make each transformer check extensions itself, and concat their
-    // extension whitelist to check here.
-
-    if ( isTransformable) {
-
-        //
-        // JAVASCRIPT
-        //
-
-        let code = await fs.readFileAsync(filePath, 'utf8')
-        let map  = ''
-
-        /**
-         *  Runs transforms against the code, mutating the code & map
-         *  with each iteration, optionally producing source maps
-         */
-        if ( transforms.length ) {
-            for ( let transformer of transforms ) {
-                let result = transformer.run({ code, map, filePath, relPath })
-
-                if ( result.code ) {
-                    code = result.code
-                    if ( result.map ) map = result.map
-                }
-            }
+        if (result.code) {
+          code = result.code;
+          if (result.map) map = result.map;
+          if (result.relPath) destRelPath = result.relPath;
         }
-        if(isLocalExecution){
-            const filePath = path.join(buildTmpDir, relPath);
-
-            return fs.ensureDirAsync(path.dirname(filePath))
-                .then(r=>{
-                    return fs.writeFileAsync(filePath, code);
-                })
-                .then(f=>{
-                    if ( useSourceMaps && map ) {
-                        if ( typeOf.Object(map) ) map = JSON.stringify(map)
-                        return fs.writeFileAsync(`${filePath}.map`, new Buffer(map)).then(()=>Promise.resolve(true));
-                    }else{
-                        return Promise.resolve(true)
-                    }
-                })
-                .catch(err=>{
-                    console.log(err);
-                    return Promise.reject(err);
-                })
-
-
-
-
-
-        }else{
-            artifact.addBuffer( new Buffer(code), relPath, zipConfig )
-            if ( useSourceMaps && map ) {
-                if ( typeOf.Object(map) ) map = JSON.stringify(map)
-                artifact.addBuffer( new Buffer(map), `${relPath}.map`, zipConfig )
-            }
-        }
-
-    } else {
-        //
-        // ARBITRARY FILES
-        //
-
-        if(isLocalExecution){
-            const filePath = path.join(buildTmpDir, relPath);
-            return fs.ensureDirAsync(path.dirname(filePath))
-                .then(()=>fs.copyAsync(relPath, filePath))
-                .catch(err=>Promise.reject(err))
-        }else{
-            artifact.addFile(filePath, relPath, zipConfig)
-        }
-        return Promise.resolve(true);
-
-
+      }
+    }
+    if(isLocalInvoke){
+      const filePath = path.join(buildTmpDir, relPath);
+      await fs.ensureDirAsync(path.dirname(filePath)).then(()=>fs.writeFileAsync(filePath, code));
+    }else{
+      artifact.addBuffer(new Buffer(code), destRelPath, zipConfig);
+      if (useSourceMaps && map) {
+        if (typeOf.Object(map)) map = JSON.stringify(map);
+        artifact.addBuffer(new Buffer(map), `${destRelPath}.map`, zipConfig);
+      }
+    }
+  } else {
+    //
+    // ARBITRARY FILES
+    //
+    if(isLocalInvoke){
+        const filePath = path.join(buildTmpDir, relPath);
+        await fs.ensureDirAsync(path.dirname(filePath)).then(()=>fs.copyAsync(relPath, filePath));
+    }else{
+        artifact.addFile(filePath, relPath, zipConfig)
     }
 
-    return artifact
+  }
+
+  return artifact;
+}
+
+export function displayModule({ filePath, packageJson = '' }) {
+  const basename = path.basename(filePath);
+
+  return `${
+    packageJson && c.grey(`${packageJson.version}\t`)
+  }${
+    c.grey(
+      filePath.replace(basename, `${c.reset(basename)}`),
+    )
+  }`;
+}
+
+export function colorizeConfig(config) {
+  return c.grey(`{ ${Object.keys(config).map((key) => {
+    const val = config[key];
+    return `${c.white(key)}: ${val ? c.green(val) : c.yellow(val)}`;
+  }).join(', ')} }`);
 }

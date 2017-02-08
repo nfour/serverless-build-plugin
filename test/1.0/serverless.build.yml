@@ -1,18 +1,21 @@
-method: "bundle"
+# method: file
+# tryFiles:
+#   - webpack.config.js
+#   - gulpfile.babel.js
+
+method: bundle
 
 sourceMaps : true
 babel      : true
+babili     : false
 uglify     : false # Wont make a big difference on small projects
 
 modules:
-  exclude: # excluded from the root node_modules
-    - aws-sdk
+  exclude: [] # excluded from the root node_modules
 
   deepExclude: # excluded from nested node_modules
-    - aws-sdk
-
-exclude:
-    - "*" # Ignores the root directory
+    - xmlbuilder # this breaks the build
+    - punycode # this breaks the build
 
 functions:
   one:
@@ -25,8 +28,14 @@ functions:
 
     modules:
       exclude:
-        - 'aws-sdk'
+        - lutils-clone
 
   two:
+    include:
+      - "functions/**"
+      - "lib/**"
+      - ".babelrc"
+
     exclude:
+      - "function/one/**"
       - "lib/one/**"

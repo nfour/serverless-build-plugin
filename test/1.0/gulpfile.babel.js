@@ -1,21 +1,16 @@
-import gulp from 'gulp'
-import Promise from 'bluebird'
+const gulp = require('gulp');
+const Promise = require('bluebird');
 
-Promise.promisifyAll(gulp)
+Promise.promisifyAll(gulp);
 
-let config = {}
+let output;
 
-gulp.task('test', async () => {
-    console.log('test1')
-    await Promise.delay(5)
-    config = require('./webpack.config.js')()
-    config.test = 1
+gulp.task('test', () => {
+  return Promise.delay(2000).then(() => {
+    output = 'exports.handler = function(event, context, done) { done(null, 1)}';
+  });
+});
 
-    return config
-})
-
-export default async () => {
-    await gulp.startAsync(['test'])
-
-    return config
-}
+module.exports = () => {
+  return gulp.startAsync(['test']).then(() => output);
+};

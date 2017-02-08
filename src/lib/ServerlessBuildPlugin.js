@@ -1,255 +1,306 @@
-import Promise from 'bluebird'
-import path from 'path'
-import Yazl from 'yazl'
-import fs from 'fs-extra'
-import { typeOf } from 'lutils'
-import Yaml from 'js-yaml'
+import Promise from 'bluebird';
+import path from 'path';
+import Yazl from 'yazl';
+import fs from 'fs-extra';
+import { typeOf, merge, clone } from 'lutils';
+import c from 'chalk';
 
-import ModuleBundler from './ModuleBundler'
-import SourceBundler from './SourceBundler'
-import FileBuild from './FileBuild'
+import { loadFile, colorizeConfig } from './utils';
+import ModuleBundler from './ModuleBundler';
+import SourceBundler from './SourceBundler';
+import FileBuild from './FileBuild';
 
-Promise.promisifyAll(fs)
-
-// FIXME: for debugging, remove later
-console.inspect = (val, ...args) => console.log( require('util').inspect(val, { depth: 6, colors: true, ...args }) )
+Promise.promisifyAll(fs);
 
 export default class ServerlessBuildPlugin {
-    config = {
-        tryFiles    : [ "webpack.config.js" ],
-        baseExclude : [ /\bnode_modules\b/ ],
+  config = {
+    method: 'bundle',
 
-        modules: {
-            exclude     : [ 'aws-sdk' ], // These match root dependencies
-            deepExclude : [ 'aws-sdk' ], // These match deep dependencies
+    tryFiles    : ['webpack.config.js'],
+    baseExclude : [/\bnode_modules\b/],
+
+    modules: {
+      exclude     : [], // These match root dependencies
+      deepExclude : [], // These match deep dependencies
+    },
+
+    exclude : [],
+    include : [],
+
+    uglify        : false,
+    uglifySource  : false,
+    uglifyModules : true,
+
+    babel             : null,
+    babili            : false,
+    normalizeBabelExt : false,
+    sourceMaps        : true,
+
+    // Passed to `yazl` as options
+    zip: { compress: true },
+
+    functions: {},
+
+    synchronous : true,
+    deploy      : true,
+  }
+
+  constructor(serverless, options = {}) {
+    //
+    // SERVERLESS
+    //
+
+    this.serverless = serverless;
+
+    if (!this.serverless.getVersion().startsWith('1')) {
+      throw new this.serverless.classes.Error(
+        'serverless-build-plugin requires serverless@1.x.x',
+      );
+    }
+
+    // This causes the `package` plugin to be skipped
+    this.serverless.service.package.artifact     = true;
+    this.serverless.service.package.individually = true;
+
+    this.hooks = {
+      // 'before:deploy:function:deploy'           : this.build, // Deprecated
+      'before:invoke:local:invoke'             : ()=>this.build(true),
+      'after:deploy:function:initialize'       : ()=>this.build(false),
+      'after:deploy:initialize'                : ()=>this.build(false),
+      'after:deploy:createDeploymentArtifacts' : () => {
+        this.serverless.service.package.artifact = null;
+      },
+    };
+
+    //
+    // PLUGIN CONFIG GENERATION
+    //
+
+    this.servicePath    = this.serverless.config.servicePath;
+    this.tmpDir         = path.join(this.servicePath, './.serverless');
+    this.buildTmpDir    = path.join(this.tmpDir, './build');
+    this.artifactTmpDir = path.join(this.tmpDir, './artifacts');
+
+    const buildConfigPath  = path.join(this.servicePath, './serverless.build.yml');
+    const buildConfig      = loadFile(buildConfigPath) || {};
+    const serverlessCustom = this.serverless.service.custom || {};
+
+    // The config inherits from multiple sources
+    this.config = merge(
+      this.config,
+      clone(serverlessCustom.build || {}),
+      clone(buildConfig),
+      clone(options),
+      { log: this.log },
+    );
+
+    const { functions } = this.serverless.service;
+
+    const functionSelection = this.config.f || this.config.function;
+
+    let selectedFunctions = typeOf.Array(functionSelection)
+      ? functionSelection
+      : [functionSelection];
+
+    selectedFunctions = selectedFunctions.filter(key => key in functions);
+    selectedFunctions = selectedFunctions.length ? selectedFunctions : Object.keys(functions);
+
+    /**
+     *  An array of full realized functions configs to build against.
+     *  Inherits from
+     *  - serverless.yml functions.<fn>.package
+     *  - serverless.build.yml functions.<fn>
+     *
+     *  in order to generate `include`, `exclude`
+     */
+
+    this.functions = selectedFunctions.reduce((obj, fnKey) => {
+      const fnCfg      = functions[fnKey];
+      const fnBuildCfg = this.config.functions[fnKey] || {};
+
+      const include = [
+        ...(this.config.include || []),
+        ...((fnCfg.package && fnCfg.package.include) || []),
+        ...(fnBuildCfg.include || []),
+      ];
+
+      const exclude = [
+        ...(this.config.baseExclude || []),
+        ...(this.config.exclude || []),
+        ...((fnCfg.package && fnCfg.package.exclude) || []),
+        ...(fnBuildCfg.exclude || []),
+      ];
+
+      // Utilize the proposed `package` configuration for functions
+      obj[fnKey] = {
+        ...fnCfg,
+
+        package: {
+          ...(fnCfg.package || {}),
+          ...(this.config.functions[fnKey] || {}),
+          include,
+          exclude,
         },
+      };
 
-        exclude : [],
-        include : [],
+      return obj;
+    }, {});
+  }
 
-        uglify        : true,
-        uglifySource  : false,
-        uglifyModules : true,
+  log = (...args) => this.serverless.cli.log(...args)
 
-        babel      : null,
-        sourceMaps : true,
+  /**
+   *  Builds either from file or through the babel optimizer.
+   */
+  build = async (isLocalInvoke) => {
+    this.log('[BUILD] Builds triggered');
 
-        // Passed to `yazl` as options
-        zip: { compress: true },
+    const { method } = this.config;
 
-        method : 'bundle',
-        file   : null,
+    if (method === 'bundle') {
+      const { uglify, babel, sourceMaps, babili } = this.config;
+      this.log(`[BUILD] ${colorizeConfig({ method, uglify, babel, babili, sourceMaps })}`);
+    } else {
+      const { tryFiles } = this.config;
+      this.log(`[BUILD] ${colorizeConfig({ method, tryFiles })}`);
 
-        functions: {}
     }
 
-    constructor(serverless, options = {}) {
-        //
-        // SERVERLESS
-        //
+    // Ensure directories
 
-        this.serverless = serverless
+    await fs.ensureDirAsync(this.buildTmpDir);
+    await fs.ensureDirAsync(this.artifactTmpDir);
 
-        if ( ! this.serverless.getVersion().startsWith('1') )
-            throw new this.serverless.classes.Error(
-                'serverless-build-plugin requires serverless@1.x.x'
-            )
-
-        this.hooks = {
-          //  'deploy'                                  : (...args) => console.log('wew'), // doesn't fire
-            'before:invoke:local:invoke'              :(...args)=>{console.log('Executing before:invoke:local:invoke'); return this.build(true)},
-            'before:deploy:createDeploymentArtifacts' : (...args) => {console.log('Executing before:deploy:createDeploymentArtifacts');return this.build(false)}, // doesn't fire
-           // 'deploy:createDeploymentArtifacts'        : (...args) => this.build(...args), // doesn't fire
-            'before:deploy:function:deploy'           : (...args) => {console.log('Executing before:deploy:function:deploy'); return this.build(false)},
-        }
-
-        //
-        // PLUGIN CONFIG GENERATION
-        //
-
-        this.servicePath    = this.serverless.config.servicePath
-        this.tmpDir         = path.join(this.servicePath, './.serverless')
-        this.buildTmpDir    = path.join(this.tmpDir, './build')
-        this.artifactTmpDir = path.join(this.tmpDir, './artifacts')
-
-        const buildConfigPath = path.join(this.servicePath, './serverless.build.yml')
-
-        const buildConfig = fs.existsSync(buildConfigPath)
-            ? Yaml.load( fs.readFileSync(buildConfigPath) )
-            : {}
-
-        // The config inherits from multiple sources
-        this.config = {
-            ...this.config,
-            ...( (this.serverless.service.custom?this.serverless.service.custom.build || {}:{}) ),
-            ...buildConfig,
-            ...options,
-        }
-
-        const { functions } = this.serverless.service
-
-        let selectedFunctions = typeOf.Array(this.config.function)
-            ? this.config.function
-            : [ this.config.function ]
-
-        selectedFunctions = selectedFunctions.filter((key) => key in functions )
-        selectedFunctions = selectedFunctions.length ? selectedFunctions : Object.keys(functions)
-
-        /**
-         *  An array of full realized functions configs to build against.
-         *  Inherits from
-         *  - serverless.yml functions.<fn>.package
-         *  - serverless.build.yml functions.<fn>
-         *
-         *  in order to generate `include`, `exclude`
-         */
-        this.functions = selectedFunctions.reduce((obj, fnKey) => {
-            const fnCfg      = functions[fnKey]
-            const fnBuildCfg = this.config.functions[fnKey] || {}
-
-            const include = [
-                ...( this.config.include || [] ),
-                ...( ( fnCfg.package && fnCfg.package.include ) || [] ),
-                ...( fnBuildCfg.include || [] )
-            ]
-
-            const exclude = [
-                ...( this.config.baseExclude || [] ),
-                ...( this.config.exclude || [] ),
-                ...( ( fnCfg.package && fnCfg.package.exclude ) || [] ),
-                ...( fnBuildCfg.exclude || [] )
-            ]
-
-            // Utilize the proposed `package` configuration for functions
-            obj[fnKey] = {
-                ...fnCfg,
-
-                package: {
-                    ...( fnCfg.package || {} ),
-                    ...( this.config.functions[fnKey] || {} ),
-                    include, exclude
-                }
-            }
-
-            return obj
-        }, {})
-
-        this.serverless.cli.log(`Serverless Build config:`)
-        console.inspect(this.config)
-    }
+    if (!this.config.keep) await fs.emptyDirAsync(this.artifactTmpDir);
 
     /**
-     *  Builds either from file or through the babel optimizer.
+     * Iterate functions and run builds either synchronously or concurrently
      */
-    async build(isLocalExecution) {
-        // TODO in the future:
-        // - create seperate zips
-        // - modify artifact completion process, splitting builds up into seperate artifacts
 
-        this.serverless.cli.log("Serverless Build triggered...")
+    await Promise.map(Object.keys(this.functions), (name) => {
+      const config = this.functions[name];
 
+      return this.buildFunction(name, config, isLocalInvoke);
+    }, {
+      concurrency: this.config.synchronous ? 1 : Infinity,
+    });
 
-        const { method }   = this.config
-        let moduleIncludes = []
+    this.log('');
+    this.log('[BUILD] Builds complete');
+    this.log('');
 
-        await fs.ensureDirAsync(this.buildTmpDir)
-        await fs.ensureDirAsync(this.artifactTmpDir)
+    if (this.config.deploy === false) process.exit();
+  }
 
-        const artifact = new Yazl.ZipFile()
+  /**
+   * Builds a function into an streaming zip artifact
+   * and sets it in `serverless.yml:functions[fnName].artifact`
+   * in order for `serverless` to consume it.
+   */
+  async buildFunction(fnName, fnConfig, isLocalInvoke) {
+    const artifact = new Yazl.ZipFile();
+    const moduleIncludes = [];
 
-        if ( method === 'bundle' ) {
-            //
-            // SOURCE BUNDLER
-            //
+    const { method } = this.config;
 
-            const sourceBundler = new SourceBundler({
-                ...this.config,
-                uglify      : this.config.uglifySource ? this.config.uglify : undefined,
-                servicePath : this.servicePath,
-                isLocalExecution: isLocalExecution,
-                buildTmpDir: this.buildTmpDir
-            }, artifact)
+    this.log('');
+    this.log(`[FUNCTION] ${c.reset.bold(fnName)}`);
 
-            for ( const fnKey in this.functions ) {
-                const config = this.functions[fnKey]
+    if (method === 'bundle') {
+      //
+      // SOURCE BUNDLER
+      //
 
-                this.serverless.cli.log(`Bundling ${fnKey}...`)
+      const sourceBundler = new SourceBundler({
+        ...this.config,
 
-                // Synchronous for now, but can be parellel
-                await sourceBundler.bundle({
-                    exclude : config.package.exclude,
-                    include : config.package.include,
-                })
-            }
-        } else
-        if ( method === 'file' ) {
-            //
-            // BUILD FILE
-            //
+        uglify: this.config.uglifySource
+          ? this.config.uglify
+          : undefined,
 
-            // This builds all functions
-            const fileBuild = await new FileBuild({
-                ...this.config,
-                servicePath : this.servicePath,
-                buildTmpDir : this.buildTmpDir,
-                functions   : this.functions,
-                serverless  : this.serverless,
-                isLocalExecution: isLocalExecution,
-                buildTmpDir: this.buildTmpDir
-            }, artifact).build()
+        servicePath: this.servicePath,
+        isLocalInvoke: isLocalInvoke,
+        buildTmpDir: this.buildTmpDir
+      }, artifact);
 
-            moduleIncludes = [ ...fileBuild.externals ] // Spread, for an iterator
-        } else {
-            throw new Error("Unknown build method under `custom.build.method`")
-        }
+      this.log('');
 
-        await new ModuleBundler({
-            ...this.config,
-            uglify      : this.config.uglifyModules ? this.config.uglify : undefined,
-            servicePath : this.servicePath,
-            isLocalExecution: isLocalExecution,
-            buildTmpDir: this.buildTmpDir
-        }, artifact).bundle({
-            include: moduleIncludes,
-            ...this.config.modules
-        })
+      await sourceBundler.bundle({
+        exclude : fnConfig.package.exclude,
+        include : fnConfig.package.include,
+      });
+    } else
+    if (method === 'file') {
+      //
+      // BUILD FILE
+      //
 
-        await this._completeArtifact(artifact,isLocalExecution)
+      // This builds all functions
+      const fileBuild = await new FileBuild({
+        ...this.config,
+        servicePath : this.servicePath,
+        buildTmpDir : this.buildTmpDir,
+        isLocalInvoke: isLocalInvoke,
+        serverless  : this.serverless,
+      }, artifact).build(fnConfig);
 
-        if ( this.config.test )
-            throw new Error("--test mode, DEBUGGING STOP")
+      moduleIncludes.push(...fileBuild.externals);
+    } else {
+      throw new Error('Unknown build method');
     }
 
-    /**
-     *  Writes the `artifact` and attaches it to serverless
-     */
-    async _completeArtifact(artifact, isLocalExecution) {
-        // Purge existing artifacts
+    this.log('');
 
-        if(isLocalExecution){
-            this.serverless.config.servicePath = this.buildTmpDir;
-            console.log(this.serverless.config.servicePath);
-        }else{
-            if ( ! this.config.keep )
-                await fs.emptyDirAsync(this.artifactTmpDir)
+    await new ModuleBundler(
+      {
+        ...this.config,
 
-            const zipPath = path.resolve(this.artifactTmpDir, `./${this.serverless.service.service}-${new Date().getTime()}.zip`)
+        uglify: this.config.uglifyModules
+          ? this.config.uglify
+          : undefined,
+        isLocalInvoke: isLocalInvoke,
+        buildTmpDir: this.buildTmpDir,
+        servicePath: this.servicePath,
+      },
+      artifact,
+    ).bundle({
+      include: moduleIncludes,
+      ...this.config.modules,
+    });
 
-            await new Promise((resolve, reject) => {
-                artifact.outputStream.pipe( fs.createWriteStream(zipPath) )
-                    .on("error", reject)
-                    .on("close", resolve)
+    await this._completeFunctionArtifact(fnName, artifact, isLocalInvoke);
+  }
 
-                artifact.end()
-            })
+  /**
+   *  Writes the `artifact` and attaches it to serverless
+   */
+  async _completeFunctionArtifact(fnName, artifact, isLocalInvoke) {
+    const { method } = this.config;
+   if(isLocalInvoke){
+     if (method === 'file'){
+       const fnConfig = this.serverless.service.functions[fnName];
+       const handleFunction    = fnConfig.handler.substring(fnConfig.handler.lastIndexOf('.')+1);
+       this.serverless.config.servicePath = this.buildTmpDir;
+       fnConfig.handler= `${fnConfig.name}.${handleFunction}`;
+     }else{
+       this.serverless.config.servicePath = this.buildTmpDir;
+     }
+   }else{
+      const zipPath = path.resolve(this.artifactTmpDir, `./${this.serverless.service.service}-${fnName}-${new Date().getTime()}.zip`);
+      await new Promise((resolve, reject) => {
+        artifact.outputStream.pipe(fs.createWriteStream(zipPath))
+          .on('error', reject)
+          .on('close', resolve);
 
-            this.serverless.service.package.artifact = zipPath
+        artifact.end();
+      });
 
-            //Purge build dir
-            if ( ! this.config.keep )
-                await fs.emptyDirAsync(this.buildTmpDir)
-        }
+      const fnConfig = this.serverless.service.functions[fnName];
 
+      fnConfig.artifact         = zipPath;
+      fnConfig.package          = fnConfig.package || {};
+      fnConfig.package.artifact = zipPath;
+   }
 
-    }
+  }
 }
