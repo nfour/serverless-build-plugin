@@ -40,6 +40,9 @@ export default class ModuleBundler {
     const transforms = await this._createTransforms();
 
     await Promise.map(this.modules, async ({ packagePath, relativePath, packageJson }) => {
+      const filesToHandle = [];
+
+
       await walker(packagePath)
         .on('directory', (dirPath, stats, stop) => {
           if (stats.isDirectory()) {
@@ -59,21 +62,28 @@ export default class ModuleBundler {
         })
         .on('file', async (filePath, stats, next) => {
           const relPath = filePath.substr(filePath.indexOf(relativePath)).replace(/^\/|\/$/g, '');
-
-          await handleFile({
+          filesToHandle.push({
             filePath,
             relPath,
-            transforms,
-            transformExtensions : ['js', 'jsx'],
-            useSourceMaps       : false,
-            artifact            : this.artifact,
-            zipConfig           : this.config.zip,
+            transforms
           });
         })
         .end();
 
+      await Promise.map(filesToHandle,f=>handleFile({
+          filePath: f.filePath,
+          relPath: f.relPath,
+          transforms: f.transforms,
+          transformExtensions : ['js', 'jsx'],
+          useSourceMaps       : false,
+          artifact            : this.artifact,
+          buildTmpDir         : this.config.buildTmpDir,
+          isLocalInvoke    : this.config.isLocalInvoke,
+          zipConfig           : this.config.zip
+      }),{concurrency:1});
+
       this.log(`[MODULE] ${displayModule({ filePath: relativePath, packageJson })}`);
-    });
+    },{concurrency:10});
 
     return this;
   }

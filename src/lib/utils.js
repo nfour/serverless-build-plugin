@@ -1,9 +1,15 @@
+
 import walk from 'findit';
 import fs from 'fs-extra';
 import { typeOf } from 'lutils';
 import path from 'path';
 import YAML from 'js-yaml';
 import c from 'chalk';
+import Promise from 'bluebird';
+
+Promise.promisifyAll(fs);
+
+
 
 export function walker(...args) {
   const w = walk(...args);
@@ -50,7 +56,7 @@ export function loadFile(fileLookup) {
  *  Used by SourceBundler & ModuleBundler.
  */
 export async function handleFile({
-    filePath, relPath,
+    filePath, relPath, isLocalInvoke, buildTmpDir,
     artifact, zipConfig, useSourceMaps,
     transformExtensions, transforms,
 }) {
@@ -83,20 +89,27 @@ export async function handleFile({
         }
       }
     }
-
-    artifact.addBuffer(new Buffer(code), destRelPath, zipConfig);
-
-    if (useSourceMaps && map) {
-      if (typeOf.Object(map)) map = JSON.stringify(map);
-
-      artifact.addBuffer(new Buffer(map), `${destRelPath}.map`, zipConfig);
+    if(isLocalInvoke){
+      const filePath = path.join(buildTmpDir, relPath);
+      await fs.ensureDirAsync(path.dirname(filePath)).then(()=>fs.writeFileAsync(filePath, code));
+    }else{
+      artifact.addBuffer(new Buffer(code), destRelPath, zipConfig);
+      if (useSourceMaps && map) {
+        if (typeOf.Object(map)) map = JSON.stringify(map);
+        artifact.addBuffer(new Buffer(map), `${destRelPath}.map`, zipConfig);
+      }
     }
   } else {
     //
     // ARBITRARY FILES
     //
+    if(isLocalInvoke){
+        const filePath = path.join(buildTmpDir, relPath);
+        await fs.ensureDirAsync(path.dirname(filePath)).then(()=>fs.copyAsync(relPath, filePath));
+    }else{
+        artifact.addFile(filePath, relPath, zipConfig)
+    }
 
-    artifact.addFile(filePath, relPath, zipConfig);
   }
 
   return artifact;

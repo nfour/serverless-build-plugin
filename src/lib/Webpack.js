@@ -30,7 +30,9 @@ export default class WebpackBuilder {
       path          : this.config.buildTmpDir,
     };
 
+
     this.externals = WebpackBuilder.normalizeExternals(config.externals || []);
+
 
     const logs = await this.runWebpack(config);
 
@@ -70,7 +72,9 @@ export default class WebpackBuilder {
   runWebpack(config) {
     return new Promise((resolve, reject) => {
       this.webpack(config).run((err, stats) => {
-        if (err) return reject(err);
+        if (err){
+          return reject(err);
+        }
 
         return resolve(stats.toString({
           colors   : true,

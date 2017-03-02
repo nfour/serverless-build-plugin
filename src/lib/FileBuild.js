@@ -65,6 +65,7 @@ export default class FileBuild {
 
       const webpackConfig = clone(result);
 
+
       merge(
         webpackConfig,
         {
@@ -74,6 +75,8 @@ export default class FileBuild {
           },
         },
       );
+
+
 
       const { externals } = await new WebpackBuilder(this.config).build(webpackConfig);
 

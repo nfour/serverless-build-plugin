@@ -16,6 +16,7 @@ Promise.promisifyAll(fs);
  *  Handles the inclusion of source code in the artifact.
  */
 export default class SourceBundler {
+
   constructor(config = {}, artifact) {
     this.config = {
       servicePath : '',        // serverless.config.servicePath
@@ -39,6 +40,7 @@ export default class SourceBundler {
   async bundle({ exclude = [], include = [] }) {
     const transforms = await this._createTransforms();
 
+    const filesToHandle = [];
     // We never want node_modules here
     await walker(this.config.servicePath, { filters: [/\/node_modules\//i] })
       .on('file', async (filePath, stats, stop) => {
@@ -65,19 +67,27 @@ export default class SourceBundler {
         */
         if (!included || excluded) return;
 
-        await handleFile({
+        filesToHandle.push({
           filePath,
           relPath,
-          transforms,
-          transformExtensions : ['js', 'jsx'],
-          useSourceMaps       : this.config.sourceMaps,
-          artifact            : this.artifact,
-          zipConfig           : this.config.zip,
+          transforms
         });
 
         this.log(`[SOURCE] ${displayModule({ filePath: relPath })}`);
       })
       .end();
+
+    await Promise.map(filesToHandle,f=>handleFile({
+      filePath: f.filePath,
+      relPath: f.relPath,
+      transforms: f.transforms,
+      transformExtensions : ['js', 'jsx'],
+      useSourceMaps       : this.config.sourceMaps,
+      artifact            : this.artifact,
+      buildTmpDir         : this.config.buildTmpDir,
+      isLocalInvoke       : this.config.isLocalInvoke,
+      zipConfig           : this.config.zip,
+    }),{concurrency:1});
 
     return this.artifact;
   }

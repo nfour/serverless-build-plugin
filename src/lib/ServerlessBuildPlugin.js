@@ -64,8 +64,9 @@ export default class ServerlessBuildPlugin {
 
     this.hooks = {
       // 'before:deploy:function:deploy'           : this.build, // Deprecated
-      'after:deploy:function:initialize'       : this.build,
-      'after:deploy:initialize'                : this.build,
+      'before:invoke:local:invoke'             : ()=>this.build(true),
+      'after:deploy:function:initialize'       : ()=>this.build(false),
+      'after:deploy:initialize'                : ()=>this.build(false),
       'after:deploy:createDeploymentArtifacts' : () => {
         this.serverless.service.package.artifact = null;
       },
@@ -112,6 +113,7 @@ export default class ServerlessBuildPlugin {
      *
      *  in order to generate `include`, `exclude`
      */
+
     this.functions = selectedFunctions.reduce((obj, fnKey) => {
       const fnCfg      = functions[fnKey];
       const fnBuildCfg = this.config.functions[fnKey] || {};
@@ -151,7 +153,7 @@ export default class ServerlessBuildPlugin {
   /**
    *  Builds either from file or through the babel optimizer.
    */
-  build = async () => {
+  build = async (isLocalInvoke) => {
     this.log('[BUILD] Builds triggered');
 
     const { method } = this.config;
@@ -162,6 +164,7 @@ export default class ServerlessBuildPlugin {
     } else {
       const { tryFiles } = this.config;
       this.log(`[BUILD] ${colorizeConfig({ method, tryFiles })}`);
+
     }
 
     // Ensure directories
@@ -174,10 +177,11 @@ export default class ServerlessBuildPlugin {
     /**
      * Iterate functions and run builds either synchronously or concurrently
      */
+
     await Promise.map(Object.keys(this.functions), (name) => {
       const config = this.functions[name];
 
-      return this.buildFunction(name, config);
+      return this.buildFunction(name, config, isLocalInvoke);
     }, {
       concurrency: this.config.synchronous ? 1 : Infinity,
     });
@@ -194,7 +198,7 @@ export default class ServerlessBuildPlugin {
    * and sets it in `serverless.yml:functions[fnName].artifact`
    * in order for `serverless` to consume it.
    */
-  async buildFunction(fnName, fnConfig) {
+  async buildFunction(fnName, fnConfig, isLocalInvoke) {
     const artifact = new Yazl.ZipFile();
     const moduleIncludes = [];
 
@@ -216,6 +220,8 @@ export default class ServerlessBuildPlugin {
           : undefined,
 
         servicePath: this.servicePath,
+        isLocalInvoke: isLocalInvoke,
+        buildTmpDir: this.buildTmpDir
       }, artifact);
 
       this.log('');
@@ -233,9 +239,9 @@ export default class ServerlessBuildPlugin {
       // This builds all functions
       const fileBuild = await new FileBuild({
         ...this.config,
-
         servicePath : this.servicePath,
         buildTmpDir : this.buildTmpDir,
+        isLocalInvoke: isLocalInvoke,
         serverless  : this.serverless,
       }, artifact).build(fnConfig);
 
@@ -253,7 +259,8 @@ export default class ServerlessBuildPlugin {
         uglify: this.config.uglifyModules
           ? this.config.uglify
           : undefined,
-
+        isLocalInvoke: isLocalInvoke,
+        buildTmpDir: this.buildTmpDir,
         servicePath: this.servicePath,
       },
       artifact,
@@ -262,27 +269,39 @@ export default class ServerlessBuildPlugin {
       ...this.config.modules,
     });
 
-    await this._completeFunctionArtifact(fnName, artifact);
+    await this._completeFunctionArtifact(fnName, artifact, isLocalInvoke);
   }
 
   /**
    *  Writes the `artifact` and attaches it to serverless
    */
-  async _completeFunctionArtifact(fnName, artifact) {
-    const zipPath = path.resolve(this.artifactTmpDir, `./${this.serverless.service.service}-${fnName}-${new Date().getTime()}.zip`);
+  async _completeFunctionArtifact(fnName, artifact, isLocalInvoke) {
+    const { method } = this.config;
+   if(isLocalInvoke){
+     if (method === 'file'){
+       const fnConfig = this.serverless.service.functions[fnName];
+       const handleFunction    = fnConfig.handler.substring(fnConfig.handler.lastIndexOf('.')+1);
+       this.serverless.config.servicePath = this.buildTmpDir;
+       fnConfig.handler= `${fnConfig.name}.${handleFunction}`;
+     }else{
+       this.serverless.config.servicePath = this.buildTmpDir;
+     }
+   }else{
+      const zipPath = path.resolve(this.artifactTmpDir, `./${this.serverless.service.service}-${fnName}-${new Date().getTime()}.zip`);
+      await new Promise((resolve, reject) => {
+        artifact.outputStream.pipe(fs.createWriteStream(zipPath))
+          .on('error', reject)
+          .on('close', resolve);
 
-    await new Promise((resolve, reject) => {
-      artifact.outputStream.pipe(fs.createWriteStream(zipPath))
-        .on('error', reject)
-        .on('close', resolve);
+        artifact.end();
+      });
 
-      artifact.end();
-    });
+      const fnConfig = this.serverless.service.functions[fnName];
 
-    const fnConfig = this.serverless.service.functions[fnName];
+      fnConfig.artifact         = zipPath;
+      fnConfig.package          = fnConfig.package || {};
+      fnConfig.package.artifact = zipPath;
+   }
 
-    fnConfig.artifact         = zipPath;
-    fnConfig.package          = fnConfig.package || {};
-    fnConfig.package.artifact = zipPath;
   }
 }
