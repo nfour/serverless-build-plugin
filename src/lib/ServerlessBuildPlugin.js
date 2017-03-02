@@ -132,6 +132,7 @@ export default class ServerlessBuildPlugin {
       // Utilize the proposed `package` configuration for functions
       obj[fnKey] = {
         ...fnCfg,
+        name: fnKey,
 
         package: {
           ...(fnCfg.package || {}),
