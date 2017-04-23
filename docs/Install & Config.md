@@ -136,6 +136,10 @@ method: file
 # selecting a build file.
 tryFiles:
   - 'webpack.config.js'
+
+# Customize your file extension for locating your entry points in webpack
+# Eg. if using TypeScript, set it to `ts`, so that a functions handler of src/myStuff/handler.handler file resolves to ./src/myStuff/handler.ts
+handlerEntryExt: 'js' 
 ```
 
 The build file handles the `default export` with this logic:

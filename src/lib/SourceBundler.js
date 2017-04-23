@@ -18,12 +18,13 @@ Promise.promisifyAll(fs);
 export default class SourceBundler {
   constructor(config = {}, artifact) {
     this.config = {
-      servicePath : '',        // serverless.config.servicePath
-      babel       : null,      // Babel options
-      babili      : false,      // Babel options
-      uglify      : null,      // UglifyJS options
-      sourceMaps  : false,     // Whether to add source maps
-      zip         : null,      // Yazl zip options
+      servicePath         : '',        // serverless.config.servicePath
+      babel               : null,      // Babel options
+      babili              : false,      // Babel options
+      uglify              : null,      // UglifyJS options
+      sourceMaps          : false,     // Whether to add source maps
+      zip                 : null,      // Yazl zip options
+      transformExtensions : ['ts', 'js', 'jsx', 'tsx'],
       ...config,
     };
 
@@ -69,7 +70,7 @@ export default class SourceBundler {
           filePath,
           relPath,
           transforms,
-          transformExtensions : ['js', 'jsx'],
+          transformExtensions : this.config.transformExtensions,
           useSourceMaps       : this.config.sourceMaps,
           artifact            : this.artifact,
           zipConfig           : this.config.zip,

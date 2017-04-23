@@ -11,10 +11,11 @@ Promise.promisifyAll(fs);
 export default class FileBuild {
   constructor(config, artifact) {
     this.config = {
-      servicePath : '',   // ./
-      buildTmpDir : '',   // ./.serverless/build
-      zip         : null, // Yazl zip options
-      tryFiles    : [],   // Array of relative paths to test for a build file
+      servicePath     : '',   // ./
+      buildTmpDir     : '',   // ./.serverless/build
+      zip             : null, // Yazl zip options
+      tryFiles        : [],   // Array of relative paths to test for a build file
+      handlerEntryExt : 'js',
       ...config,
     };
 
@@ -55,7 +56,7 @@ export default class FileBuild {
     // - Webpack Config:             executed and output files are zipped
     //
 
-    const entryPoint    = `./${fnConfig.handler.split(/\.[^.]+$/)[0]}.js`;
+    const entryPoint = `./${fnConfig.handler.split(/\.[^.]+$/)[0]}.${this.config.handlerEntryExt}`;
     const buildFilename = `${fnConfig.name}.js`;
 
     if (typeOf.Object(result)) {

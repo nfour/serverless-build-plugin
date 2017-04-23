@@ -36,6 +36,9 @@ export default class ServerlessBuildPlugin {
     normalizeBabelExt : false,
     sourceMaps        : true,
 
+    transformExtensions : ['ts', 'js', 'jsx', 'tsx'],
+    handlerEntryExt     : 'js',
+
     // Passed to `yazl` as options
     zip: { compress: true },
 
