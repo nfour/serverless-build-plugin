@@ -96,7 +96,9 @@ export default class FileBuild {
           await fs.accessAsync(filePath);
         } catch (err) { return; }
 
-        this.artifact.addFile(filePath, entry, this.config.zip);
+        const fileWithExt = entry.replace(/\.[^.]+$/, '.js');
+
+        this.artifact.addFile(filePath, fileWithExt, this.config.zip);
       });
     } else
     if (typeOf.String(result) || result instanceof Buffer) {
