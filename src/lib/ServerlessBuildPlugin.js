@@ -16,6 +16,8 @@ export default class ServerlessBuildPlugin {
   config = {
     method: 'bundle',
 
+    useServerlessOffline: false,
+
     tryFiles    : ['webpack.config.js'],
     baseExclude : [/\bnode_modules\b/],
 
@@ -148,6 +150,8 @@ export default class ServerlessBuildPlugin {
         this.serverless.service.package.artifact = null;
       },
       'before:offline:start': () => {
+        if (!this.config.useServerlessOffline) return null;
+
         this.config.noDeploy = true;
         this.serverless.config.servicePath = this.buildTmpDir;
 
