@@ -247,10 +247,10 @@ export default class ServerlessBuildPlugin {
           servicePath : this.servicePath,
           buildTmpDir : this.buildTmpDir,
           serverless  : this.serverless,
-        }, artifact);
+        });
       }
 
-      await this.fileBuild.build(fnConfig);
+      await this.fileBuild.build(fnConfig, artifact);
 
       // This builds all functions
 

@@ -9,7 +9,7 @@ import WebpackBuilder from './Webpack';
 Promise.promisifyAll(fs);
 
 export default class FileBuild {
-  constructor(config, artifact) {
+  constructor(config) {
     this.config = {
       servicePath     : '',   // ./
       buildTmpDir     : '',   // ./.serverless/build
@@ -21,7 +21,6 @@ export default class FileBuild {
 
     this.log = this.config.log || (() => {});
 
-    this.artifact  = artifact;
     this.externals = new Set();
     this.alreadyBuilt = new Set();
   }
@@ -29,7 +28,7 @@ export default class FileBuild {
   /**
    *  Handles building from a build file's output.
    */
-  async build(fnConfig) {
+  async build(fnConfig, artifact) {
     //
     // RESOLVE BUILD FILE
     //
@@ -57,19 +56,19 @@ export default class FileBuild {
     // - Webpack Config:             executed and output files are zipped
     //
 
-    const entryPoint = `./${fnConfig.handler.split(/\.[^.]+$/)[0]}.${this.config.handlerEntryExt}`;
-    const buildFilename = entryPoint.replace(
-      new RegExp(`\\.${this.config.handlerEntryExt}$`),
-      '.js',
-    );
+    const entryRelPath = `${fnConfig.handler.split(/\.[^.]+$/)[0]}`;
+    const entryPoint = `./${entryRelPath}.${this.config.handlerEntryExt}`;
+    const buildFilename = `./${entryRelPath}.js`;
+
+    console.log({ buildFilename });
 
     if (typeOf.Object(result)) {
       //
       // WEBPACK CONFIG
       //
 
-      if (!this.alreadyBuilt.has(buildFilename)) {
-        this.alreadyBuilt.add(buildFilename);
+      if (!this.alreadyBuilt.has(entryRelPath)) {
+        this.alreadyBuilt.add(entryRelPath);
 
         const webpackConfig = clone(result);
 
@@ -89,23 +88,17 @@ export default class FileBuild {
       }
 
       await Promise.each([
-        {
-          file  : buildFilename,
-          entry : entryPoint,
-        },
-        {
-          file  : `${buildFilename}.map`,
-          entry : `${entryPoint}.map`,
-        },
-      ], async ({ file, entry }) => {
-        const filePath = path.resolve(this.config.buildTmpDir, entry);
+        buildFilename, `${buildFilename}.map`,
+      ], async (relPath) => {
+        const filePath = path.resolve(this.config.buildTmpDir, relPath);
 
-
+        console.log({ filePath, relPath });
         try {
           await fs.accessAsync(filePath);
         } catch (err) { return; }
 
-        this.artifact.addFile(filePath, file, this.config.zip);
+        console.log({ added: true });
+        artifact.addFile(filePath, relPath, this.config.zip);
       });
     } else
     if (typeOf.String(result) || result instanceof Buffer) {
@@ -115,14 +108,14 @@ export default class FileBuild {
 
       if (typeOf.String(result)) result = new Buffer(result);
 
-      this.artifact.addBuffer(result, entryPoint, this.config.zip);
+      artifact.addBuffer(result, entryPoint, this.config.zip);
     } else
     if (isStream(result)) {
       //
       // STREAMS
       //
 
-      this.artifact.addReadStream(result, entryPoint, this.config.zip);
+      artifact.addReadStream(result, entryPoint, this.config.zip);
     } else {
       throw new Error('Unrecognized build output');
     }
