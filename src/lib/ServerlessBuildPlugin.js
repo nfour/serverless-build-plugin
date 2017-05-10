@@ -65,14 +65,6 @@ export default class ServerlessBuildPlugin {
     this.serverless.service.package.artifact     = true;
     this.serverless.service.package.individually = true;
 
-    this.hooks = {
-      // 'before:deploy:function:deploy'           : this.build, // Deprecated
-      'after:deploy:function:initialize'       : this.build,
-      'after:deploy:initialize'                : this.build,
-      'after:deploy:createDeploymentArtifacts' : () => {
-        this.serverless.service.package.artifact = null;
-      },
-    };
 
     //
     // PLUGIN CONFIG GENERATION
@@ -147,6 +139,21 @@ export default class ServerlessBuildPlugin {
 
       return obj;
     }, {});
+
+
+    this.hooks = {
+      'after:deploy:function:initialize'       : this.build,
+      'after:deploy:initialize'                : this.build,
+      'after:deploy:createDeploymentArtifacts' : () => {
+        this.serverless.service.package.artifact = null;
+      },
+      'before:offline:start': () => {
+        this.config.noDeploy = true;
+        this.serverless.config.servicePath = this.buildTmpDir;
+
+        return this.build();
+      },
+    };
   }
 
   log = (...args) => this.serverless.cli.log(...args)
@@ -199,7 +206,7 @@ export default class ServerlessBuildPlugin {
    */
   async buildFunction(fnName, fnConfig) {
     const artifact = new Yazl.ZipFile();
-    const moduleIncludes = [];
+    let moduleIncludes;
 
     const { method } = this.config;
 
@@ -233,16 +240,21 @@ export default class ServerlessBuildPlugin {
       // BUILD FILE
       //
 
+      if (!this.fileBuild) {
+        this.fileBuild = new FileBuild({
+          ...this.config,
+
+          servicePath : this.servicePath,
+          buildTmpDir : this.buildTmpDir,
+          serverless  : this.serverless,
+        }, artifact);
+      }
+
+      await this.fileBuild.build(fnConfig);
+
       // This builds all functions
-      const fileBuild = await new FileBuild({
-        ...this.config,
 
-        servicePath : this.servicePath,
-        buildTmpDir : this.buildTmpDir,
-        serverless  : this.serverless,
-      }, artifact).build(fnConfig);
-
-      moduleIncludes.push(...fileBuild.externals);
+      moduleIncludes = this.fileBuild.externals;
     } else {
       throw new Error('Unknown build method');
     }
@@ -261,7 +273,7 @@ export default class ServerlessBuildPlugin {
       },
       artifact,
     ).bundle({
-      include: moduleIncludes,
+      include: Array.from(moduleIncludes || []),
       ...this.config.modules,
     });
 

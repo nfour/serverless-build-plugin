@@ -23,6 +23,7 @@ export default class FileBuild {
 
     this.artifact  = artifact;
     this.externals = new Set();
+    this.alreadyBuilt = new Set();
   }
 
   /**
@@ -57,12 +58,19 @@ export default class FileBuild {
     //
 
     const entryPoint = `./${fnConfig.handler.split(/\.[^.]+$/)[0]}.${this.config.handlerEntryExt}`;
-    const buildFilename = `${fnConfig.name}.js`;
+    const buildFilename = entryPoint.replace(
+      new RegExp(`\\.${this.config.handlerEntryExt}$`),
+      '.js',
+    );
 
     if (typeOf.Object(result)) {
       //
       // WEBPACK CONFIG
       //
+
+      if (this.alreadyBuilt.has(buildFilename)) return;
+
+      this.alreadyBuilt.add(buildFilename);
 
       const webpackConfig = clone(result);
 
@@ -90,15 +98,14 @@ export default class FileBuild {
           entry : `${entryPoint}.map`,
         },
       ], async ({ file, entry }) => {
-        const filePath = path.resolve(this.config.buildTmpDir, file);
+        const filePath = path.resolve(this.config.buildTmpDir, entry);
+
 
         try {
           await fs.accessAsync(filePath);
         } catch (err) { return; }
 
-        const fileWithExt = entry.replace(/\.[^.]+$/, '.js');
-
-        this.artifact.addFile(filePath, fileWithExt, this.config.zip);
+        this.artifact.addFile(filePath, file, this.config.zip);
       });
     } else
     if (typeOf.String(result) || result instanceof Buffer) {
