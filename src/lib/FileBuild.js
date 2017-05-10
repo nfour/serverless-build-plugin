@@ -60,8 +60,6 @@ export default class FileBuild {
     const entryPoint = `./${entryRelPath}.${this.config.handlerEntryExt}`;
     const buildFilename = `./${entryRelPath}.js`;
 
-    console.log({ buildFilename });
-
     if (typeOf.Object(result)) {
       //
       // WEBPACK CONFIG
