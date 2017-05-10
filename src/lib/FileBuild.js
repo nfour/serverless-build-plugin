@@ -68,25 +68,25 @@ export default class FileBuild {
       // WEBPACK CONFIG
       //
 
-      if (this.alreadyBuilt.has(buildFilename)) return;
+      if (!this.alreadyBuilt.has(buildFilename)) {
+        this.alreadyBuilt.add(buildFilename);
 
-      this.alreadyBuilt.add(buildFilename);
+        const webpackConfig = clone(result);
 
-      const webpackConfig = clone(result);
-
-      merge(
-        webpackConfig,
-        {
-          entry  : [...(webpackConfig.entry || []), entryPoint],
-          output : {
-            filename: buildFilename,
+        merge(
+          webpackConfig,
+          {
+            entry  : [...(webpackConfig.entry || []), entryPoint],
+            output : {
+              filename: buildFilename,
+            },
           },
-        },
-      );
+        );
 
-      const { externals } = await new WebpackBuilder(this.config).build(webpackConfig);
+        const { externals } = await new WebpackBuilder(this.config).build(webpackConfig);
 
-      externals.forEach(ext => this.externals.add(ext));
+        externals.forEach(ext => this.externals.add(ext));
+      }
 
       await Promise.each([
         {
