@@ -92,12 +92,10 @@ export default class FileBuild {
       ], async (relPath) => {
         const filePath = path.resolve(this.config.buildTmpDir, relPath);
 
-        console.log({ filePath, relPath });
         try {
           await fs.accessAsync(filePath);
         } catch (err) { return; }
 
-        console.log({ added: true });
         artifact.addFile(filePath, relPath, this.config.zip);
       });
     } else
