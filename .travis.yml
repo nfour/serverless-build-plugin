@@ -5,4 +5,4 @@ node_js:
 
 before_script:
   - "ls -la test/1.0/"
-  - "cd test/1.0/ && npm install"
+  - "cd test/1.0/ && npm install && cd ../../"
