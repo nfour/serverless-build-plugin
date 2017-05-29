@@ -4,6 +4,7 @@ import Yazl from 'yazl';
 import fs from 'fs-extra';
 import { typeOf, merge, clone } from 'lutils';
 import c from 'chalk';
+import semver from 'semver';
 
 import { loadFile, colorizeConfig } from './utils';
 import ModuleBundler from './ModuleBundler';
@@ -57,7 +58,7 @@ export default class ServerlessBuildPlugin {
 
     this.serverless = serverless;
 
-    if (!this.serverless.getVersion().startsWith('1')) {
+    if (!semver.lt(this.serverless.getVersion(), '1.0.0') {
       throw new this.serverless.classes.Error(
         'serverless-build-plugin requires serverless@1.x.x',
       );
@@ -144,8 +145,6 @@ export default class ServerlessBuildPlugin {
 
 
     this.hooks = {
-      'after:deploy:function:initialize'       : this.build,
-      'after:deploy:initialize'                : this.build,
       'after:deploy:createDeploymentArtifacts' : () => {
         this.serverless.service.package.artifact = null;
       },
@@ -158,6 +157,19 @@ export default class ServerlessBuildPlugin {
         return this.build();
       },
     };
+
+    // hooks change from 1.12
+    if (semver.gte(this.serverless.getVersion(), '1.12.0') {
+      this.hooks = Object.assign({
+        'before:package:initialize'          : this.build,
+        'before:package:function:initialize' : this.build,
+      }, this.hooks);
+    } else {
+      this.hooks = Object.assign({
+        'after:deploy:function:initialize'   : this.build,
+        'after:deploy:initialize'            : this.build,
+      }, this.hooks);
+    }
   }
 
   log = (...args) => this.serverless.cli.log(...args)
