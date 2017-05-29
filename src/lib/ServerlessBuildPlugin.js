@@ -85,23 +85,17 @@ export default class ServerlessBuildPlugin {
         const functionObject = this.serverless.service.getFunction(functionName);
         const funcPackageConfig = functionObject.package || {};
 
-        if (funcPackageConfig.artifact) {
-          if (process.env.SLS_DEBUG) {
-            this.serverless.cli.log('package.artifact is defined, skipping packaging');
-          }
+        const artifactFilePath = funcPackageConfig.artifact;
+        const packageFilePath = path.join(this.serverless.config.servicePath,
+          '.serverless',
+          zipFileName,
+        );
 
-          const artifactFilePath = funcPackageConfig.artifact;
-          const packageFilePath = path.join(this.serverless.config.servicePath,
-            '.serverless',
-            zipFileName
-          );
-
-          return copyFile(artifactFilePath, packageFilePath).then(() => {
-            functionObject.artifact = artifactFilePath;
-            return artifactFilePath;
-          })
-        };
-      }
+        return copyFile(artifactFilePath, packageFilePath).then(() => {
+          functionObject.artifact = artifactFilePath;
+          return artifactFilePath;
+        });
+      };
     }
 
     //
@@ -193,17 +187,17 @@ export default class ServerlessBuildPlugin {
     // hooks changed in 1.12 :/
     if (semver.gte(this.serverless.getVersion(), '1.12.0')) {
       this.hooks = Object.assign({
-        'before:package:initialize'                : this.build,
-        'before:package:function:initialize'       : this.build,
+        'before:package:initialize'               : this.build,
+        'before:package:function:initialize'      : this.build,
         'after:package:createDeploymentArtifacts' : () => {
           this.serverless.service.package.artifact = null;
         },
       }, this.hooks);
     } else {
       this.hooks = Object.assign({
-        'after:deploy:function:initialize'         : this.build,
-        'after:deploy:initialize'                  : this.build,
-        'after:deploy:createDeploymentArtifacts'   : () => {
+        'after:deploy:function:initialize'       : this.build,
+        'after:deploy:initialize'                : this.build,
+        'after:deploy:createDeploymentArtifacts' : () => {
           this.serverless.service.package.artifact = null;
         },
       }, this.hooks);
