@@ -1,3 +1,8 @@
+## 1.5.0 - May 30 2017
+Features:
+- [x] Supports latest serverless versions as of now (1.14)
+
+
 ## 1.0.0 - Jan 5 2017
 - [BREAKING] Made `excludes` file globs actually override `includes`
   - This means if you have a global exclude like `**/*.js` you can't include .js files
