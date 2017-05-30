@@ -17,6 +17,12 @@ export function walker(...args) {
   return w;
 }
 
+/**
+ * Wraps fs-extra copy
+ */
+export function copyFile(source, dest) {
+  return fs.copy(source, dest);
+}
 
 /**
  * Read any of:

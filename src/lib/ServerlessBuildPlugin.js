@@ -4,8 +4,9 @@ import Yazl from 'yazl';
 import fs from 'fs-extra';
 import { typeOf, merge, clone } from 'lutils';
 import c from 'chalk';
+import semver from 'semver';
 
-import { loadFile, colorizeConfig } from './utils';
+import { loadFile, colorizeConfig, copyFile } from './utils';
 import ModuleBundler from './ModuleBundler';
 import SourceBundler from './SourceBundler';
 import FileBuild from './FileBuild';
@@ -57,16 +58,45 @@ export default class ServerlessBuildPlugin {
 
     this.serverless = serverless;
 
-    if (!this.serverless.getVersion().startsWith('1')) {
+    if (semver.lt(this.serverless.getVersion(), '1.0.0')) {
       throw new this.serverless.classes.Error(
         'serverless-build-plugin requires serverless@1.x.x',
       );
     }
 
-    // This causes the `package` plugin to be skipped
-    this.serverless.service.package.artifact     = true;
+    // put the package plugin into 'individual' mode
     this.serverless.service.package.individually = true;
 
+    // in sls 1.11 and lower this will skip 'archiving' (no effect in 1.12+)
+    this.serverless.service.package.artifact = true;
+
+    // in sls 1.12 and high this will skip 'archiving'
+    if (semver.gte(this.serverless.getVersion(), '1.12.0')) {
+      const packagePlugin = this.serverless.pluginManager.plugins.reduce((acc, val) => {
+        if (val.constructor.name === 'Package') {
+          return val;
+        }
+        return acc;
+      }, false);
+
+      packagePlugin.packageFunction = (functionName) => {
+        const zipFileName = `${functionName}.zip`;
+
+        const functionObject = this.serverless.service.getFunction(functionName);
+        const funcPackageConfig = functionObject.package || {};
+
+        const artifactFilePath = funcPackageConfig.artifact;
+        const packageFilePath = path.join(this.serverless.config.servicePath,
+          '.serverless',
+          zipFileName,
+        );
+
+        return copyFile(artifactFilePath, packageFilePath).then(() => {
+          functionObject.artifact = artifactFilePath;
+          return artifactFilePath;
+        });
+      };
+    }
 
     //
     // PLUGIN CONFIG GENERATION
@@ -144,11 +174,6 @@ export default class ServerlessBuildPlugin {
 
 
     this.hooks = {
-      'after:deploy:function:initialize'       : this.build,
-      'after:deploy:initialize'                : this.build,
-      'after:deploy:createDeploymentArtifacts' : () => {
-        this.serverless.service.package.artifact = null;
-      },
       'before:offline:start': () => {
         if (!this.config.useServerlessOffline) return null;
 
@@ -158,6 +183,25 @@ export default class ServerlessBuildPlugin {
         return this.build();
       },
     };
+
+    // hooks changed in 1.12 :/
+    if (semver.gte(this.serverless.getVersion(), '1.12.0')) {
+      this.hooks = Object.assign({
+        'before:package:initialize'               : this.build,
+        'before:package:function:initialize'      : this.build,
+        'after:package:createDeploymentArtifacts' : () => {
+          this.serverless.service.package.artifact = null;
+        },
+      }, this.hooks);
+    } else {
+      this.hooks = Object.assign({
+        'after:deploy:function:initialize'       : this.build,
+        'after:deploy:initialize'                : this.build,
+        'after:deploy:createDeploymentArtifacts' : () => {
+          this.serverless.service.package.artifact = null;
+        },
+      }, this.hooks);
+    }
   }
 
   log = (...args) => this.serverless.cli.log(...args)
