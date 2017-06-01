@@ -1,15 +1,16 @@
-import Promise from 'bluebird';
-import path from 'path';
-import { typeOf, merge, clone } from 'lutils';
-import fs from 'fs-extra';
+import * as Bluebird from 'bluebird';
 import isStream from 'is-stream';
+import { clone, isFunction, isObject, isString, merge } from 'lutils';
+import path from 'path';
 
-import WebpackBuilder from './Webpack';
+import { WebpackBuilder } from './Webpack';
 
-Promise.promisifyAll(fs);
+export class FileBuild {
+  log: any; // FIXME:
+  externals: Set<string>;
+  alreadyBuilt: Set<string>;
 
-export default class FileBuild {
-  constructor(config) {
+  constructor (config) {
     this.config = {
       servicePath     : '',   // ./
       buildTmpDir     : '',   // ./.serverless/build
@@ -28,7 +29,7 @@ export default class FileBuild {
   /**
    *  Handles building from a build file's output.
    */
-  async build(fnConfig, artifact) {
+  async build (fnConfig, artifact) {
     //
     // RESOLVE BUILD FILE
     //
@@ -45,8 +46,8 @@ export default class FileBuild {
     let result = require(builderFilePath);
 
     // Resolve any functions...
-    if (typeOf.Function(result)) {
-      result = await Promise.try(() => result(fnConfig, this));
+    if (isFunction(result)) {
+      result = await Bluebird.try(() => result(fnConfig, this));
     }
 
     //
@@ -60,7 +61,7 @@ export default class FileBuild {
     const entryPoint = `./${entryRelPath}.${this.config.handlerEntryExt}`;
     const buildFilename = `./${entryRelPath}.js`;
 
-    if (typeOf.Object(result)) {
+    if (isObject(result)) {
       //
       // WEBPACK CONFIG
       //
@@ -82,7 +83,7 @@ export default class FileBuild {
 
         const { externals } = await new WebpackBuilder(this.config).build(webpackConfig);
 
-        externals.forEach(ext => this.externals.add(ext));
+        externals.forEach((ext) => this.externals.add(ext));
       }
 
       await Promise.each([
@@ -97,12 +98,12 @@ export default class FileBuild {
         artifact.addFile(filePath, relPath, this.config.zip);
       });
     } else
-    if (typeOf.String(result) || result instanceof Buffer) {
+    if (isString(result) || result instanceof Buffer) {
       //
       // STRINGS, BUFFERS
       //
 
-      if (typeOf.String(result)) result = new Buffer(result);
+      if (isString(result)) { result = new Buffer(result); }
 
       artifact.addBuffer(result, entryPoint, this.config.zip);
     } else
@@ -122,11 +123,11 @@ export default class FileBuild {
   /**
    *  Allows for build files to be auto selected
    */
-  async _tryBuildFiles() {
+  async _tryBuildFiles () {
     for (const fileName of this.config.tryFiles) {
-      const exists = await fs.statAsync(fileName).then(stat => stat.isFile());
+      const exists = await fs.statAsync(fileName).then((stat) => stat.isFile());
 
-      if (exists) return fileName;
+      if (exists) { return fileName; }
     }
 
     return null;
