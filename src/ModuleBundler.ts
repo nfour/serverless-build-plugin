@@ -1,10 +1,10 @@
 import Promise from 'bluebird';
-import path, { sep } from 'path';
 import fs from 'fs-extra';
+import path, { sep } from 'path';
 import resolvePackage from 'resolve-pkg';
 
-import { walker, handleFile, displayModule } from './utils';
 import UglifyTransform from './transforms/Uglify';
+import { displayModule, handleFile, walker } from './utils';
 
 Promise.promisifyAll(fs);
 
@@ -14,7 +14,7 @@ Promise.promisifyAll(fs);
  *  Handles the inclusion of node_modules.
  */
 export default class ModuleBundler {
-  constructor(config = {}, artifact) {
+  constructor (config = {}, artifact) {
     this.config = {
       servicePath : '',   // serverless.config.servicePath
       uglify      : null, // UglifyJS config
@@ -31,8 +31,8 @@ export default class ModuleBundler {
    *  Determines module locations then adds them into ./node_modules
    *  inside the artifact.
    */
-  async bundle({ include = [], exclude = [], deepExclude = [] }) {
-    this.modules = await ModuleBundler.resolveDependencies(
+  async bundle ({ include = [], exclude = [], deepExclude = [] }) {
+    this.modules = await this.resolveDependencies(
       this.config.servicePath,
       { include, exclude, deepExclude },
     );
@@ -78,7 +78,7 @@ export default class ModuleBundler {
     return this;
   }
 
-  async _createTransforms() {
+  async _createTransforms () {
     const transforms = [];
 
     let uglifyConfig = this.config.uglify;
@@ -98,7 +98,7 @@ export default class ModuleBundler {
    *  @returns {Array}
    *      [ { name, packagePath, packagePath } ]
    */
-  static async resolveDependencies(
+  private async resolveDependencies (
     initialPackageDir,
     { include = [], exclude = [], deepExclude = [] } = {},
   ) {

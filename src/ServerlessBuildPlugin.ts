@@ -1,20 +1,19 @@
-import Promise from 'bluebird';
-import path from 'path';
-import Yazl from 'yazl';
-import fs from 'fs-extra';
-import { typeOf, merge, clone } from 'lutils';
+import * as Bluebird from 'bluebird';
 import c from 'chalk';
+import fs from 'fs-extra';
+import path from 'path';
 import semver from 'semver';
+import Yazl from 'yazl';
 
-import { loadFile, colorizeConfig, copyFile } from './utils';
+import { clone, isArray, merge } from 'lutils';
+import FileBuild from './FileBuild';
 import ModuleBundler from './ModuleBundler';
 import SourceBundler from './SourceBundler';
-import FileBuild from './FileBuild';
+import { IPluginConfig, ISls } from './types';
+import { colorizeConfig, copyFile, loadFile } from './utils';
 
-Promise.promisifyAll(fs);
-
-export default class ServerlessBuildPlugin {
-  config = {
+export class ServerlessBuildPlugin {
+  config: IPluginConfig = {
     method: 'bundle',
 
     useServerlessOffline: false,
@@ -49,9 +48,20 @@ export default class ServerlessBuildPlugin {
 
     synchronous : true,
     deploy      : true,
-  }
+  };
 
-  constructor(serverless, options = {}) {
+  serverless: ISls;
+  servicePath: string;
+  tmpDir: string;
+  buildTmpDir: string;
+  artifactTmpDir: string;
+
+  functions: any; // FIXME:
+  hooks: any; // FIXME:
+
+  fileBuild: FileBuild;
+
+  constructor (serverless: ISls, options = {}) {
     //
     // SERVERLESS
     //
@@ -102,13 +112,13 @@ export default class ServerlessBuildPlugin {
     // PLUGIN CONFIG GENERATION
     //
 
-    this.servicePath    = this.serverless.config.servicePath;
-    this.tmpDir         = path.join(this.servicePath, './.serverless');
-    this.buildTmpDir    = path.join(this.tmpDir, './build');
+    this.servicePath = this.serverless.config.servicePath;
+    this.tmpDir = path.join(this.servicePath, './.serverless');
+    this.buildTmpDir = path.join(this.tmpDir, './build');
     this.artifactTmpDir = path.join(this.tmpDir, './artifacts');
 
-    const buildConfigPath  = path.join(this.servicePath, './serverless.build.yml');
-    const buildConfig      = loadFile(buildConfigPath) || {};
+    const buildConfigPath = path.join(this.servicePath, './serverless.build.yml');
+    const buildConfig = loadFile(buildConfigPath) || {};
     const serverlessCustom = this.serverless.service.custom || {};
 
     // The config inherits from multiple sources
@@ -124,11 +134,11 @@ export default class ServerlessBuildPlugin {
 
     const functionSelection = this.config.f || this.config.function;
 
-    let selectedFunctions = typeOf.Array(functionSelection)
+    let selectedFunctions = isArray(functionSelection)
       ? functionSelection
       : [functionSelection];
 
-    selectedFunctions = selectedFunctions.filter(key => key in functions);
+    selectedFunctions = selectedFunctions.filter((key) => key in functions);
     selectedFunctions = selectedFunctions.length ? selectedFunctions : Object.keys(functions);
 
     /**
@@ -140,7 +150,7 @@ export default class ServerlessBuildPlugin {
      *  in order to generate `include`, `exclude`
      */
     this.functions = selectedFunctions.reduce((obj, fnKey) => {
-      const fnCfg      = functions[fnKey];
+      const fnCfg = functions[fnKey];
       const fnBuildCfg = this.config.functions[fnKey] || {};
 
       const include = [
@@ -172,10 +182,9 @@ export default class ServerlessBuildPlugin {
       return obj;
     }, {});
 
-
     this.hooks = {
       'before:offline:start': () => {
-        if (!this.config.useServerlessOffline) return null;
+        if (!this.config.useServerlessOffline) { return null; }
 
         this.config.noDeploy = true;
         this.serverless.config.servicePath = this.buildTmpDir;
@@ -186,25 +195,27 @@ export default class ServerlessBuildPlugin {
 
     // hooks changed in 1.12 :/
     if (semver.gte(this.serverless.getVersion(), '1.12.0')) {
-      this.hooks = Object.assign({
+      this.hooks = {
         'before:package:initialize'               : this.build,
         'before:package:function:initialize'      : this.build,
         'after:package:createDeploymentArtifacts' : () => {
           this.serverless.service.package.artifact = null;
         },
-      }, this.hooks);
+        ...this.hooks,
+      };
     } else {
-      this.hooks = Object.assign({
+      this.hooks = {
         'after:deploy:function:initialize'       : this.build,
         'after:deploy:initialize'                : this.build,
         'after:deploy:createDeploymentArtifacts' : () => {
           this.serverless.service.package.artifact = null;
         },
-      }, this.hooks);
+        ...this.hooks,
+      };
     }
   }
 
-  log = (...args) => this.serverless.cli.log(...args)
+  log = (...args) => this.serverless.cli.log(...args);
 
   /**
    *  Builds either from file or through the babel optimizer.
@@ -227,12 +238,12 @@ export default class ServerlessBuildPlugin {
     await fs.ensureDirAsync(this.buildTmpDir);
     await fs.ensureDirAsync(this.artifactTmpDir);
 
-    if (!this.config.keep) await fs.emptyDirAsync(this.artifactTmpDir);
+    if (!this.config.keep) { await fs.emptyDirAsync(this.artifactTmpDir); }
 
     /**
      * Iterate functions and run builds either synchronously or concurrently
      */
-    await Promise.map(Object.keys(this.functions), (name) => {
+    await Bluebird.map(Object.keys(this.functions), (name) => {
       const config = this.functions[name];
 
       return this.buildFunction(name, config);
@@ -244,7 +255,7 @@ export default class ServerlessBuildPlugin {
     this.log('[BUILD] Builds complete');
     this.log('');
 
-    if (this.config.deploy === false) process.exit();
+    if (this.config.deploy === false) { process.exit(); }
   }
 
   /**
@@ -252,7 +263,7 @@ export default class ServerlessBuildPlugin {
    * and sets it in `serverless.yml:functions[fnName].artifact`
    * in order for `serverless` to consume it.
    */
-  async buildFunction(fnName, fnConfig) {
+  async buildFunction (fnName, fnConfig) {
     const artifact = new Yazl.ZipFile();
     let moduleIncludes;
 
@@ -331,8 +342,11 @@ export default class ServerlessBuildPlugin {
   /**
    *  Writes the `artifact` and attaches it to serverless
    */
-  async _completeFunctionArtifact(fnName, artifact) {
-    const zipPath = path.resolve(this.artifactTmpDir, `./${this.serverless.service.service}-${fnName}-${new Date().getTime()}.zip`);
+  async _completeFunctionArtifact (fnName, artifact) {
+    const zipPath = path.resolve(
+      this.artifactTmpDir,
+      `./${this.serverless.service.service}-${fnName}-${new Date().getTime()}.zip`,
+    );
 
     await new Promise((resolve, reject) => {
       artifact.outputStream.pipe(fs.createWriteStream(zipPath))
@@ -344,8 +358,8 @@ export default class ServerlessBuildPlugin {
 
     const fnConfig = this.serverless.service.functions[fnName];
 
-    fnConfig.artifact         = zipPath;
-    fnConfig.package          = fnConfig.package || {};
+    fnConfig.artifact = zipPath;
+    fnConfig.package = fnConfig.package || {};
     fnConfig.package.artifact = zipPath;
   }
 }
