@@ -1,8 +1,8 @@
 import path from 'path';
 import requireResolve from 'resolve-pkg';
 
-export default class UglifyTransform {
-  constructor(config = {}, options = {}) {
+export class UglifyTransform {
+  constructor (config = {}, options = {}) {
     this.config = {
       dead_code : true,
       unsafe    : false,
@@ -25,7 +25,7 @@ export default class UglifyTransform {
     );
   }
 
-  run({ code, map, filePath }) {
+  run ({ code, map, filePath }) {
     const fileName = path.basename(filePath);
 
     let result = { code, map };

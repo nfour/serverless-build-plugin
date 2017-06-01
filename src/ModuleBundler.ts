@@ -3,7 +3,7 @@ import * as fs from 'fs-promise';
 import { join, sep } from 'path';
 import * as resolvePackage from 'resolve-pkg';
 
-import { Uglify as UglifyTransform } from './transforms/Uglify';
+import { UglifyTransform } from './transforms/Uglify';
 import { IPluginConfig, IZip } from './types';
 import { displayModule, handleFile, walker } from './utils';
 

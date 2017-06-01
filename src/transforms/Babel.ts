@@ -1,7 +1,7 @@
 import requireResolve from 'resolve-pkg';
 
-export default class BabelTransform {
-  constructor(config = {}, options = {}) {
+export class BabelTransform {
+  constructor (config = {}, options = {}) {
     this.config = {
       sourceMaps: 'both',
       ...config,
@@ -26,7 +26,7 @@ export default class BabelTransform {
     );
   }
 
-  run({ code, map, relPath }) {
+  run ({ code, map, relPath }) {
     let result = { code, map, relPath };
 
     try {

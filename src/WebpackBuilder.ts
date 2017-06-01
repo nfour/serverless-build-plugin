@@ -2,8 +2,8 @@ import Promise from 'bluebird';
 import { typeOf } from 'lutils';
 import requireResolve from 'resolve-pkg';
 
-export default class WebpackBuilder {
-  constructor(config = {}) {
+export class WebpackBuilder {
+  constructor (config = {}) {
     this.config = {
       servicePath : '',   // ./
       buildTmpDir : '',   // ./.serverless/build
@@ -21,7 +21,7 @@ export default class WebpackBuilder {
   /**
    *  Builds a webpack config into the build directory.
    */
-  async build(config) {
+  async build (config) {
     config.context = this.config.servicePath;
     config.entry   = [...(config.entry || [])];
     config.output  = {
@@ -48,7 +48,7 @@ export default class WebpackBuilder {
    *
    *  @return [ "moduleName" ]
    */
-  static normalizeExternals(externals) {
+  static normalizeExternals (externals) {
     return externals.reduce((arr, external) => {
       const type = typeOf(external);
 
@@ -67,7 +67,7 @@ export default class WebpackBuilder {
     }, []);
   }
 
-  runWebpack(config) {
+  runWebpack (config) {
     return new Promise((resolve, reject) => {
       this.webpack(config).run((err, stats) => {
         if (err) return reject(err);
