@@ -1,11 +1,8 @@
-import walk from 'findit';
-import fs from 'fs-extra';
+import * as c from 'chalk';
+import * as walk from 'findit';
 import { typeOf } from 'lutils';
-import path from 'path';
-import YAML from 'js-yaml';
-import c from 'chalk';
 
-export function walker(...args) {
+export function walker (...args) {
   const w = walk(...args);
 
   w.end = () => new Promise((resolve, reject) => {
@@ -20,7 +17,7 @@ export function walker(...args) {
 /**
  * Wraps fs-extra copy
  */
-export function copyFile(source, dest) {
+export function copyFile (source, dest) {
   return fs.copy(source, dest);
 }
 
@@ -33,7 +30,7 @@ export function copyFile(source, dest) {
  * @param {String} fileLookup
  * @returns {any} config
  */
-export function loadFile(fileLookup) {
+export function loadFile (fileLookup) {
   const tryExts = ['.yml', '.yaml', ''];
 
   for (const ext of tryExts) {
@@ -55,13 +52,13 @@ export function loadFile(fileLookup) {
  *  Normalizes transforming and zip allocation for walked files.
  *  Used by SourceBundler & ModuleBundler.
  */
-export async function handleFile({
+export async function handleFile ({
     filePath, relPath,
     artifact, zipConfig, useSourceMaps,
     transformExtensions, transforms,
 }) {
   const extname         = path.extname(filePath);
-  const isTransformable = transformExtensions.some(ext => `.${ext}` === extname.toLowerCase());
+  const isTransformable = transformExtensions.some((ext) => `.${ext}` === extname.toLowerCase());
 
   // TODO: make each transformer check extensions itself, and concat their
   // extension whitelist to check here.
@@ -108,7 +105,7 @@ export async function handleFile({
   return artifact;
 }
 
-export function displayModule({ filePath, packageJson = '' }) {
+export function displayModule ({ filePath, packageJson = '' }) {
   const basename = path.basename(filePath);
 
   return `${
@@ -120,7 +117,7 @@ export function displayModule({ filePath, packageJson = '' }) {
   }`;
 }
 
-export function colorizeConfig(config) {
+export function colorizeConfig (config) {
   return c.grey(`{ ${Object.keys(config).map((key) => {
     const val = config[key];
     return `${c.white(key)}: ${val ? c.green(val) : c.yellow(val)}`;

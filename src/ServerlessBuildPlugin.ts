@@ -3,7 +3,6 @@ import c from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import semver from 'semver';
-import Yazl from 'yazl';
 
 import { clone, isArray, merge } from 'lutils';
 import FileBuild from './FileBuild';

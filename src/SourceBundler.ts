@@ -1,21 +1,17 @@
-import Promise from 'bluebird';
-import path from 'path';
-import fs from 'fs-extra';
+import * as Bluebird from 'bluebird';
 import { typeOf } from 'lutils';
-import glob from 'minimatch';
+import * as glob from 'minimatch';
 
 import { walker, handleFile, displayModule } from './utils';
-import BabelTransform from './transforms/Babel';
-import UglifyTransform from './transforms/Uglify';
-
-Promise.promisifyAll(fs);
+import {BabelTransform} from './transforms/Babel';
+import {UglifyTransform} from './transforms/Uglify';
 
 /**
  *  @class SourceBundler
  *
  *  Handles the inclusion of source code in the artifact.
  */
-export default class SourceBundler {
+export class SourceBundler {
   constructor(config = {}, artifact) {
     this.config = {
       servicePath         : '',        // serverless.config.servicePath

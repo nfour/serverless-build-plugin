@@ -3,7 +3,7 @@ import isStream from 'is-stream';
 import { clone, isFunction, isObject, isString, merge } from 'lutils';
 import path from 'path';
 
-import { WebpackBuilder } from './Webpack';
+import { WebpackBuilder } from './WebpackBuilder';
 
 export class FileBuild {
   log: any; // FIXME:
