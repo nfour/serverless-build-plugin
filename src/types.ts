@@ -44,3 +44,7 @@ export interface IPluginConfig {
 export interface ISls {
   [key: string]: any;
 }
+
+export interface IZip {
+  [key: string]: any;
+}

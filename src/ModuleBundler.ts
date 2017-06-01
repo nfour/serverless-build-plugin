@@ -1,12 +1,18 @@
-import Promise from 'bluebird';
-import fs from 'fs-extra';
-import path, { sep } from 'path';
-import resolvePackage from 'resolve-pkg';
+import * as Bluebird from 'bluebird';
+import * as fs from 'fs-promise';
+import { join, sep } from 'path';
+import * as resolvePackage from 'resolve-pkg';
 
-import UglifyTransform from './transforms/Uglify';
+import { Uglify as UglifyTransform } from './transforms/Uglify';
+import { IPluginConfig, IZip } from './types';
 import { displayModule, handleFile, walker } from './utils';
 
-Promise.promisifyAll(fs);
+export interface IModuleBundlerConfig extends IPluginConfig {
+  servicePath: string;
+  uglify: any;
+  zip: any;
+  log: () => any;
+}
 
 /**
  *  @class ModuleBundler
@@ -14,16 +20,20 @@ Promise.promisifyAll(fs);
  *  Handles the inclusion of node_modules.
  */
 export default class ModuleBundler {
-  constructor (config = {}, artifact) {
+  config: IModuleBundlerConfig;
+  log: (text: string) => any;
+  artifact: IZip;
+
+  constructor (config: IModuleBundlerConfig, artifact) {
     this.config = {
       servicePath : '',   // serverless.config.servicePath
       uglify      : null, // UglifyJS config
       zip         : null, // Yazl zip config
-      ...config,
-    };
+      log: () => null,
+      ...config || {},
+    } as IModuleBundlerConfig;
 
-    this.log = this.config.log || (() => {});
-
+    this.log = this.config.log;
     this.artifact = artifact;
   }
 
@@ -39,7 +49,7 @@ export default class ModuleBundler {
 
     const transforms = await this._createTransforms();
 
-    await Promise.map(this.modules, async ({ packagePath, relativePath, packageJson }) => {
+    await Bluebird.map(this.modules, async ({ packagePath, relativePath, packageJson }) => {
       await walker(packagePath)
         .on('directory', (dirPath, stats, stop) => {
           if (stats.isDirectory()) {
@@ -52,7 +62,9 @@ export default class ModuleBundler {
             if (
               endParts[0] === 'node_modules' &&
               deepExclude.indexOf(endParts[1]) !== -1
-            ) return stop();
+            ) {
+              return stop();
+            }
           }
 
           return null;
@@ -84,7 +96,7 @@ export default class ModuleBundler {
     let uglifyConfig = this.config.uglify;
 
     if (uglifyConfig) {
-      if (uglifyConfig === true) uglifyConfig = null;
+      if (uglifyConfig === true) { uglifyConfig = null; }
 
       transforms.push(new UglifyTransform(uglifyConfig, this.config));
     }
@@ -103,8 +115,8 @@ export default class ModuleBundler {
     { include = [], exclude = [], deepExclude = [] } = {},
   ) {
     const resolvedDeps = [];
-    const cache        = {};
-    const separator    = `${sep}node_modules${sep}`;
+    const cache: Set<string> = new Set();
+    const separator = `${sep}node_modules${sep}`;
 
     /**
      *  Resolves packages to their package root directory &
@@ -112,7 +124,7 @@ export default class ModuleBundler {
      *  - Will also ignore the input package in the results
      */
     const recurse = async (packageDir, _include = [], _exclude = []) => {
-      const packageJson = require(path.join(packageDir, './package.json')); // eslint-disable-line
+      const packageJson = require(join(packageDir, './package.json')); // eslint-disable-line
       const { name, dependencies } = packageJson;
 
       const result = {
@@ -120,30 +132,32 @@ export default class ModuleBundler {
         packagePath: packageDir,
       };
 
-      if (!dependencies) return result;
+      if (!dependencies) { return result; }
 
-      await Promise.map(Object.keys(dependencies), async (packageName) => {
+      await Bluebird.map(Object.keys(dependencies), async (packageName) => {
         /**
          *  Skips on exclude matches, if set
          *  Skips on include mis-matches, if set
          */
-        if (_exclude.length && _exclude.indexOf(packageName) > -1) return;
-        if (_include.length && _include.indexOf(packageName) < 0) return;
+        if (_exclude.length && _exclude.indexOf(packageName) > -1) { return; }
+        if (_include.length && _include.indexOf(packageName) < 0) { return; }
 
-        const resolvedDir  = resolvePackage(packageName, { cwd: packageDir });
+        const resolvedDir = resolvePackage(packageName, { cwd: packageDir });
 
-        const childPackageJsonPath = path.join(resolvedDir, './package.json');
+        const childPackageJsonPath = join(resolvedDir, './package.json');
 
         let childPackageJson;
-        if (fs.existsSync(childPackageJsonPath)) childPackageJson = require(childPackageJsonPath); // eslint-disable-line
+        if (await fs.exists(childPackageJsonPath)) {
+          childPackageJson = require(childPackageJsonPath); // eslint-disable-line
+        }
 
-        if (!resolvedDir) return;
+        if (!resolvedDir) { return; }
 
-        const relativePath = path.join('node_modules', resolvedDir.split(separator).slice(1).join(separator));
+        const relativePath = join('node_modules', resolvedDir.split(separator).slice(1).join(separator));
 
-        if (relativePath in cache) return;
+        if (cache.has(relativePath)) { return; }
 
-        cache[relativePath] = true;
+        cache.add(relativePath);
 
         const childResult = await recurse(resolvedDir, undefined, deepExclude);
 
