@@ -4,15 +4,16 @@ import * as resolvePackage from 'resolve-pkg';
 
 import { Archiver } from 'archiver';
 import { exists } from 'fs-extra';
+import { Logger } from './lib/Logger';
 import { handleFile } from './lib/utils';
 import { Walker } from './lib/Walker';
-import { Logger } from './Logger';
 import { UglifyTransform } from './transforms/Uglify';
 
 export interface IModule {
   packagePath: string;
   relativePath: string;
   packageJson: any;
+  packageDir: string;
 }
 
 export type IUglifyParams = null | boolean | { [key: string]: any };
@@ -55,31 +56,30 @@ export class ModuleBundler {
 
     const transforms = await this.resolveTransforms();
 
-    const readModule = async ({ packagePath, relativePath, packageJson }) => {
-      this.logger.message('MODULE_BEFORE', relativePath);
+    const readModule = async ({ packagePath, packageDir, relativePath, packageJson }) => {
+      const filter = (dirPath, stats) => {
+        if (walker.symlinkRoots.has(dirPath)) { console.log('wew', dirPath);}
 
-      const filter = (dirPath, stats, stop) => {
-        if (stats.isDirectory()) {
-          // This pulls ['node_modules', 'pack'] out of
-          // .../node_modules/package/node_modules/pack
-          const endParts = dirPath.split(packagePath)[1].split('/').slice(-2);
+        // This pulls ['node_modules', 'pack'] out of
+        // .../node_modules/package/node_modules/pack
+        const endParts = dirPath.split(packagePath)[1].split('/').slice(-2);
 
-          // When a directory is a package and matches a deep exclude pattern
-          // Then skip it
-          if (
-            endParts[0] === 'node_modules' &&
-            deepExclude.indexOf(endParts[1]) !== -1
-          ) {
-            return false;
-          }
+        // When a directory is a package and matches a deep exclude pattern
+        // Then skip it
+        if (
+          endParts[0] === 'node_modules' &&
+          deepExclude.indexOf(endParts[1]) !== -1
+        ) {
+          return false;
         }
 
         return true;
       };
 
-      const onFile = async (filePath, stats, next) => {
+      const onFile = async (filePath, stats) => {
         const relPath = filePath.substr(filePath.indexOf(relativePath)).replace(/^\/|\/$/g, '');
 
+        // if (/lutils/.test(filePath)) console.log(filePath);
         await handleFile({
           filePath,
           relPath,
@@ -90,12 +90,19 @@ export class ModuleBundler {
         });
       };
 
-      await new Walker(packagePath, { followSymlinks: this.followSymlinks })
-        .filter(filter)
-        .file(onFile)
-        .end();
+      console.log({ packagePath, packageDir });
 
-      this.logger.module(({ filePath: relativePath, packageJson }));
+      // TODO: to solve symlinks we need the package resolver to return the original path
+      // - option 1: traverse at depth 2 all folders beforehand, building up a list of symlinks & their resolved paths, then use that to fudge a new path
+      // - options 2: see if the module has symlink related functionality
+
+      const walker = new Walker(packagePath, { followSymlinks: this.followSymlinks })
+        .filter(filter)
+        .file(onFile);
+
+      await walker.end();
+
+      await this.logger.module(({ filePath: relativePath, packageJson }));
     };
 
     await Bluebird.map(this.modules, readModule);
@@ -139,6 +146,7 @@ export class ModuleBundler {
 
       const result = {
         name,
+        packageDir,
         packagePath: packageDir,
       };
 
@@ -171,7 +179,7 @@ export class ModuleBundler {
 
         const childResult = await recurse(resolvedDir, undefined, deepExclude);
 
-        resolvedDeps.push({ ...childResult, relativePath, packageJson: childPackageJson });
+        resolvedDeps.push({ ...childResult, packageDir, relativePath, packageJson: childPackageJson });
       });
 
       return result;

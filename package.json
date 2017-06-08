@@ -24,6 +24,7 @@
     "findit": "^2.0.0",
     "findit2": "^2.2.3",
     "fs-extra": "^3.0.1",
+    "get-folder-size": "^1.0.0",
     "is-stream": "~1.1.0",
     "js-yaml": "^3.8.4",
     "lutils": "^2.4.0",

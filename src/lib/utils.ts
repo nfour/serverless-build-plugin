@@ -1,6 +1,6 @@
 import { Archiver } from 'archiver';
 import * as c from 'chalk';
-import { readFile } from 'fs-extra';
+import { copy, readFile } from 'fs-extra';
 import * as YAML from 'js-yaml';
 import { isObject } from 'lutils';
 import * as path from 'path';
@@ -111,4 +111,28 @@ export function colorizeConfig (config) {
     const val = config[key];
     return `${c.white(key)}: ${val ? c.green(val) : c.yellow(val)}`;
   }).join(', ')} }`);
+}
+
+/**
+ * Mutates `packageFunction` on the `Package` serverless built-in plugin
+ * in order to intercept
+ */
+export function overridePackagePlugin ({ serverless, tmpDir }) {
+  const packagePlugin = serverless.pluginManager.plugins.find((plugin) =>
+    plugin.constructor.name === 'Package',
+  );
+
+  packagePlugin.packageFunction = async (fnName) => {
+    const functionObject = serverless.service.getFunction(fnName);
+    const funcPackageConfig = functionObject.package || {};
+
+    const artifactFilePath = funcPackageConfig.artifact;
+    const packageFilePath = path.join(tmpDir, `./${fnName}.zip`);
+
+    await copy(artifactFilePath, packageFilePath);
+
+    functionObject.artifact = artifactFilePath;
+
+    return artifactFilePath;
+  };
 }
