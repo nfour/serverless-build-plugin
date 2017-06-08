@@ -11,7 +11,7 @@ export interface IModuleBundlerConfig extends IPluginConfig {
   servicePath: string;
   uglify: any;
   zip: any;
-  log: () => any;
+  log?: () => any;
 }
 
 /**
@@ -19,10 +19,11 @@ export interface IModuleBundlerConfig extends IPluginConfig {
  *
  *  Handles the inclusion of node_modules.
  */
-export default class ModuleBundler {
+export class ModuleBundler {
   config: IModuleBundlerConfig;
   log: (text: string) => any;
   artifact: IZip;
+  modules: any; // FIXME:
 
   constructor (config: IModuleBundlerConfig, artifact) {
     this.config = {
@@ -41,7 +42,9 @@ export default class ModuleBundler {
    *  Determines module locations then adds them into ./node_modules
    *  inside the artifact.
    */
-  async bundle ({ include = [], exclude = [], deepExclude = [] }) {
+  async bundle ({ include = [], exclude = [], deepExclude = [] }: {
+    include?: string[], exclude?: string[], deepExclude?: string[],
+  }) {
     this.modules = await this.resolveDependencies(
       this.config.servicePath,
       { include, exclude, deepExclude },

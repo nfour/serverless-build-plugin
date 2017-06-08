@@ -2,6 +2,10 @@ import path from 'path';
 import requireResolve from 'resolve-pkg';
 
 export class UglifyTransform {
+  config: any; // FIXME:
+  options: any; // FIXME:
+  uglify: any; // FIXME:
+
   constructor (config = {}, options = {}) {
     this.config = {
       dead_code : true,
@@ -41,8 +45,9 @@ export class UglifyTransform {
         fromString   : true,
       });
     } catch (err) {
-      if (this.options.logErrors) console.error(err); // eslint-disable-line
-      if (!this.options.skipOnError) throw err;
+      // tslint:disable-next-line:no-console
+      if (this.options.logErrors) { console.error(err); } // eslint-disable-line
+      if (!this.options.skipOnError) { throw err; }
     }
 
     return result;

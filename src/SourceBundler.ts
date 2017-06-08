@@ -1,10 +1,10 @@
-import * as Bluebird from 'bluebird';
-import { typeOf } from 'lutils';
+import { exists, readFile } from 'fs-extra';
+import { isObject, isRegExp } from 'lutils';
 import * as glob from 'minimatch';
-
-import { walker, handleFile, displayModule } from './utils';
-import {BabelTransform} from './transforms/Babel';
-import {UglifyTransform} from './transforms/Uglify';
+import { join } from 'path';
+import { BabelTransform } from './transforms/Babel';
+import { UglifyTransform } from './transforms/Uglify';
+import { displayModule, handleFile, walker } from './utils';
 
 /**
  *  @class SourceBundler
@@ -12,7 +12,11 @@ import {UglifyTransform} from './transforms/Uglify';
  *  Handles the inclusion of source code in the artifact.
  */
 export class SourceBundler {
-  constructor(config = {}, artifact) {
+  config: any; // FIXME:
+  log: any; // FIXME:
+  artifact: any; // FIXME:
+
+  constructor (config = {}, artifact) {
     this.config = {
       servicePath         : '',        // serverless.config.servicePath
       babel               : null,      // Babel options
@@ -24,7 +28,7 @@ export class SourceBundler {
       ...config,
     };
 
-    this.log = this.config.log || (() => {});
+    this.log = this.config.log || (() => null);
 
     this.artifact = artifact;
   }
@@ -33,7 +37,7 @@ export class SourceBundler {
    *  Walks through, transforms, and zips source content wich
    *  is both `included` and not `excluded` by the regex or glob patterns.
    */
-  async bundle({ exclude = [], include = [] }) {
+  async bundle ({ exclude = [], include = [] }) {
     const transforms = await this._createTransforms();
 
     // We never want node_modules here
@@ -43,12 +47,12 @@ export class SourceBundler {
          *  A relative path to the servicePath
          *  @example ./functions/test/handler.js
          */
-        const relPath = path.join(
+        const relPath = join(
           filePath.split(this.config.servicePath)[1],
         ).replace(/^\/|\/$/g, '');
 
-        const testPattern = pattern => (
-          typeOf.RegExp(pattern)
+        const testPattern = (pattern) => (
+          isRegExp(pattern)
             ? pattern.test(relPath)
             : glob(relPath, pattern, { dot: true })
         );
@@ -57,10 +61,10 @@ export class SourceBundler {
         const excluded = exclude.some(testPattern);
 
         /**
-        *  When a pattern matches an exclude, it skips
-        *  When a pattern doesnt match an include, it skips
-        */
-        if (!included || excluded) return;
+         *  When a pattern matches an exclude, it skips
+         *  When a pattern doesnt match an include, it skips
+         */
+        if (!included || excluded) { return; }
 
         await handleFile({
           filePath,
@@ -79,17 +83,17 @@ export class SourceBundler {
     return this.artifact;
   }
 
-  async _createTransforms() {
+  async _createTransforms () {
     const transforms = [];
 
     if (this.config.babel) {
       let babelQuery = this.config.babel;
 
-      if (!typeOf.Object(babelQuery)) {
-        const babelrcPath = path.join(this.config.servicePath, '.babelrc');
+      if (!isObject(babelQuery)) {
+        const babelrcPath = join(this.config.servicePath, '.babelrc');
 
-        babelQuery = fs.existsSync(babelrcPath)
-          ? JSON.parse(await fs.readFileAsync(babelrcPath))
+        babelQuery = exists(babelrcPath)
+          ? JSON.parse(await readFile(babelrcPath, 'utf8'))
           : {};
       }
 
@@ -105,7 +109,7 @@ export class SourceBundler {
     let uglifyConfig = this.config.uglify;
 
     if (uglifyConfig) {
-      if (!typeOf.Object(uglifyConfig)) uglifyConfig = null;
+      if (!isObject(uglifyConfig)) { uglifyConfig = null; }
 
       transforms.push(new UglifyTransform(uglifyConfig, { ...this.config, logErrors: true }));
     }
