@@ -1,7 +1,7 @@
 import * as archiver from 'archiver';
 import * as Bluebird from 'bluebird';
 import * as c from 'chalk';
-import { createWriteStream, emptyDir, ensureDir } from 'fs-extra';
+import { copy, createWriteStream, emptyDir, ensureDir } from 'fs-extra';
 import { clone, isArray, merge } from 'lutils';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -10,7 +10,7 @@ import { Logger } from './Logger';
 import { ModuleBundler } from './ModuleBundler';
 import { SourceBundler } from './SourceBundler';
 import { IPluginConfig, ISls } from './types';
-import { colorizeConfig, copyFile, loadFile } from './utils';
+import { colorizeConfig, loadFile } from './utils';
 
 export class ServerlessBuildPlugin {
   config: IPluginConfig = {
@@ -102,7 +102,7 @@ export class ServerlessBuildPlugin {
           zipFileName,
         );
 
-        return copyFile(artifactFilePath, packageFilePath).then(() => {
+        return copy(artifactFilePath, packageFilePath).then(() => {
           functionObject.artifact = artifactFilePath;
           return artifactFilePath;
         });
@@ -128,7 +128,6 @@ export class ServerlessBuildPlugin {
       clone(serverlessCustom.build || {}),
       clone(buildConfig),
       clone(options),
-      { log: this.log },
     );
 
     const { functions } = this.serverless.service;
@@ -229,10 +228,10 @@ export class ServerlessBuildPlugin {
 
     if (method === 'bundle') {
       const { uglify, babel, sourceMaps, babili } = this.config;
-      this.log(`[BUILD] ${colorizeConfig({ method, uglify, babel, babili, sourceMaps })}`);
+      this.logger.config(`${colorizeConfig({ method, uglify, babel, babili, sourceMaps })}`);
     } else {
       const { tryFiles } = this.config;
-      this.log(`[BUILD] ${colorizeConfig({ method, tryFiles })}`);
+      this.logger.config(`${colorizeConfig({ method, tryFiles })}`);
     }
 
     // Ensure directories
@@ -253,9 +252,9 @@ export class ServerlessBuildPlugin {
       concurrency: this.config.synchronous ? 1 : Infinity,
     });
 
-    this.log('');
-    this.log('[BUILD] Builds complete');
-    this.log('');
+    this.logger.message('|', '');
+    this.logger.message('|', 'Builds complete');
+    this.logger.message('|', '');
 
     if (this.config.deploy === false) { process.exit(); }
   }
@@ -271,8 +270,8 @@ export class ServerlessBuildPlugin {
 
     const artifact = archiver('zip', { gzip: true, gzipOptions: { level: 5 } });
 
-    this.log('');
-    this.log(`[FUNCTION] ${c.reset.bold(fnName)}`);
+    this.logger.log('');
+    this.logger.message('BUILD', c.reset.bold(fnName));
 
     if (method === 'bundle') {
       //
@@ -289,7 +288,7 @@ export class ServerlessBuildPlugin {
         servicePath: this.servicePath,
       }, artifact);
 
-      this.log('');
+      this.logger.log('');
 
       await sourceBundler.bundle({
         exclude : fnConfig.package.exclude,
@@ -320,7 +319,7 @@ export class ServerlessBuildPlugin {
       throw new Error('Unknown build method');
     }
 
-    this.log('');
+    this.logger.log('');
 
     await new ModuleBundler(
       {
@@ -338,13 +337,13 @@ export class ServerlessBuildPlugin {
       ...this.config.modules,
     });
 
-    await this._completeFunctionArtifact(fnName, artifact);
+    await this.completeFunctionArtifact(fnName, artifact);
   }
 
   /**
    *  Writes the `artifact` and attaches it to serverless
    */
-  async _completeFunctionArtifact (fnName, artifact) {
+  private async completeFunctionArtifact (fnName, artifact) {
     const zipPath = path.resolve(
       this.artifactTmpDir,
       `./${this.serverless.service.service}-${fnName}-${new Date().getTime()}.zip`,

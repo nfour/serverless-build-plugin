@@ -1,13 +1,13 @@
 import * as Bluebird from 'bluebird';
 import { exists } from 'fs-extra';
-import isStream from 'is-stream';
+import * as isStream from 'is-stream';
 import { clone, isFunction, isObject, isString, merge } from 'lutils';
-import path from 'path';
-
+import * as path from 'path';
+import { Logger } from './Logger';
 import { WebpackBuilder } from './WebpackBuilder';
 
 export class FileBuild {
-  log: any; // FIXME:
+  logger: Logger; // FIXME:
   externals: Set<string>;
   alreadyBuilt: Set<string>;
   config: any; // FIXME:
@@ -22,7 +22,7 @@ export class FileBuild {
       ...config,
     };
 
-    this.log = this.config.log || (() => null);
+    this.logger = this.config.logger;
 
     this.externals = new Set();
     this.alreadyBuilt = new Set();

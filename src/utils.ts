@@ -1,6 +1,6 @@
 import * as c from 'chalk';
 import * as walk from 'findit';
-import { copy, readFile } from 'fs-extra';
+import { readFile } from 'fs-extra';
 import * as YAML from 'js-yaml';
 import { isObject } from 'lutils';
 import * as path from 'path';
@@ -15,13 +15,6 @@ export function walker (...args) {
   });
 
   return w;
-}
-
-/**
- * Wraps fs-extra copy
- */
-export function copyFile (source, dest) {
-  return copy(source, dest);
 }
 
 /**
