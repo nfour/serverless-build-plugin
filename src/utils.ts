@@ -91,19 +91,19 @@ export async function handleFile ({
       }
     }
 
-    archive.append(new Buffer(code), destRelPath);
+    archive.append(new Buffer(code), { name: destRelPath });
 
     if (useSourceMaps && map) {
       if (isObject(map)) { map = JSON.stringify(map); }
 
-      archive.append(new Buffer(map), `${destRelPath}.map`);
+      archive.append(new Buffer(map), { name: `${destRelPath}.map` });
     }
   } else {
     //
     // ARBITRARY FILES
     //
 
-    archive.file(filePath, relPath);
+    archive.file(filePath, { name: relPath });
   }
 
   return archive;
