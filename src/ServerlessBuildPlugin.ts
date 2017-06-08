@@ -6,6 +6,7 @@ import { clone, isArray, merge } from 'lutils';
 import * as path from 'path';
 import * as semver from 'semver';
 import { FileBuild } from './FileBuild';
+import { Logger } from './Logger';
 import { ModuleBundler } from './ModuleBundler';
 import { SourceBundler } from './SourceBundler';
 import { IPluginConfig, ISls } from './types';
@@ -59,6 +60,7 @@ export class ServerlessBuildPlugin {
   hooks: any; // FIXME:
 
   fileBuild: FileBuild;
+  logger: Logger;
 
   constructor (serverless: ISls, options = {}) {
     //
@@ -212,15 +214,16 @@ export class ServerlessBuildPlugin {
         ...this.hooks,
       };
     }
-  }
 
-  log = (...args) => this.serverless.cli.log(...args);
+    this.logger = new Logger({ serverless });
+  }
 
   /**
    *  Builds either from file or through the babel optimizer.
    */
   build = async () => {
-    this.log('[BUILD] Builds triggered');
+    this.logger.message('|', 'Build triggered...');
+    // TODO: from here replace logger
 
     const { method } = this.config;
 

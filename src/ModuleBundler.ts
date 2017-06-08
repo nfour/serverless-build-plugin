@@ -50,7 +50,7 @@ export class ModuleBundler {
       { include, exclude, deepExclude },
     );
 
-    const transforms = await this._createTransforms();
+    const transforms = await this.createTransforms();
 
     await Bluebird.map(this.modules, async ({ packagePath, relativePath, packageJson }) => {
       await walker(packagePath)
@@ -93,7 +93,7 @@ export class ModuleBundler {
     return this;
   }
 
-  async _createTransforms () {
+  private async createTransforms () {
     const transforms = [];
 
     let uglifyConfig = this.config.uglify;
