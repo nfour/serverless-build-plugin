@@ -1,6 +1,10 @@
 import requireResolve from 'resolve-pkg';
 
 export class BabelTransform {
+  config: any; // FIXME:
+  options: any; // FIXME:
+  babel: any; // FIXME:
+
   constructor (config = {}, options = {}) {
     this.config = {
       sourceMaps: 'both',
@@ -18,7 +22,7 @@ export class BabelTransform {
 
     const { babili, servicePath } = this.options;
 
-    if (babili) this.config.presets.push('babili');
+    if (babili) { this.config.presets.push('babili'); }
 
     // eslint-disable-next-line
     this.babel = require(
@@ -44,8 +48,9 @@ export class BabelTransform {
           : relPath,
       };
     } catch (err) {
-      if (this.options.logErrors) console.error(err); // eslint-disable-line
-      if (!this.options.skipOnError) throw err;
+      // tslint:disable-next-line:no-console
+      if (this.options.logErrors) { console.error(err); } // eslint-disable-line
+      if (!this.options.skipOnError) { throw err; }
     }
 
     return result;

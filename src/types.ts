@@ -48,3 +48,5 @@ export interface ISls {
 export interface IZip {
   [key: string]: any;
 }
+
+export type ILog = () => any;

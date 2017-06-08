@@ -1,4 +1,5 @@
 import * as Bluebird from 'bluebird';
+import { exists } from 'fs-extra';
 import isStream from 'is-stream';
 import { clone, isFunction, isObject, isString, merge } from 'lutils';
 import path from 'path';
@@ -9,6 +10,7 @@ export class FileBuild {
   log: any; // FIXME:
   externals: Set<string>;
   alreadyBuilt: Set<string>;
+  config: any; // FIXME:
 
   constructor (config) {
     this.config = {
@@ -20,7 +22,7 @@ export class FileBuild {
       ...config,
     };
 
-    this.log = this.config.log || (() => {});
+    this.log = this.config.log || (() => null);
 
     this.externals = new Set();
     this.alreadyBuilt = new Set();
@@ -34,7 +36,7 @@ export class FileBuild {
     // RESOLVE BUILD FILE
     //
 
-    let builderFilePath = await this._tryBuildFiles();
+    let builderFilePath = await this.tryBuildFiles();
 
     if (!builderFilePath) {
       throw new Error('Unrecognized build file path');
@@ -86,13 +88,13 @@ export class FileBuild {
         externals.forEach((ext) => this.externals.add(ext));
       }
 
-      await Promise.each([
+      await Bluebird.each([
         buildFilename, `${buildFilename}.map`,
       ], async (relPath) => {
         const filePath = path.resolve(this.config.buildTmpDir, relPath);
 
         try {
-          await fs.accessAsync(filePath);
+          await exists(filePath);
         } catch (err) { return; }
 
         artifact.addFile(filePath, relPath, this.config.zip);
@@ -123,11 +125,9 @@ export class FileBuild {
   /**
    *  Allows for build files to be auto selected
    */
-  async _tryBuildFiles () {
+  private async tryBuildFiles () {
     for (const fileName of this.config.tryFiles) {
-      const exists = await fs.statAsync(fileName).then((stat) => stat.isFile());
-
-      if (exists) { return fileName; }
+      if (await exists(fileName)) { return fileName; }
     }
 
     return null;

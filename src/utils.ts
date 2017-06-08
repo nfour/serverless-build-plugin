@@ -1,6 +1,9 @@
 import * as c from 'chalk';
 import * as walk from 'findit';
-import { typeOf } from 'lutils';
+import { copy, readFile } from 'fs-extra';
+import * as YAML from 'js-yaml';
+import { isObject } from 'lutils';
+import * as path from 'path';
 
 export function walker (...args) {
   const w = walk(...args);
@@ -18,7 +21,7 @@ export function walker (...args) {
  * Wraps fs-extra copy
  */
 export function copyFile (source, dest) {
-  return fs.copy(source, dest);
+  return copy(source, dest);
 }
 
 /**
@@ -30,7 +33,7 @@ export function copyFile (source, dest) {
  * @param {String} fileLookup
  * @returns {any} config
  */
-export function loadFile (fileLookup) {
+export async function loadFile (fileLookup) {
   const tryExts = ['.yml', '.yaml', ''];
 
   for (const ext of tryExts) {
@@ -38,7 +41,7 @@ export function loadFile (fileLookup) {
       const filePath = require.resolve(`${fileLookup}${ext}`);
 
       if (/\.ya?ml$/i.test(filePath)) {
-        return YAML.load(fs.readFileSync(filePath));
+        return YAML.load(await readFile(filePath, 'utf8'));
       }
 
       return require(filePath); // eslint-disable-line
@@ -57,7 +60,7 @@ export async function handleFile ({
     artifact, zipConfig, useSourceMaps,
     transformExtensions, transforms,
 }) {
-  const extname         = path.extname(filePath);
+  const extname = path.extname(filePath);
   const isTransformable = transformExtensions.some((ext) => `.${ext}` === extname.toLowerCase());
 
   // TODO: make each transformer check extensions itself, and concat their
@@ -67,8 +70,8 @@ export async function handleFile ({
     // JAVASCRIPT
     //
 
-    let code        = await fs.readFileAsync(filePath, 'utf8');
-    let map         = '';
+    let code = await readFile(filePath, 'utf8');
+    let map = '';
     let destRelPath = relPath;
 
     /**
@@ -81,8 +84,8 @@ export async function handleFile ({
 
         if (result.code) {
           code = result.code;
-          if (result.map) map = result.map;
-          if (result.relPath) destRelPath = result.relPath;
+          if (result.map) { map = result.map; }
+          if (result.relPath) { destRelPath = result.relPath; }
         }
       }
     }
@@ -90,7 +93,7 @@ export async function handleFile ({
     artifact.addBuffer(new Buffer(code), destRelPath, zipConfig);
 
     if (useSourceMaps && map) {
-      if (typeOf.Object(map)) map = JSON.stringify(map);
+      if (isObject(map)) { map = JSON.stringify(map); }
 
       artifact.addBuffer(new Buffer(map), `${destRelPath}.map`, zipConfig);
     }
@@ -105,7 +108,7 @@ export async function handleFile ({
   return artifact;
 }
 
-export function displayModule ({ filePath, packageJson = '' }) {
+export function displayModule ({ filePath, packageJson }: { filePath: string, packageJson?: any }) {
   const basename = path.basename(filePath);
 
   return `${

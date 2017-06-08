@@ -1,13 +1,13 @@
+import * as archiver from 'archiver';
 import * as Bluebird from 'bluebird';
-import c from 'chalk';
-import fs from 'fs-extra';
-import path from 'path';
-import semver from 'semver';
-
+import * as c from 'chalk';
+import { createWriteStream, emptyDir, ensureDir } from 'fs-extra';
 import { clone, isArray, merge } from 'lutils';
-import FileBuild from './FileBuild';
-import ModuleBundler from './ModuleBundler';
-import SourceBundler from './SourceBundler';
+import * as path from 'path';
+import * as semver from 'semver';
+import { FileBuild } from './FileBuild';
+import { ModuleBundler } from './ModuleBundler';
+import { SourceBundler } from './SourceBundler';
 import { IPluginConfig, ISls } from './types';
 import { colorizeConfig, copyFile, loadFile } from './utils';
 
@@ -234,10 +234,10 @@ export class ServerlessBuildPlugin {
 
     // Ensure directories
 
-    await fs.ensureDirAsync(this.buildTmpDir);
-    await fs.ensureDirAsync(this.artifactTmpDir);
+    await ensureDir(this.buildTmpDir);
+    await ensureDir(this.artifactTmpDir);
 
-    if (!this.config.keep) { await fs.emptyDirAsync(this.artifactTmpDir); }
+    if (!this.config.keep) { await emptyDir(this.artifactTmpDir); }
 
     /**
      * Iterate functions and run builds either synchronously or concurrently
@@ -263,10 +263,10 @@ export class ServerlessBuildPlugin {
    * in order for `serverless` to consume it.
    */
   async buildFunction (fnName, fnConfig) {
-    const artifact = new Yazl.ZipFile();
-    let moduleIncludes;
-
+    let moduleIncludes: Set<string>;
     const { method } = this.config;
+
+    const artifact = archiver('zip', { gzip: true, gzipOptions: { level: 5 } });
 
     this.log('');
     this.log(`[FUNCTION] ${c.reset.bold(fnName)}`);
@@ -348,7 +348,7 @@ export class ServerlessBuildPlugin {
     );
 
     await new Promise((resolve, reject) => {
-      artifact.outputStream.pipe(fs.createWriteStream(zipPath))
+      artifact.outputStream.pipe(createWriteStream(zipPath))
         .on('error', reject)
         .on('close', resolve);
 
