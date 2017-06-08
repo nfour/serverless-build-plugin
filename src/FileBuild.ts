@@ -94,7 +94,7 @@ export class FileBuild {
           await exists(filePath);
         } catch (err) { return; }
 
-        archive.file(filePath, relPath);
+        archive.file(filePath, { name: relPath });
       });
     } else
     if (isString(result) || result instanceof Buffer) {
@@ -104,14 +104,14 @@ export class FileBuild {
 
       if (isString(result)) { result = new Buffer(result); }
 
-      archive.append(result, entryPoint);
+      archive.append(result, { name: entryPoint });
     } else
     if (isStream(result)) {
       //
       // STREAMS
       //
 
-      archive.append(result, entryPoint);
+      archive.append(result, { name: entryPoint });
     } else {
       throw new Error('Unrecognized build output');
     }
