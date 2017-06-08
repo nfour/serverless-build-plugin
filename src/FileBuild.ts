@@ -4,7 +4,7 @@ import { exists } from 'fs-extra';
 import * as isStream from 'is-stream';
 import { clone, isFunction, isObject, isString, merge } from 'lutils';
 import * as path from 'path';
-import { Logger } from './Logger';
+import { Logger } from './lib/Logger';
 import { WebpackBuilder } from './WebpackBuilder';
 
 export class FileBuild {

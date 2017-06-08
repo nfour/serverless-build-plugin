@@ -1,14 +1,14 @@
 import * as Archiver from 'archiver';
 import * as Bluebird from 'bluebird';
 import * as c from 'chalk';
-import { copy, createWriteStream, emptyDir, ensureDir } from 'fs-extra';
+import { createWriteStream, emptyDir, ensureDir } from 'fs-extra';
 import { clone, isArray, merge } from 'lutils';
 import * as path from 'path';
 import * as semver from 'semver';
 import { defaultConfig, IPluginConfig } from './config';
 import { FileBuild } from './FileBuild';
-import { loadFile } from './lib/utils';
-import { Logger } from './Logger';
+import { Logger } from './lib/Logger';
+import { loadFile, overridePackagePlugin } from './lib/utils';
 import { ModuleBundler } from './ModuleBundler';
 import { SourceBundler } from './SourceBundler';
 
@@ -32,57 +32,46 @@ export class ServerlessBuildPlugin {
     // SERVERLESS
     //
 
+    this.logger = new Logger({ serverless });
     this.serverless = serverless;
 
-    if (semver.lt(this.serverless.getVersion(), '1.0.0')) {
+    const version = this.serverless.getVersion();
+
+    if (semver.lt(version, '1.0.0')) {
       throw new this.serverless.classes.Error(
         'serverless-build-plugin requires serverless@1.x.x',
       );
     }
 
-    // put the package plugin into 'individual' mode
+    this.servicePath = this.serverless.config.servicePath;
+    this.tmpDir = path.join(this.servicePath, './.serverless');
+    this.buildTmpDir = path.join(this.tmpDir, './build');
+    this.artifactTmpDir = path.join(this.tmpDir, './artifacts');
+
+    //
+    // COMPATIBILITY
+    //
+
+    // Put the package plugin into 'individual' mode
     this.serverless.service.package.individually = true;
 
-    // in sls 1.11 and lower this will skip 'archiving' (no effect in 1.12+)
+    // In sls 1.11 and lower this will skip 'archiving' (no effect in 1.12+)
     this.serverless.service.package.artifact = true;
 
-    // in sls 1.12 and high this will skip 'archiving'
-    if (semver.gte(this.serverless.getVersion(), '1.12.0')) {
-      const packagePlugin = this.serverless.pluginManager.plugins.reduce((acc, val) => {
-        if (val.constructor.name === 'Package') {
-          return val;
-        }
-        return acc;
-      }, false);
-
-      packagePlugin.packageFunction = (functionName) => {
-        const zipFileName = `${functionName}.zip`;
-
-        const functionObject = this.serverless.service.getFunction(functionName);
-        const funcPackageConfig = functionObject.package || {};
-
-        const artifactFilePath = funcPackageConfig.artifact;
-        const packageFilePath = path.join(
-          this.serverless.config.servicePath,
-          '.serverless',
-          zipFileName,
-        );
-
-        return copy(artifactFilePath, packageFilePath).then(() => {
-          functionObject.artifact = artifactFilePath;
-          return artifactFilePath;
-        });
-      };
+    // TODO: remove support for < 1.12
+    // In sls 1.12 and higher this will skip 'archiving'
+    if (semver.gte(version, '1.12.0')) {
+      overridePackagePlugin({ serverless, tmpDir: this.tmpDir });
+    } else {
+      this.logger.message(
+        c.red('DEPRECATION'),
+        'Upgrade to >= serverless@1.12. Build plugin is dropping support in the next major version',
+      );
     }
 
     //
     // PLUGIN CONFIG GENERATION
     //
-
-    this.servicePath = this.serverless.config.servicePath;
-    this.tmpDir = path.join(this.servicePath, './.serverless');
-    this.buildTmpDir = path.join(this.tmpDir, './build');
-    this.artifactTmpDir = path.join(this.tmpDir, './artifacts');
 
     const buildConfigPath = path.join(this.servicePath, './serverless.build.yml');
     const buildConfig = loadFile(buildConfigPath) || {};
@@ -108,7 +97,7 @@ export class ServerlessBuildPlugin {
     selectedFunctions = selectedFunctions.length ? selectedFunctions : Object.keys(functions);
 
     /**
-     *  An array of full realized functions configs to build against.
+     *  An array of realized functions configs to build against.
      *  Inherits from
      *  - serverless.yml functions.<fn>.package
      *  - serverless.build.yml functions.<fn>
@@ -160,7 +149,7 @@ export class ServerlessBuildPlugin {
     };
 
     // hooks changed in 1.12 :/
-    if (semver.gte(this.serverless.getVersion(), '1.12.0')) {
+    if (semver.gte(version, '1.12.0')) {
       this.hooks = {
         'before:package:initialize'               : this.build,
         'before:package:function:initialize'      : this.build,
@@ -180,28 +169,39 @@ export class ServerlessBuildPlugin {
       };
     }
 
-    this.logger = new Logger({ serverless });
   }
 
   /**
-   *  Builds either from file or through the babel optimizer.
+   *  Builds either from file or through babel
    */
   build = async () => {
-    this.logger.message('BUILD', 'Build triggered...');
+    this.logger.message('BUILDS', 'Initializing');
+    this.logger.log('');
 
-    const { method } = this.config;
+    const reduceConfig = (keys) =>
+      keys.reduce((obj, key) => {
+        obj[key] = this.config[key];
+        return obj;
+      }, {});
 
-    if (method === 'bundle') {
-      const { uglify, babel, sourceMaps, babili } = this.config;
-
-      this.logger.config({ method, uglify, babel, babili, sourceMaps });
+    if (this.config.method === 'file') {
+      this.logger.config(reduceConfig([
+        'method', 'tryFiles', 'handlerEntryExt',
+        'synchronous', 'deploy', 'useServerlessOffline',
+        'modules', 'zip',
+        'followSymlinks',
+      ]));
     } else {
-      const { tryFiles } = this.config;
-
-      this.logger.config({ method, tryFiles });
+      this.logger.config(reduceConfig([
+        'method',
+        'synchronous', 'deploy', 'useServerlessOffline',
+        'babel', 'babili', 'uglify', 'uglifySource', 'uglifyModules',
+        'nomralizeBabelExt', 'sourceMaps', 'transformExtensions',
+        'baseExclude',
+        'modules', 'include', 'exclude', 'zip',
+        'followSymlinks',
+      ]));
     }
-
-    this.logger.config(this.config);
 
     // Ensure directories
 
@@ -222,11 +222,14 @@ export class ServerlessBuildPlugin {
     });
 
     this.logger.log('');
-    this.logger.message('BUILD', 'Builds complete');
+    this.logger.message('BUILDS', 'Complete!');
     this.logger.log('');
 
     if (this.config.deploy === false) {
       this.logger.message('EXIT', 'User requested via --no-deploy');
+
+      await Bluebird.delay(1);
+
       process.exit();
     }
   }
@@ -243,7 +246,8 @@ export class ServerlessBuildPlugin {
     const artifact = Archiver('zip', { store: true });
 
     this.logger.log('');
-    this.logger.message('BUILD', c.reset.bold(fnName));
+    this.logger.message('FUNCTION', c.reset.bold(fnName));
+    this.logger.log('');
 
     if (method === 'bundle') {
       //
@@ -320,16 +324,13 @@ export class ServerlessBuildPlugin {
       `./${this.serverless.service.service}-${fnName}-${new Date().getTime()}.zip`,
     );
 
-    artifact.finalize();
-
     await new Promise((resolve, reject) => {
       artifact
         .on('error', reject)
         .on('close', resolve);
 
       artifact.pipe(createWriteStream(artifactPath));
-
-      artifact.end();
+      artifact.finalize();
     });
 
     const fnConfig = this.serverless.service.functions[fnName];

@@ -5,7 +5,7 @@ import * as glob from 'minimatch';
 import { join } from 'path';
 import { handleFile } from './lib/utils';
 import { Walker } from './lib/Walker';
-import { Logger } from './Logger';
+import { Logger } from './lib/Logger';
 import { BabelTransform } from './transforms/Babel';
 import { UglifyTransform } from './transforms/Uglify';
 

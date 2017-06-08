@@ -1,6 +1,6 @@
 import { typeOf } from 'lutils';
 import * as requireResolve from 'resolve-pkg';
-import { Logger } from './Logger';
+import { Logger } from './lib/Logger';
 
 export class WebpackBuilder {
   externals: string[];
@@ -37,12 +37,13 @@ export class WebpackBuilder {
 
     this.externals = this.normalizeExternals(config.externals || []);
 
+    this.logger.message('WEBPACK');
+    this.logger.log('');
+
     const logs = await this.runWebpack(config);
 
     this.logger.log('');
-    this.logger.message('WEBPACK');
-    this.logger.log('');
-    this.logger.log(logs);
+    this.logger.block('WEBPACK', logs);
 
     return this;
   }
@@ -76,8 +77,6 @@ export class WebpackBuilder {
     return new Promise((resolve, reject) => {
       this.webpack(config).run((err, stats) => {
         if (err) { return reject(err); }
-
-        console.log(Object.keys(stats));
 
         return resolve(stats.toString({
           colors   : true,
