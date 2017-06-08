@@ -1,9 +1,9 @@
 import * as Bluebird from 'bluebird';
-import * as fs from 'fs-promise';
 import { join, sep } from 'path';
 import * as resolvePackage from 'resolve-pkg';
 
 import { Archiver } from 'archiver';
+import { exists } from 'fs-extra';
 import { Logger } from './Logger';
 import { UglifyTransform } from './transforms/Uglify';
 import { handleFile, walker } from './utils';
@@ -138,7 +138,7 @@ export class ModuleBundler {
         const childPackageJsonPath = join(resolvedDir, './package.json');
 
         let childPackageJson;
-        if (await fs.exists(childPackageJsonPath)) {
+        if (await exists(childPackageJsonPath)) {
           childPackageJson = require(childPackageJsonPath); // eslint-disable-line
         }
 
