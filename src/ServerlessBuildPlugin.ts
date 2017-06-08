@@ -5,64 +5,29 @@ import { copy, createWriteStream, emptyDir, ensureDir } from 'fs-extra';
 import { clone, isArray, merge } from 'lutils';
 import * as path from 'path';
 import * as semver from 'semver';
+import { defaultConfig, IPluginConfig } from './config';
 import { FileBuild } from './FileBuild';
+import { loadFile } from './lib/utils';
 import { Logger } from './Logger';
 import { ModuleBundler } from './ModuleBundler';
 import { SourceBundler } from './SourceBundler';
-import { IPluginConfig, ISls } from './types';
-import { loadFile } from './utils';
 
 export class ServerlessBuildPlugin {
-  config: IPluginConfig = {
-    method: 'bundle',
+  config: IPluginConfig = defaultConfig;
 
-    useServerlessOffline: false,
-
-    tryFiles    : ['webpack.config.js'],
-    baseExclude : [/\bnode_modules\b/],
-
-    modules: {
-      exclude     : [], // These match root dependencies
-      deepExclude : [], // These match deep dependencies
-    },
-
-    exclude : [],
-    include : [],
-
-    uglify        : false,
-    uglifySource  : false,
-    uglifyModules : true,
-
-    babel             : null,
-    babili            : false,
-    normalizeBabelExt : false,
-    sourceMaps        : true,
-
-    transformExtensions : ['ts', 'js', 'jsx', 'tsx'],
-    handlerEntryExt     : 'js',
-
-    // Passed to `yazl` as options
-    zip: { compress: true },
-
-    functions: {},
-
-    synchronous : true,
-    deploy      : true,
-  };
-
-  serverless: ISls;
+  serverless: any;
   servicePath: string;
   tmpDir: string;
   buildTmpDir: string;
   artifactTmpDir: string;
 
-  functions: any; // FIXME:
-  hooks: any; // FIXME:
+  functions: any;
+  hooks: any;
 
   fileBuild: FileBuild;
   logger: Logger;
 
-  constructor (serverless: ISls, options = {}) {
+  constructor (serverless, options = {}) {
     //
     // SERVERLESS
     //
@@ -97,7 +62,8 @@ export class ServerlessBuildPlugin {
         const funcPackageConfig = functionObject.package || {};
 
         const artifactFilePath = funcPackageConfig.artifact;
-        const packageFilePath = path.join(this.serverless.config.servicePath,
+        const packageFilePath = path.join(
+          this.serverless.config.servicePath,
           '.serverless',
           zipFileName,
         );
@@ -235,14 +201,14 @@ export class ServerlessBuildPlugin {
       this.logger.config({ method, tryFiles });
     }
 
+    this.logger.config(this.config);
+
     // Ensure directories
 
     await ensureDir(this.buildTmpDir);
     await ensureDir(this.artifactTmpDir);
 
     if (!this.config.keep) { await emptyDir(this.artifactTmpDir); }
-
-    console.log(this.config);
 
     /**
      * Iterate functions and run builds either synchronously or concurrently
@@ -259,7 +225,10 @@ export class ServerlessBuildPlugin {
     this.logger.message('BUILD', 'Builds complete');
     this.logger.log('');
 
-    if (this.config.deploy === false) { process.exit(); }
+    if (this.config.deploy === false) {
+      this.logger.message('EXIT', 'User requested via --no-deploy');
+      process.exit();
+    }
   }
 
   /**
@@ -272,8 +241,6 @@ export class ServerlessBuildPlugin {
     const { method } = this.config;
 
     const artifact = Archiver('zip', { store: true });
-
-    artifact.on('error', console.error);
 
     this.logger.log('');
     this.logger.message('BUILD', c.reset.bold(fnName));
@@ -291,6 +258,7 @@ export class ServerlessBuildPlugin {
         logger: this.logger,
         archive: artifact,
         servicePath: this.servicePath,
+        followSymlinks: this.config.followSymlinks,
       });
 
       this.logger.log('');
@@ -333,6 +301,7 @@ export class ServerlessBuildPlugin {
 
         servicePath: this.servicePath,
         archive: artifact,
+        followSymlinks: this.config.followSymlinks,
       },
     ).bundle({
       include: Array.from(moduleIncludes || []),
@@ -353,28 +322,20 @@ export class ServerlessBuildPlugin {
 
     artifact.finalize();
 
-    console.log('--------------------------------------------');
-    console.log('--------------------------------------------');
-    console.log(artifactPath);
-    console.log('--------------------------------------------');
-    console.log('--------------------------------------------');
-    createWriteStream;
-    // process.exit();
+    await new Promise((resolve, reject) => {
+      artifact
+        .on('error', reject)
+        .on('close', resolve);
 
-  //   await new Promise((resolve, reject) => {
-  //     artifact
-  //       .on('error', reject)
-  //       .on('close', resolve);
+      artifact.pipe(createWriteStream(artifactPath));
 
-  //     artifact.pipe(createWriteStream(artifactPath));
+      artifact.end();
+    });
 
-  //     artifact.end();
-  //   });
+    const fnConfig = this.serverless.service.functions[fnName];
 
-  //   const fnConfig = this.serverless.service.functions[fnName];
-
-  //   fnConfig.artifact = artifactPath;
-  //   fnConfig.package = fnConfig.package || {};
-  //   fnConfig.package.artifact = artifactPath;
+    fnConfig.artifact = artifactPath;
+    fnConfig.package = fnConfig.package || {};
+    fnConfig.package.artifact = artifactPath;
   }
 }

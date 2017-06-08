@@ -1,16 +1,18 @@
 import * as c from 'chalk';
 import * as path from 'path';
-import { ISls } from './types';
-import { colorizeConfig } from './utils';
+import { colorizeConfig } from './lib/utils';
 
 export class Logger {
-  serverless: ISls;
+  silent = false;
   log: (...args: string[]) => any;
 
-  constructor ({ serverless }) {
-    this.serverless = serverless;
+  private serverless: any;
 
-    this.log = (...args) => this.serverless.cli.log(...args);
+  constructor ({ serverless, silent }: { silent?: boolean, serverless: any }) {
+    this.serverless = serverless;
+    this.silent = silent;
+
+    this.log = (...args) => !this.silent && this.serverless.cli.log(...args);
   }
 
   message (prefix: string, str: string = '') {

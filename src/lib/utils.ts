@@ -1,22 +1,9 @@
 import { Archiver } from 'archiver';
 import * as c from 'chalk';
-import * as walk from 'findit';
 import { readFile } from 'fs-extra';
 import * as YAML from 'js-yaml';
 import { isObject } from 'lutils';
 import * as path from 'path';
-
-export function walker (...args) {
-  const w = walk(...args);
-
-  w.end = () => new Promise((resolve, reject) => {
-    w.on('error', reject);
-    w.on('stop', resolve);
-    w.on('end', resolve);
-  });
-
-  return w;
-}
 
 /**
  * Read any of:
@@ -50,9 +37,9 @@ export async function loadFile (fileLookup) {
  *  Used by SourceBundler & ModuleBundler.
  */
 export async function handleFile ({
-    filePath, relPath,
-    archive, useSourceMaps,
-    transformExtensions, transforms,
+  filePath, relPath,
+  archive, useSourceMaps,
+  transformExtensions, transforms,
 }: {
   archive: Archiver;
   useSourceMaps: boolean;
@@ -64,8 +51,6 @@ export async function handleFile ({
   const extname = path.extname(filePath);
   const isTransformable = transformExtensions.some((ext) => `.${ext}` === extname.toLowerCase());
 
-  // TODO: make each transformer check extensions itself, and concat their
-  // extension whitelist to check here.
   if (isTransformable) {
     //
     // JAVASCRIPT
@@ -90,8 +75,6 @@ export async function handleFile ({
         }
       }
     }
-
-    console.log(filePath)
 
     archive.append(new Buffer(code), { name: destRelPath });
 
