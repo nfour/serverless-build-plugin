@@ -242,6 +242,8 @@ export class ServerlessBuildPlugin {
 
     if (!this.config.keep) { await emptyDir(this.artifactTmpDir); }
 
+    console.log(this.config);
+
     /**
      * Iterate functions and run builds either synchronously or concurrently
      */
@@ -269,7 +271,9 @@ export class ServerlessBuildPlugin {
     let moduleIncludes: Set<string>;
     const { method } = this.config;
 
-    const artifact = Archiver('zip', { gzip: true, gzipOptions: { level: 5 } });
+    const artifact = Archiver('zip', { store: true });
+
+    artifact.on('error', console.error);
 
     this.logger.log('');
     this.logger.message('BUILD', c.reset.bold(fnName));
@@ -292,8 +296,8 @@ export class ServerlessBuildPlugin {
       this.logger.log('');
 
       await sourceBundler.bundle({
-        exclude : fnConfig.package.exclude,
-        include : fnConfig.package.include,
+        exclude: fnConfig.package.exclude,
+        include: fnConfig.package.include,
       });
     } else
     if (method === 'file') {
@@ -312,8 +316,6 @@ export class ServerlessBuildPlugin {
       }
 
       await this.fileBuild.build(fnConfig, artifact);
-
-      // This builds all functions
 
       moduleIncludes = this.fileBuild.externals;
     } else {
@@ -351,20 +353,28 @@ export class ServerlessBuildPlugin {
 
     artifact.finalize();
 
-    await new Promise((resolve, reject) => {
-      artifact
-        .on('error', reject)
-        .on('close', resolve);
+    console.log('--------------------------------------------');
+    console.log('--------------------------------------------');
+    console.log(artifactPath);
+    console.log('--------------------------------------------');
+    console.log('--------------------------------------------');
+    createWriteStream;
+    // process.exit();
 
-      artifact.pipe(createWriteStream(artifactPath));
+  //   await new Promise((resolve, reject) => {
+  //     artifact
+  //       .on('error', reject)
+  //       .on('close', resolve);
 
-      artifact.end();
-    });
+  //     artifact.pipe(createWriteStream(artifactPath));
 
-    const fnConfig = this.serverless.service.functions[fnName];
+  //     artifact.end();
+  //   });
 
-    fnConfig.artifact = artifactPath;
-    fnConfig.package = fnConfig.package || {};
-    fnConfig.package.artifact = artifactPath;
+  //   const fnConfig = this.serverless.service.functions[fnName];
+
+  //   fnConfig.artifact = artifactPath;
+  //   fnConfig.package = fnConfig.package || {};
+  //   fnConfig.package.artifact = artifactPath;
   }
 }

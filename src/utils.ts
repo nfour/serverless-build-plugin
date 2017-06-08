@@ -91,6 +91,8 @@ export async function handleFile ({
       }
     }
 
+    console.log(filePath)
+
     archive.append(new Buffer(code), { name: destRelPath });
 
     if (useSourceMaps && map) {

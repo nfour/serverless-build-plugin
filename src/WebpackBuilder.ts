@@ -77,7 +77,7 @@ export class WebpackBuilder {
       this.webpack(config).run((err, stats) => {
         if (err) { return reject(err); }
 
-        console.log(stats);
+        console.log(Object.keys(stats));
 
         return resolve(stats.toString({
           colors   : true,
