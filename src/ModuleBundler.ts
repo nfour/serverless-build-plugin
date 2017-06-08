@@ -3,9 +3,10 @@ import * as fs from 'fs-promise';
 import { join, sep } from 'path';
 import * as resolvePackage from 'resolve-pkg';
 
+import { Logger } from './Logger';
 import { UglifyTransform } from './transforms/Uglify';
 import { IPluginConfig, IZip } from './types';
-import { displayModule, handleFile, walker } from './utils';
+import { handleFile, walker } from './utils';
 
 export interface IModuleBundlerConfig extends IPluginConfig {
   servicePath: string;
@@ -21,7 +22,7 @@ export interface IModuleBundlerConfig extends IPluginConfig {
  */
 export class ModuleBundler {
   config: IModuleBundlerConfig;
-  log: (text: string) => any;
+  logger: Logger;
   artifact: IZip;
   modules: any; // FIXME:
 
@@ -30,11 +31,10 @@ export class ModuleBundler {
       servicePath : '',   // serverless.config.servicePath
       uglify      : null, // UglifyJS config
       zip         : null, // Yazl zip config
-      log: () => null,
       ...config || {},
     } as IModuleBundlerConfig;
 
-    this.log = this.config.log;
+    this.logger = this.config.logger;
     this.artifact = artifact;
   }
 
@@ -87,7 +87,7 @@ export class ModuleBundler {
         })
         .end();
 
-      this.log(`[MODULE] ${displayModule({ filePath: relativePath, packageJson })}`);
+      this.logger.module(({ filePath: relativePath, packageJson }));
     });
 
     return this;

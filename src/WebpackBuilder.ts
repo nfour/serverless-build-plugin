@@ -1,10 +1,11 @@
 import { typeOf } from 'lutils';
 import requireResolve from 'resolve-pkg';
+import { Logger } from './Logger';
 
 export class WebpackBuilder {
   externals: any; // FIXME:
   config: any; // FIXME:
-  log: any; // FIXME:
+  logger: Logger;
   webpack: any; // FIXME:
 
   constructor (config = {}) {
@@ -14,7 +15,7 @@ export class WebpackBuilder {
       ...config,
     };
 
-    this.log = this.config.log || (() => null);
+    this.logger = this.config.logger;
 
     // eslint-disable-next-line
     this.webpack = require(
@@ -38,10 +39,10 @@ export class WebpackBuilder {
 
     const logs = await this.runWebpack(config);
 
-    this.log('');
-    this.log('[WEBPACK]');
-    this.log('');
-    this.log(logs);
+    this.logger.log('');
+    this.logger.message('WEBPACK');
+    this.logger.log('');
+    this.logger.log(logs);
 
     return this;
   }
@@ -71,7 +72,7 @@ export class WebpackBuilder {
     }, []);
   }
 
-  private runWebpack (config) {
+  private runWebpack (config): Promise<string> {
     return new Promise((resolve, reject) => {
       this.webpack(config).run((err, stats) => {
         if (err) { return reject(err); }

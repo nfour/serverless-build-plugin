@@ -2,9 +2,10 @@ import { exists, readFile } from 'fs-extra';
 import { isObject, isRegExp } from 'lutils';
 import * as glob from 'minimatch';
 import { join } from 'path';
+import { Logger } from './Logger';
 import { BabelTransform } from './transforms/Babel';
 import { UglifyTransform } from './transforms/Uglify';
-import { displayModule, handleFile, walker } from './utils';
+import { handleFile, walker } from './utils';
 
 /**
  *  @class SourceBundler
@@ -12,8 +13,8 @@ import { displayModule, handleFile, walker } from './utils';
  *  Handles the inclusion of source code in the artifact.
  */
 export class SourceBundler {
-  config: any; // FIXME:
-  log: any; // FIXME:
+  config: any;
+  logger: Logger;
   artifact: any; // FIXME:
 
   constructor (config = {}, artifact) {
@@ -28,8 +29,7 @@ export class SourceBundler {
       ...config,
     };
 
-    this.log = this.config.log || (() => null);
-
+    this.logger = this.config.logger;
     this.artifact = artifact;
   }
 
@@ -38,7 +38,7 @@ export class SourceBundler {
    *  is both `included` and not `excluded` by the regex or glob patterns.
    */
   async bundle ({ exclude = [], include = [] }) {
-    const transforms = await this._createTransforms();
+    const transforms = await this.createTransforms();
 
     // We never want node_modules here
     await walker(this.config.servicePath, { filters: [/\/node_modules\//i] })
@@ -76,14 +76,14 @@ export class SourceBundler {
           zipConfig           : this.config.zip,
         });
 
-        this.log(`[SOURCE] ${displayModule({ filePath: relPath })}`);
+        this.logger.source({ filePath: relPath });
       })
       .end();
 
     return this.artifact;
   }
 
-  async _createTransforms () {
+  private async createTransforms () {
     const transforms = [];
 
     if (this.config.babel) {

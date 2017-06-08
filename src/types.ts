@@ -1,3 +1,5 @@
+import { Logger } from './Logger';
+
 export interface IPluginConfig {
   method: 'bundle'|'file';
 
@@ -39,6 +41,8 @@ export interface IPluginConfig {
   function?: string;
   noDeploy?: boolean;
   keep?: boolean;
+
+  logger?: Logger;
 }
 
 export interface ISls {
