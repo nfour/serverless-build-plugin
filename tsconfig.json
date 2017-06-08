@@ -5,7 +5,6 @@
     "moduleResolution": "node",
     "outDir": "./dist",
     "declaration": true,
-    "allowSyntheticDefaultImports": true,
     "noUnusedLocals": true,
     "lib": [
       "es2015",

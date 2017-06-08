@@ -17,7 +17,13 @@ export class FileBuild {
   tryFiles: string[];
   handlerEntryExt: string;
 
-  constructor (config: Partial<FileBuild>) {
+  constructor (config: {
+    logger: Logger,
+    servicePath: string,
+    buildTmpDir: string,
+    tryFiles: string[];
+    handlerEntryExt: string;
+  }) {
     Object.assign(this, config);
 
     this.externals = new Set();

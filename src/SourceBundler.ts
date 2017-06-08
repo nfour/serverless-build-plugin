@@ -23,7 +23,16 @@ export class SourceBundler {
   sourceMaps = false;
   transformExtensions = ['ts', 'js', 'jsx', 'tsx'];
 
-  constructor (config: Partial<SourceBundler>) {
+  constructor (config: {
+    logger: Logger;
+    archive: Archiver;
+    servicePath: string;
+    babel?: any;
+    babili?: false;
+    uglify?: any;
+    sourceMaps?: boolean;
+    transformExtensions?: string;
+  }) {
     Object.assign(this, config);
   }
 

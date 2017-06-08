@@ -1,5 +1,5 @@
-import path from 'path';
-import requireResolve from 'resolve-pkg';
+import * as path from 'path';
+import * as requireResolve from 'resolve-pkg';
 
 export class UglifyTransform {
   config: any;
