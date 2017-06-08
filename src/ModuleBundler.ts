@@ -4,9 +4,10 @@ import * as resolvePackage from 'resolve-pkg';
 
 import { Archiver } from 'archiver';
 import { exists } from 'fs-extra';
+import { handleFile } from './lib/utils';
+import { Walker } from './lib/Walker';
 import { Logger } from './Logger';
 import { UglifyTransform } from './transforms/Uglify';
-import { handleFile, walker } from './utils';
 
 export interface IModule {
   packagePath: string;
@@ -28,12 +29,14 @@ export class ModuleBundler {
   archive: Archiver;
   servicePath: string;
   uglify: IUglifyParams;
+  followSymlinks: boolean = true;
 
   constructor (config: {
     logger: Logger;
     archive: Archiver;
     servicePath: string;
-    uglify: IUglifyParams;
+    uglify?: IUglifyParams;
+    followSymlinks?: boolean;
   }) {
     Object.assign(this, config);
   }
@@ -52,42 +55,50 @@ export class ModuleBundler {
 
     const transforms = await this.resolveTransforms();
 
-    await Bluebird.map(this.modules, async ({ packagePath, relativePath, packageJson }) => {
-      await walker(packagePath)
-        .on('directory', (dirPath, stats, stop) => {
-          if (stats.isDirectory()) {
-            // This pulls ['node_modules', 'pack'] out of
-            // .../node_modules/package/node_modules/pack
-            const endParts = dirPath.split(packagePath)[1].split('/').slice(-2);
+    const readModule = async ({ packagePath, relativePath, packageJson }) => {
+      this.logger.message('MODULE_BEFORE', relativePath);
 
-            // When a directory is a package and matches a deep exclude pattern
-            // Then skip it
-            if (
-              endParts[0] === 'node_modules' &&
-              deepExclude.indexOf(endParts[1]) !== -1
-            ) {
-              return stop();
-            }
+      const filter = (dirPath, stats, stop) => {
+        if (stats.isDirectory()) {
+          // This pulls ['node_modules', 'pack'] out of
+          // .../node_modules/package/node_modules/pack
+          const endParts = dirPath.split(packagePath)[1].split('/').slice(-2);
+
+          // When a directory is a package and matches a deep exclude pattern
+          // Then skip it
+          if (
+            endParts[0] === 'node_modules' &&
+            deepExclude.indexOf(endParts[1]) !== -1
+          ) {
+            return false;
           }
+        }
 
-          return null;
-        })
-        .on('file', async (filePath, stats, next) => {
-          const relPath = filePath.substr(filePath.indexOf(relativePath)).replace(/^\/|\/$/g, '');
+        return true;
+      };
 
-          await handleFile({
-            filePath,
-            relPath,
-            transforms,
-            transformExtensions : ['js', 'jsx'],
-            useSourceMaps       : false,
-            archive            : this.archive,
-          });
-        })
+      const onFile = async (filePath, stats, next) => {
+        const relPath = filePath.substr(filePath.indexOf(relativePath)).replace(/^\/|\/$/g, '');
+
+        await handleFile({
+          filePath,
+          relPath,
+          transforms,
+          transformExtensions: ['js', 'jsx'],
+          useSourceMaps: false,
+          archive: this.archive,
+        });
+      };
+
+      await new Walker(packagePath, { followSymlinks: this.followSymlinks })
+        .filter(filter)
+        .file(onFile)
         .end();
 
       this.logger.module(({ filePath: relativePath, packageJson }));
-    });
+    };
+
+    await Bluebird.map(this.modules, readModule);
 
     return this;
   }

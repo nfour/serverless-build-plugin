@@ -3,10 +3,11 @@ import { exists, readFile } from 'fs-extra';
 import { isObject, isRegExp } from 'lutils';
 import * as glob from 'minimatch';
 import { join } from 'path';
+import { handleFile } from './lib/utils';
+import { Walker } from './lib/Walker';
 import { Logger } from './Logger';
 import { BabelTransform } from './transforms/Babel';
 import { UglifyTransform } from './transforms/Uglify';
-import { handleFile, walker } from './utils';
 
 /**
  *  @class SourceBundler
@@ -22,6 +23,7 @@ export class SourceBundler {
   uglify: any;
   sourceMaps = false;
   transformExtensions = ['ts', 'js', 'jsx', 'tsx'];
+  followSymlinks = true;
 
   constructor (config: {
     logger: Logger;
@@ -32,6 +34,7 @@ export class SourceBundler {
     uglify?: any;
     sourceMaps?: boolean;
     transformExtensions?: string;
+    followSymlinks?: boolean;
   }) {
     Object.assign(this, config);
   }
@@ -43,43 +46,45 @@ export class SourceBundler {
   async bundle ({ exclude = [], include = [] }) {
     const transforms = await this.createTransforms();
 
-    // We never want node_modules here
-    await walker(this.servicePath, { filters: [/\/node_modules\//i] })
-      .on('file', async (filePath, stats, stop) => {
-        /**
-         *  A relative path to the servicePath
-         *  @example ./functions/test/handler.js
-         */
-        const relPath = join(
-          filePath.split(this.servicePath)[1],
-        ).replace(/^\/|\/$/g, '');
+    const onFile = async (filePath, stats, stop) => {
+      /**
+       *  A relative path to the servicePath
+       *  @example ./functions/test/handler.js
+       */
+      const relPath = join(
+        filePath.split(this.servicePath)[1],
+      ).replace(/^\/|\/$/g, '');
 
-        const testPattern = (pattern) => (
-          isRegExp(pattern)
-            ? pattern.test(relPath)
-            : glob(relPath, pattern, { dot: true })
-        );
+      const testPattern = (pattern) => (
+        isRegExp(pattern)
+          ? pattern.test(relPath)
+          : glob(relPath, pattern, { dot: true })
+      );
 
-        const included = include.some(testPattern);
-        const excluded = exclude.some(testPattern);
+      const included = include.some(testPattern);
+      const excluded = exclude.some(testPattern);
 
-        /**
-         *  When a pattern matches an exclude, it skips
-         *  When a pattern doesnt match an include, it skips
-         */
-        if (!included || excluded) { return; }
+      /**
+       *  When a pattern matches an exclude, it skips
+       *  When a pattern doesnt match an include, it skips
+       */
+      if (!included || excluded) { return; }
 
-        await handleFile({
-          filePath,
-          relPath,
-          transforms,
-          transformExtensions: this.transformExtensions,
-          useSourceMaps: this.sourceMaps,
-          archive: this.archive,
-        });
+      await handleFile({
+        filePath,
+        relPath,
+        transforms,
+        transformExtensions: this.transformExtensions,
+        useSourceMaps: this.sourceMaps,
+        archive: this.archive,
+      });
 
-        this.logger.source({ filePath: relPath });
-      })
+      this.logger.source({ filePath: relPath });
+    };
+
+    await new Walker(this.servicePath, { followSymlinks: this.followSymlinks })
+      .filter((dir) => !/\/node_modules\//i.test(dir))
+      .file(onFile)
       .end();
 
     return this.archive;
