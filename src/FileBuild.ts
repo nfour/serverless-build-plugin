@@ -1,3 +1,4 @@
+import { Archiver } from 'archiver';
 import * as Bluebird from 'bluebird';
 import { exists } from 'fs-extra';
 import * as isStream from 'is-stream';
@@ -10,19 +11,14 @@ export class FileBuild {
   logger: Logger; // FIXME:
   externals: Set<string>;
   alreadyBuilt: Set<string>;
-  config: any; // FIXME:
 
-  constructor (config) {
-    this.config = {
-      servicePath     : '',   // ./
-      buildTmpDir     : '',   // ./.serverless/build
-      zip             : null, // Yazl zip options
-      tryFiles        : [],   // Array of relative paths to test for a build file
-      handlerEntryExt : 'js',
-      ...config,
-    };
+  servicePath: string;
+  buildTmpDir: string;
+  tryFiles: string[];
+  handlerEntryExt: string;
 
-    this.logger = this.config.logger;
+  constructor (config: Partial<FileBuild>) {
+    Object.assign(this, config);
 
     this.externals = new Set();
     this.alreadyBuilt = new Set();
@@ -31,18 +27,17 @@ export class FileBuild {
   /**
    *  Handles building from a build file's output.
    */
-  async build (fnConfig, artifact) {
-    //
-    // RESOLVE BUILD FILE
-    //
-
+  async build (
+    fnConfig: { handler: string; },
+    archive: Archiver,
+  ) {
     let builderFilePath = await this.tryBuildFiles();
 
     if (!builderFilePath) {
       throw new Error('Unrecognized build file path');
     }
 
-    builderFilePath = path.resolve(this.config.servicePath, builderFilePath);
+    builderFilePath = path.resolve(this.servicePath, builderFilePath);
 
     // eslint-disable-next-line
     let result = require(builderFilePath);
@@ -53,14 +48,12 @@ export class FileBuild {
     }
 
     //
-    // HANDLE RESULT OUTPUT:
-    //
-    // - String, Buffer or Stream:   piped as 'handler.js' into zip
-    // - Webpack Config:             executed and output files are zipped
+    // - String, Buffer or Stream : piped as 'handler.js' into zip
+    // - Webpack Config           : executed and output files are zipped
     //
 
     const entryRelPath = `${fnConfig.handler.split(/\.[^.]+$/)[0]}`;
-    const entryPoint = `./${entryRelPath}.${this.config.handlerEntryExt}`;
+    const entryPoint = `./${entryRelPath}.${this.handlerEntryExt}`;
     const buildFilename = `./${entryRelPath}.js`;
 
     if (isObject(result)) {
@@ -83,7 +76,11 @@ export class FileBuild {
           },
         );
 
-        const { externals } = await new WebpackBuilder(this.config).build(webpackConfig);
+        const { externals } = await new WebpackBuilder({
+          logger: this.logger,
+          buildTmpDir: this.buildTmpDir,
+          servicePath: this.servicePath,
+        }).build(webpackConfig);
 
         externals.forEach((ext) => this.externals.add(ext));
       }
@@ -91,13 +88,13 @@ export class FileBuild {
       await Bluebird.each([
         buildFilename, `${buildFilename}.map`,
       ], async (relPath) => {
-        const filePath = path.resolve(this.config.buildTmpDir, relPath);
+        const filePath = path.resolve(this.buildTmpDir, relPath);
 
         try {
           await exists(filePath);
         } catch (err) { return; }
 
-        artifact.addFile(filePath, relPath, this.config.zip);
+        archive.file(filePath, relPath);
       });
     } else
     if (isString(result) || result instanceof Buffer) {
@@ -107,14 +104,14 @@ export class FileBuild {
 
       if (isString(result)) { result = new Buffer(result); }
 
-      artifact.addBuffer(result, entryPoint, this.config.zip);
+      archive.append(result, entryPoint);
     } else
     if (isStream(result)) {
       //
       // STREAMS
       //
 
-      artifact.addReadStream(result, entryPoint, this.config.zip);
+      archive.append(result, entryPoint);
     } else {
       throw new Error('Unrecognized build output');
     }
@@ -126,7 +123,7 @@ export class FileBuild {
    *  Allows for build files to be auto selected
    */
   private async tryBuildFiles () {
-    for (const fileName of this.config.tryFiles) {
+    for (const fileName of this.tryFiles) {
       if (await exists(fileName)) { return fileName; }
     }
 

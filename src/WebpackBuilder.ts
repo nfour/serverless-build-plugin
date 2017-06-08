@@ -3,23 +3,18 @@ import requireResolve from 'resolve-pkg';
 import { Logger } from './Logger';
 
 export class WebpackBuilder {
-  externals: any; // FIXME:
-  config: any; // FIXME:
+  externals: string[];
+  servicePath: string;
+  buildTmpDir: string;
   logger: Logger;
-  webpack: any; // FIXME:
+  webpack: any;
 
-  constructor (config = {}) {
-    this.config = {
-      servicePath : '',   // ./
-      buildTmpDir : '',   // ./.serverless/build
-      ...config,
-    };
-
-    this.logger = this.config.logger;
+  constructor (config: Partial<WebpackBuilder>) {
+    Object.assign(this, config);
 
     // eslint-disable-next-line
     this.webpack = require(
-      requireResolve('webpack', { cwd: this.config.servicePath }),
+      requireResolve('webpack', { cwd: this.servicePath }),
     );
   }
 
@@ -27,12 +22,12 @@ export class WebpackBuilder {
    *  Builds a webpack config into the build directory.
    */
   async build (config) {
-    config.context = this.config.servicePath;
+    config.context = this.servicePath;
     config.entry = [...(config.entry || [])];
     config.output = {
       ...config.output,
       libraryTarget : 'commonjs',
-      path          : this.config.buildTmpDir,
+      path          : this.buildTmpDir,
     };
 
     this.externals = this.normalizeExternals(config.externals || []);

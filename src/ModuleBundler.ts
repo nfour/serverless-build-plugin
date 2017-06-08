@@ -3,16 +3,15 @@ import * as fs from 'fs-promise';
 import { join, sep } from 'path';
 import * as resolvePackage from 'resolve-pkg';
 
+import { Archiver } from 'archiver';
 import { Logger } from './Logger';
 import { UglifyTransform } from './transforms/Uglify';
-import { IPluginConfig, IZip } from './types';
 import { handleFile, walker } from './utils';
 
-export interface IModuleBundlerConfig extends IPluginConfig {
-  servicePath: string;
-  uglify: any;
-  zip: any;
-  log?: () => any;
+export interface IModule {
+  packagePath: string;
+  relativePath: string;
+  packageJson: any;
 }
 
 /**
@@ -21,21 +20,14 @@ export interface IModuleBundlerConfig extends IPluginConfig {
  *  Handles the inclusion of node_modules.
  */
 export class ModuleBundler {
-  config: IModuleBundlerConfig;
   logger: Logger;
-  artifact: IZip;
-  modules: any; // FIXME:
+  archive: Archiver;
+  modules: IModule[];
+  servicePath: string;
+  uglify: null|boolean|{ [key: string]: any };
 
-  constructor (config: IModuleBundlerConfig, artifact) {
-    this.config = {
-      servicePath : '',   // serverless.config.servicePath
-      uglify      : null, // UglifyJS config
-      zip         : null, // Yazl zip config
-      ...config || {},
-    } as IModuleBundlerConfig;
-
-    this.logger = this.config.logger;
-    this.artifact = artifact;
+  constructor (config: Partial<ModuleBundler>) {
+    Object.assign(this, config);
   }
 
   /**
@@ -46,11 +38,11 @@ export class ModuleBundler {
     include?: string[], exclude?: string[], deepExclude?: string[],
   }) {
     this.modules = await this.resolveDependencies(
-      this.config.servicePath,
+      this.servicePath,
       { include, exclude, deepExclude },
     );
 
-    const transforms = await this.createTransforms();
+    const transforms = await this.resolveTransforms();
 
     await Bluebird.map(this.modules, async ({ packagePath, relativePath, packageJson }) => {
       await walker(packagePath)
@@ -81,8 +73,7 @@ export class ModuleBundler {
             transforms,
             transformExtensions : ['js', 'jsx'],
             useSourceMaps       : false,
-            artifact            : this.artifact,
-            zipConfig           : this.config.zip,
+            archive            : this.archive,
           });
         })
         .end();
@@ -93,31 +84,28 @@ export class ModuleBundler {
     return this;
   }
 
-  private async createTransforms () {
+  private async resolveTransforms () {
     const transforms = [];
 
-    let uglifyConfig = this.config.uglify;
+    let uglifyConfig = this.uglify;
 
     if (uglifyConfig) {
       if (uglifyConfig === true) { uglifyConfig = null; }
 
-      transforms.push(new UglifyTransform(uglifyConfig, this.config));
+      transforms.push(new UglifyTransform(uglifyConfig, this));
     }
 
     return transforms;
   }
 
   /**
-   *  Resolves a package's dependencies to an array of paths.
-   *
-   *  @returns {Array}
-   *      [ { name, packagePath, packagePath } ]
+   * Resolves a package's dependencies to an array of paths.
    */
   private async resolveDependencies (
     initialPackageDir,
     { include = [], exclude = [], deepExclude = [] } = {},
-  ) {
-    const resolvedDeps = [];
+  ): Promise<IModule[]> {
+    const resolvedDeps: IModule[] = [];
     const cache: Set<string> = new Set();
     const separator = `${sep}node_modules${sep}`;
 

@@ -1,9 +1,9 @@
 import requireResolve from 'resolve-pkg';
 
 export class BabelTransform {
-  config: any; // FIXME:
-  options: any; // FIXME:
-  babel: any; // FIXME:
+  config: any;
+  options: any;
+  babel: any;
 
   constructor (config = {}, options = {}) {
     this.config = {
@@ -20,13 +20,11 @@ export class BabelTransform {
       ...options,
     };
 
-    const { babili, servicePath } = this.options;
-
-    if (babili) { this.config.presets.push('babili'); }
+    if (this.options.babili) { this.config.presets.push('babili'); }
 
     // eslint-disable-next-line
     this.babel = require(
-      requireResolve('babel-core', { cwd: servicePath }),
+      requireResolve('babel-core', { cwd: this.options.servicePath }),
     );
   }
 
