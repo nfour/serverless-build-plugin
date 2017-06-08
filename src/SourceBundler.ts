@@ -1,3 +1,4 @@
+import { Archiver } from 'archiver';
 import { exists, readFile } from 'fs-extra';
 import { isObject, isRegExp } from 'lutils';
 import * as glob from 'minimatch';
@@ -13,24 +14,17 @@ import { handleFile, walker } from './utils';
  *  Handles the inclusion of source code in the artifact.
  */
 export class SourceBundler {
-  config: any;
   logger: Logger;
-  artifact: any; // FIXME:
+  archive: Archiver;
+  servicePath: string;
+  babel: any;
+  babili: false;
+  uglify: any;
+  sourceMaps = false;
+  transformExtensions = ['ts', 'js', 'jsx', 'tsx'];
 
-  constructor (config = {}, artifact) {
-    this.config = {
-      servicePath         : '',        // serverless.config.servicePath
-      babel               : null,      // Babel options
-      babili              : false,      // Babel options
-      uglify              : null,      // UglifyJS options
-      sourceMaps          : false,     // Whether to add source maps
-      zip                 : null,      // Yazl zip options
-      transformExtensions : ['ts', 'js', 'jsx', 'tsx'],
-      ...config,
-    };
-
-    this.logger = this.config.logger;
-    this.artifact = artifact;
+  constructor (config: Partial<SourceBundler>) {
+    Object.assign(this, config);
   }
 
   /**
@@ -41,14 +35,14 @@ export class SourceBundler {
     const transforms = await this.createTransforms();
 
     // We never want node_modules here
-    await walker(this.config.servicePath, { filters: [/\/node_modules\//i] })
+    await walker(this.servicePath, { filters: [/\/node_modules\//i] })
       .on('file', async (filePath, stats, stop) => {
         /**
          *  A relative path to the servicePath
          *  @example ./functions/test/handler.js
          */
         const relPath = join(
-          filePath.split(this.config.servicePath)[1],
+          filePath.split(this.servicePath)[1],
         ).replace(/^\/|\/$/g, '');
 
         const testPattern = (pattern) => (
@@ -70,27 +64,26 @@ export class SourceBundler {
           filePath,
           relPath,
           transforms,
-          transformExtensions : this.config.transformExtensions,
-          useSourceMaps       : this.config.sourceMaps,
-          artifact            : this.artifact,
-          zipConfig           : this.config.zip,
+          transformExtensions: this.transformExtensions,
+          useSourceMaps: this.sourceMaps,
+          archive: this.archive,
         });
 
         this.logger.source({ filePath: relPath });
       })
       .end();
 
-    return this.artifact;
+    return this.archive;
   }
 
   private async createTransforms () {
     const transforms = [];
 
-    if (this.config.babel) {
-      let babelQuery = this.config.babel;
+    if (this.babel) {
+      let babelQuery = this.babel;
 
       if (!isObject(babelQuery)) {
-        const babelrcPath = join(this.config.servicePath, '.babelrc');
+        const babelrcPath = join(this.servicePath, '.babelrc');
 
         babelQuery = exists(babelrcPath)
           ? JSON.parse(await readFile(babelrcPath, 'utf8'))
@@ -99,19 +92,24 @@ export class SourceBundler {
 
       // If `sourceMaps` are switched off by the plugin's configuration,
       // ensure that is passed down to the babel transformer too.
-      if (this.config.sourceMaps === false) {
+      if (this.sourceMaps === false) {
         babelQuery.sourceMaps = false;
       }
 
-      transforms.push(new BabelTransform(babelQuery, this.config));
+      transforms.push(new BabelTransform(babelQuery, this));
     }
 
-    let uglifyConfig = this.config.uglify;
+    let uglifyConfig = this.uglify;
 
     if (uglifyConfig) {
       if (!isObject(uglifyConfig)) { uglifyConfig = null; }
 
-      transforms.push(new UglifyTransform(uglifyConfig, { ...this.config, logErrors: true }));
+      transforms.push(
+        new UglifyTransform(
+          uglifyConfig,
+          { servicePath: this.servicePath, logErrors: true },
+        ),
+      );
     }
 
     return transforms;

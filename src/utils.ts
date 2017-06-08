@@ -1,6 +1,7 @@
+import { Archiver } from 'archiver';
 import * as c from 'chalk';
 import * as walk from 'findit';
-import { readFile } from 'fs-extra';
+import { createReadStream, readFile } from 'fs-extra';
 import * as YAML from 'js-yaml';
 import { isObject } from 'lutils';
 import * as path from 'path';
@@ -50,8 +51,15 @@ export async function loadFile (fileLookup) {
  */
 export async function handleFile ({
     filePath, relPath,
-    artifact, zipConfig, useSourceMaps,
+    archive, useSourceMaps,
     transformExtensions, transforms,
+}: {
+  archive: Archiver;
+  useSourceMaps: boolean;
+  transformExtensions: string[];
+  filePath: string;
+  relPath: string;
+  transforms: any[]
 }) {
   const extname = path.extname(filePath);
   const isTransformable = transformExtensions.some((ext) => `.${ext}` === extname.toLowerCase());
@@ -83,22 +91,22 @@ export async function handleFile ({
       }
     }
 
-    artifact.addBuffer(new Buffer(code), destRelPath, zipConfig);
+    archive.append(new Buffer(code), destRelPath);
 
     if (useSourceMaps && map) {
       if (isObject(map)) { map = JSON.stringify(map); }
 
-      artifact.addBuffer(new Buffer(map), `${destRelPath}.map`, zipConfig);
+      archive.append(new Buffer(map), `${destRelPath}.map`);
     }
   } else {
     //
     // ARBITRARY FILES
     //
 
-    artifact.addFile(filePath, relPath, zipConfig);
+    archive.file(filePath, relPath);
   }
 
-  return artifact;
+  return archive;
 }
 
 export function displayModule ({ filePath, packageJson }: { filePath: string, packageJson?: any }) {

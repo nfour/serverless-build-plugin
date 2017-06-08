@@ -1,4 +1,4 @@
-import * as archiver from 'archiver';
+import * as Archiver from 'archiver';
 import * as Bluebird from 'bluebird';
 import * as c from 'chalk';
 import { copy, createWriteStream, emptyDir, ensureDir } from 'fs-extra';
@@ -221,8 +221,7 @@ export class ServerlessBuildPlugin {
    *  Builds either from file or through the babel optimizer.
    */
   build = async () => {
-    this.logger.message('|', 'Build triggered...');
-    // TODO: from here replace logger
+    this.logger.message('BUILD', 'Build triggered...');
 
     const { method } = this.config;
 
@@ -252,9 +251,9 @@ export class ServerlessBuildPlugin {
       concurrency: this.config.synchronous ? 1 : Infinity,
     });
 
-    this.logger.message('|', '');
-    this.logger.message('|', 'Builds complete');
-    this.logger.message('|', '');
+    this.logger.log('');
+    this.logger.message('BUILD', 'Builds complete');
+    this.logger.log('');
 
     if (this.config.deploy === false) { process.exit(); }
   }
@@ -268,7 +267,7 @@ export class ServerlessBuildPlugin {
     let moduleIncludes: Set<string>;
     const { method } = this.config;
 
-    const artifact = archiver('zip', { gzip: true, gzipOptions: { level: 5 } });
+    const artifact = Archiver('zip', { gzip: true, gzipOptions: { level: 5 } });
 
     this.logger.log('');
     this.logger.message('BUILD', c.reset.bold(fnName));
@@ -279,14 +278,14 @@ export class ServerlessBuildPlugin {
       //
 
       const sourceBundler = new SourceBundler({
-        ...this.config,
-
         uglify: this.config.uglifySource
           ? this.config.uglify
           : undefined,
 
+        logger: this.logger,
+        archive: artifact,
         servicePath: this.servicePath,
-      }, artifact);
+      });
 
       this.logger.log('');
 
@@ -323,15 +322,14 @@ export class ServerlessBuildPlugin {
 
     await new ModuleBundler(
       {
-        ...this.config,
-
+        logger: this.logger,
         uglify: this.config.uglifyModules
           ? this.config.uglify
           : undefined,
 
         servicePath: this.servicePath,
+        archive: artifact,
       },
-      artifact,
     ).bundle({
       include: Array.from(moduleIncludes || []),
       ...this.config.modules,
@@ -343,24 +341,28 @@ export class ServerlessBuildPlugin {
   /**
    *  Writes the `artifact` and attaches it to serverless
    */
-  private async completeFunctionArtifact (fnName, artifact) {
-    const zipPath = path.resolve(
+  private async completeFunctionArtifact (fnName: string, artifact: Archiver.Archiver) {
+    const artifactPath = path.resolve(
       this.artifactTmpDir,
       `./${this.serverless.service.service}-${fnName}-${new Date().getTime()}.zip`,
     );
 
+    artifact.finalize();
+
     await new Promise((resolve, reject) => {
-      artifact.outputStream.pipe(createWriteStream(zipPath))
+      artifact
         .on('error', reject)
         .on('close', resolve);
+
+      artifact.pipe(createWriteStream(artifactPath));
 
       artifact.end();
     });
 
     const fnConfig = this.serverless.service.functions[fnName];
 
-    fnConfig.artifact = zipPath;
+    fnConfig.artifact = artifactPath;
     fnConfig.package = fnConfig.package || {};
-    fnConfig.package.artifact = zipPath;
+    fnConfig.package.artifact = artifactPath;
   }
 }

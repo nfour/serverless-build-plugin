@@ -2,30 +2,26 @@ import path from 'path';
 import requireResolve from 'resolve-pkg';
 
 export class UglifyTransform {
-  config: any; // FIXME:
-  options: any; // FIXME:
-  uglify: any; // FIXME:
+  config: any;
+  options: any;
+  uglify: any;
 
   constructor (config = {}, options = {}) {
     this.config = {
-      dead_code : true,
-      unsafe    : false,
-
+      dead_code: true,
+      unsafe: false,
       ...config,
     };
 
     this.options = {
-      servicePath : '',
-      skipOnError : true, // When false, errors will halt execution
-      logErrors   : false,
+      skipOnError: true, // When false, errors will halt execution
+      logErrors: false,
       ...options,
     };
 
-    const { servicePath } = this.options;
-
     // eslint-disable-next-line
     this.uglify = require(
-      requireResolve('uglify-js', { cwd: servicePath }),
+      requireResolve('uglify-js', { cwd: this.options.servicePath }),
     );
   }
 
