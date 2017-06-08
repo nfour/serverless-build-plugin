@@ -10,7 +10,7 @@ import { Logger } from './Logger';
 import { ModuleBundler } from './ModuleBundler';
 import { SourceBundler } from './SourceBundler';
 import { IPluginConfig, ISls } from './types';
-import { colorizeConfig, loadFile } from './utils';
+import { loadFile } from './utils';
 
 export class ServerlessBuildPlugin {
   config: IPluginConfig = {
@@ -227,10 +227,12 @@ export class ServerlessBuildPlugin {
 
     if (method === 'bundle') {
       const { uglify, babel, sourceMaps, babili } = this.config;
-      this.logger.config(`${colorizeConfig({ method, uglify, babel, babili, sourceMaps })}`);
+
+      this.logger.config({ method, uglify, babel, babili, sourceMaps });
     } else {
       const { tryFiles } = this.config;
-      this.logger.config(`${colorizeConfig({ method, tryFiles })}`);
+
+      this.logger.config({ method, tryFiles });
     }
 
     // Ensure directories
@@ -301,11 +303,11 @@ export class ServerlessBuildPlugin {
 
       if (!this.fileBuild) {
         this.fileBuild = new FileBuild({
-          ...this.config,
-
-          servicePath : this.servicePath,
-          buildTmpDir : this.buildTmpDir,
-          serverless  : this.serverless,
+          logger: this.logger,
+          servicePath: this.servicePath,
+          buildTmpDir: this.buildTmpDir,
+          handlerEntryExt: this.config.handlerEntryExt,
+          tryFiles: this.config.tryFiles,
         });
       }
 

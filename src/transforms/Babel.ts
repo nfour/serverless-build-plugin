@@ -1,4 +1,4 @@
-import requireResolve from 'resolve-pkg';
+import * as requireResolve from 'resolve-pkg';
 
 export class BabelTransform {
   config: any;

@@ -1,15 +1,20 @@
 import { typeOf } from 'lutils';
-import requireResolve from 'resolve-pkg';
+import * as requireResolve from 'resolve-pkg';
 import { Logger } from './Logger';
 
 export class WebpackBuilder {
   externals: string[];
+  webpack: any;
+
   servicePath: string;
   buildTmpDir: string;
   logger: Logger;
-  webpack: any;
 
-  constructor (config: Partial<WebpackBuilder>) {
+  constructor (config: {
+    servicePath: string;
+    buildTmpDir: string;
+    logger: Logger;
+  }) {
     Object.assign(this, config);
 
     // eslint-disable-next-line
@@ -71,6 +76,8 @@ export class WebpackBuilder {
     return new Promise((resolve, reject) => {
       this.webpack(config).run((err, stats) => {
         if (err) { return reject(err); }
+
+        console.log(stats);
 
         return resolve(stats.toString({
           colors   : true,

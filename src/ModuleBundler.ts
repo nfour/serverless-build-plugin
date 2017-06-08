@@ -14,19 +14,27 @@ export interface IModule {
   packageJson: any;
 }
 
+export type IUglifyParams = null | boolean | { [key: string]: any };
+
 /**
  *  @class ModuleBundler
  *
  *  Handles the inclusion of node_modules.
  */
 export class ModuleBundler {
+  modules: IModule[];
+
   logger: Logger;
   archive: Archiver;
-  modules: IModule[];
   servicePath: string;
-  uglify: null|boolean|{ [key: string]: any };
+  uglify: IUglifyParams;
 
-  constructor (config: Partial<ModuleBundler>) {
+  constructor (config: {
+    logger: Logger;
+    archive: Archiver;
+    servicePath: string;
+    uglify: IUglifyParams;
+  }) {
     Object.assign(this, config);
   }
 

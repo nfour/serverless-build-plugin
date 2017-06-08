@@ -14,7 +14,7 @@ export class Logger {
   }
 
   message (prefix: string, str: string = '') {
-    this.log(c.grey(`[${prefix}]`), str);
+    this.log(`${c.grey(`[${prefix}]`)} ${str}`);
   }
 
   module ({ filePath, packageJson }: { filePath: string, packageJson?: any }) {
@@ -39,7 +39,7 @@ export class Logger {
     );
   }
 
-  config (config) {
+  config (config: { [key: string]: any }) {
     return this.message('CONFIG', colorizeConfig(config));
   }
 }
