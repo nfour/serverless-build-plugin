@@ -1,7 +1,7 @@
 import { Archiver } from 'archiver';
 import * as c from 'chalk';
 import * as walk from 'findit';
-import { createReadStream, readFile } from 'fs-extra';
+import { readFile } from 'fs-extra';
 import * as YAML from 'js-yaml';
 import { isObject } from 'lutils';
 import * as path from 'path';
