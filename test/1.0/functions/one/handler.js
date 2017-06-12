@@ -16,5 +16,6 @@ export const handler = async (event, context, done) => {
   done(null, {
     statusCode : 200,
     headers    : { 'content-type': 'application/json' },
-    body       : JSON.stringify({ num: number + typeOf(number) }) });
+    body       : JSON.stringify({ num: number + typeOf(number) })
+  });
 };

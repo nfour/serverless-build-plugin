@@ -71,6 +71,7 @@ export class ServerlessBuildPlugin {
 
     const buildConfigPath = path.join(this.servicePath, './serverless.build.yml');
     const buildConfig = loadFile(buildConfigPath) || {};
+
     const serverlessCustom = this.serverless.service.custom || {};
 
     // The config inherits from multiple sources

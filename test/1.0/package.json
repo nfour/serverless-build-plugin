@@ -26,6 +26,7 @@
     "babel-register": "~6.18.0",
     "gulp": "latest",
     "json-loader": "~0.5.0",
+    "serverless": "^1.15.2",
     "webpack": "2.2.0-rc.3"
   }
 }

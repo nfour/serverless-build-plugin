@@ -4,7 +4,7 @@ service: slsBuildTest
 
 provider:
   name    : aws
-  runtime : nodejs4.3
+  runtime : nodejs6.10
   # profile : dev
   stage   : samslsbuild
   region  : ap-southeast-2
