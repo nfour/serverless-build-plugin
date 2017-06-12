@@ -64,8 +64,6 @@ export class SourceBundler {
       const isIncluded = include.some(testPattern);
       const isExcluded = exclude.some(testPattern);
 
-      console.log({ relPath, isIncluded, isExcluded, include, exclude });
-
       /**
        *  When a pattern matches an exclude, it skips
        *  When a pattern doesnt match an include, it skips
