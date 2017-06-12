@@ -13,7 +13,7 @@ describe('ModuleBundler', () => {
     archive: artifact,
   });
 
-  const { dependencies } = require(`${servicePath}/package.json`); // eslint-disable-line
+  const { dependencies } = require(`${servicePath}/package.json`);
 
   beforeAll(async () => {
     await moduleBundler.bundle({});
