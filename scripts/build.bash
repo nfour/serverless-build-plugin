@@ -4,15 +4,15 @@
 rm -rf dist
 mkdir dist
 
-# Copy latent files into ./dist
-cp * dist 2>/dev/null || :
-cp .* dist 2>/dev/null || :
+# Copy latent, belonging to the index module
+rsync -am . ./dist  --exclude '*/*' --include '*'
+
+# Copy latent files from source, recursively
+rsync -am  ./src/* ./dist --exclude '*.ts'
 
 # Build typescript
 yarn tsc
 
-# Copy latent files from source, recursively
-cd src
-find . -name "*.json" -type f -exec cp --parents {} ../dist/ \;
-find . -name "*.feature" -type f -exec cp --parents {} ../dist/ \;
-cd ..
+
+
+
