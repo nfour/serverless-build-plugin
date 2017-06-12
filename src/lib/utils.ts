@@ -1,6 +1,6 @@
 import { Archiver } from 'archiver';
 import * as c from 'chalk';
-import { readFile } from 'fs-extra';
+import { readFile, readFileSync } from 'fs-extra';
 import * as YAML from 'js-yaml';
 import { isObject } from 'lutils';
 import * as path from 'path';
@@ -14,7 +14,7 @@ import * as path from 'path';
  * @param {String} fileLookup
  * @returns {any} config
  */
-export async function loadFile (fileLookup) {
+export function loadFile (fileLookup) {
   const tryExts = ['.yml', '.yaml', ''];
 
   for (const ext of tryExts) {
@@ -22,7 +22,7 @@ export async function loadFile (fileLookup) {
       const filePath = require.resolve(`${fileLookup}${ext}`);
 
       if (/\.ya?ml$/i.test(filePath)) {
-        return YAML.load(await readFile(filePath, 'utf8'));
+        return YAML.load(readFileSync(filePath, 'utf8'));
       }
 
       return require(filePath); // eslint-disable-line
