@@ -158,11 +158,11 @@ export class ServerlessBuildPlugin {
       };
     } else {
       this.hooks = {
-        // 'after:deploy:function:initialize': this.build,
-        // 'after:deploy:initialize': this.build,
-        // 'after:deploy:createDeploymentArtifacts': () => {
-        //   this.serverless.service.package.artifact = null;
-        // },
+        'after:deploy:function:initialize': this.build,
+        'after:deploy:initialize': this.build,
+        'after:deploy:createDeploymentArtifacts': () => {
+          this.serverless.service.package.artifact = null;
+        },
         ...this.hooks,
       };
     }
@@ -365,11 +365,6 @@ export class ServerlessBuildPlugin {
       const artifactPath = fnConfig.artifact || (fnConfig.package && fnConfig.package.artifact);
 
       if (!artifactPath) { throw new Error(`Artifact path not found for function ${fnName}`); }
-      // if (!artifactPath) {
-      //   await this.build();
-
-      //   artifactPath = fnConfig.artifact;
-      // }
 
       const packageFilePath = path.join(this.tmpDir, `./${fnName}.zip`);
 
