@@ -1,14 +1,14 @@
 import * as Archiver from 'archiver';
 import * as Bluebird from 'bluebird';
 import * as c from 'chalk';
-import { createWriteStream, emptyDir, ensureDir } from 'fs-extra';
+import { copy, createWriteStream, emptyDir, ensureDir } from 'fs-extra';
 import { clone, isArray, merge } from 'lutils';
 import * as path from 'path';
 import * as semver from 'semver';
 import { defaultConfig, IPluginConfig } from './config';
 import { FileBuild } from './FileBuild';
 import { Logger } from './lib/Logger';
-import { loadFile, overridePackagePlugin } from './lib/utils';
+import { loadFile } from './lib/utils';
 import { ModuleBundler } from './ModuleBundler';
 import { SourceBundler } from './SourceBundler';
 
@@ -58,11 +58,7 @@ export class ServerlessBuildPlugin {
     // In sls 1.11 and lower this will skip 'archiving' (no effect in 1.12+)
     this.serverless.service.package.artifact = true;
 
-    // TODO: remove support for < 1.12
-    // In sls 1.12 and higher this will skip 'archiving'
-    if (semver.gte(version, '1.12.0')) {
-      overridePackagePlugin({ serverless, tmpDir: this.tmpDir });
-    } else {
+    if (semver.lt(version, '1.12.0')) {
       this.logger.message(
         c.red('DEPRECATION'),
         'Upgrade to >= serverless@1.12. Build plugin is dropping support in the next major version',
@@ -150,24 +146,34 @@ export class ServerlessBuildPlugin {
 
     // hooks changed in 1.12 :/
     if (semver.gte(version, '1.12.0')) {
+      this.overridePackagePlugin();
+
       this.hooks = {
-        'before:package:initialize'               : this.build,
-        'before:package:function:initialize'      : this.build,
-        'after:package:createDeploymentArtifacts' : () => {
+        'before:package:function:package': this.build,
+        'before:package:initialize': this.build,
+        'after:package:createDeploymentArtifacts': () => {
           this.serverless.service.package.artifact = null;
         },
         ...this.hooks,
       };
     } else {
       this.hooks = {
-        'after:deploy:function:initialize'       : this.build,
-        'after:deploy:initialize'                : this.build,
-        'after:deploy:createDeploymentArtifacts' : () => {
-          this.serverless.service.package.artifact = null;
-        },
+        // 'after:deploy:function:initialize': this.build,
+        // 'after:deploy:initialize': this.build,
+        // 'after:deploy:createDeploymentArtifacts': () => {
+        //   this.serverless.service.package.artifact = null;
+        // },
         ...this.hooks,
       };
     }
+
+    this.fileBuild = new FileBuild({
+      logger: this.logger,
+      servicePath: this.servicePath,
+      buildTmpDir: this.buildTmpDir,
+      handlerEntryExt: this.config.handlerEntryExt,
+      tryFiles: this.config.tryFiles,
+    });
 
   }
 
@@ -245,7 +251,6 @@ export class ServerlessBuildPlugin {
 
     const artifact = Archiver('zip', { store: true });
 
-    this.logger.log('');
     this.logger.message('FUNCTION', c.reset.bold(fnName));
     this.logger.log('');
 
@@ -277,16 +282,6 @@ export class ServerlessBuildPlugin {
       // BUILD FILE
       //
 
-      if (!this.fileBuild) {
-        this.fileBuild = new FileBuild({
-          logger: this.logger,
-          servicePath: this.servicePath,
-          buildTmpDir: this.buildTmpDir,
-          handlerEntryExt: this.config.handlerEntryExt,
-          tryFiles: this.config.tryFiles,
-        });
-      }
-
       await this.fileBuild.build(fnConfig, artifact);
 
       moduleIncludes = this.fileBuild.externals;
@@ -312,7 +307,13 @@ export class ServerlessBuildPlugin {
       ...this.config.modules,
     });
 
-    await this.completeFunctionArtifact(fnName, artifact);
+    this.logger.log('');
+
+    const result = await this.completeFunctionArtifact(fnName, artifact);
+
+    this.logger.log('');
+
+    return result;
   }
 
   /**
@@ -325,18 +326,58 @@ export class ServerlessBuildPlugin {
     );
 
     await new Promise((resolve, reject) => {
-      artifact
+      const stream = createWriteStream(artifactPath);
+      stream
         .on('error', reject)
         .on('close', resolve);
 
-      artifact.pipe(createWriteStream(artifactPath));
+      artifact.pipe(stream);
       artifact.finalize();
     });
+
+    const size = `${(artifact.pointer() / 1024 / 1024).toFixed(4)} MB`;
+
+    this.logger.message(
+      'ARTIFACT',
+      `${c.bold(fnName)} ${c.blue(size)}`,
+    );
 
     const fnConfig = this.serverless.service.functions[fnName];
 
     fnConfig.artifact = artifactPath;
     fnConfig.package = fnConfig.package || {};
     fnConfig.package.artifact = artifactPath;
+
+    return fnConfig;
+  }
+
+  /**
+   * Mutates `packageFunction` on the `Package` serverless built-in plugin
+   * in order to intercept
+   */
+  private overridePackagePlugin = () => {
+    const packagePlugin = this.serverless.pluginManager.plugins.find((item) =>
+      item.constructor.name === 'Package',
+    );
+
+    packagePlugin.packageFunction = async (fnName) => {
+      const fnConfig = this.serverless.service.functions[fnName];
+      const artifactPath = fnConfig.artifact || (fnConfig.package && fnConfig.package.artifact);
+
+      if (!artifactPath) { throw new Error(`Artifact path not found for function ${fnName}`); }
+      // if (!artifactPath) {
+      //   await this.build();
+
+      //   artifactPath = fnConfig.artifact;
+      // }
+
+      const packageFilePath = path.join(this.tmpDir, `./${fnName}.zip`);
+
+      await copy(artifactPath, packageFilePath);
+
+      fnConfig.artifact = artifactPath;
+
+      return artifactPath;
+    };
   }
 }

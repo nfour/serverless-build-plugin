@@ -34,10 +34,13 @@ export class Logger {
     return this.log(`${c.grey(`[${prefix}]`)} ${str}`);
   }
 
-  async module ({ filePath, packageJson }: { filePath: string, packageJson?: any }) {
+  async module ({ filePath, realPath, packageJson }: {
+    filePath: string, packageJson?: any,
+    realPath?: string,
+  }) {
     const directory = path.basename(filePath);
 
-    const size = await directorySize(filePath);
+    const size = await directorySize(realPath || filePath);
 
     return this.message(
       'MODULE',

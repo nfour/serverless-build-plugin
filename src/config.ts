@@ -28,7 +28,7 @@ export const defaultConfig: IPluginConfig = {
   transformExtensions: ['ts', 'js', 'jsx', 'tsx'],
   handlerEntryExt: 'js',
 
-  zip: { gzip: true, gzipOptions: { level: 7 } },
+  zip: { gzip: true, gzipOptions: { level: 5 } },
   followSymlinks: true,
 
   functions: {},

@@ -6,6 +6,7 @@
     "outDir": "./dist",
     "declaration": true,
     "noUnusedLocals": true,
+    "downlevelIteration": true,
     "lib": [
       "es2015",
       "es2016",
