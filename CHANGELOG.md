@@ -1,5 +1,9 @@
 ## 2.0.0 - Jun 12 2017
 
+Breaking changes:
+- [x] `serverless@0.5` support dropped
+- [x] `babel`, `uglifyjs`, `babel-preset-babili` and `webpack` are now **peerDependencies**
+
 Features:
 - [x] Symlinked modules now supported. 
   - eg. `yarn link myModule` will work as expected when building
@@ -8,9 +12,6 @@ Features:
   - [x] Can now specify the `silent` option to hush the CLI
 - [x] Artifacts are now configured for `archiver` 
 - [x] Supports `sls package` instead of `sls deploy --no-deploy`. This command can't build one function at a time at this time
-
-Breaking changes:
-- [x] `serverless@0.5` support dropped
 
 Under the covers:
 - [x] Rewritten in TypeScript for added sanity
