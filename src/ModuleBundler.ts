@@ -117,7 +117,7 @@ export class ModuleBundler {
 
       await walker.end();
 
-      await this.logger.module(({ filePath: relativePath, realPath: packagePath }));
+      await this.logger.module(({ filePath: relativePath, realPath: packagePath, packageJson }));
     };
 
     await Bluebird.map(this.modules, readModule);
@@ -150,6 +150,7 @@ export class ModuleBundler {
     for (const [real, link] of items) {
       if (filePath.startsWith(real)) {
         const relLinkedPath = filePath.slice(real.length);
+
         return {
           real, link,
           relLinkedPath,
