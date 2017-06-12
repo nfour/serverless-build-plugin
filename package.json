@@ -11,6 +11,8 @@
     "build:watch": "tsc --watch",
     "build:link": "yarn build && cd dist && yarn unlink && yarn link",
     "test": "jest src",
+    "test:dist": "jest -c '{}' dist",
+    "test:prepare": "cd test/1.0 && yarn",
     "lint": "tslint 'src/**/*.ts'",
     "coverage": "jest src --coverage"
   },
