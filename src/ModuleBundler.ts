@@ -111,13 +111,13 @@ export class ModuleBundler {
         });
       };
 
-      const walker = new Walker(packagePath, { followSymlinks: this.followSymlinks })
+      const walker = new Walker(packagePath)
         .filter(filter)
         .file(onFile);
 
       await walker.end();
 
-      await this.logger.module(({ filePath: relativePath, realPath: packagePath, packageJson }));
+      await this.logger.module(({ filePath: relativePath, realPath: packagePath }));
     };
 
     await Bluebird.map(this.modules, readModule);
