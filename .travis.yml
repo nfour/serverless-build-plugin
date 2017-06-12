@@ -9,6 +9,8 @@ before_install:
 
 install:
   - yarn install
+  - cd test/1.0 && yarn install
+
 
 script:
   - yarn lint

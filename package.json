@@ -9,12 +9,10 @@
   "scripts": {
     "build": "./scripts/build.bash",
     "build:watch": "tsc --watch",
-    "test:unit": "yarn jest -- --testPathPattern='\\/[^\\/\\.]+\\.test\\.tsx?$'",
-    "test:integration": "yarn jest -- --testPathPattern='\\.int\\.test\\.tsx?$'",
     "build:link": "yarn build && cd dist && yarn unlink && yarn link",
-    "test": "yarn test:unit",
+    "test": "jest src",
     "lint": "tslint 'src/**/*.ts'",
-    "coverage": "yarn test:unit -- --coverage"
+    "coverage": "jest src --coverage"
   },
   "dependencies": {
     "archiver": "^1.3.0",
