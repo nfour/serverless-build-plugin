@@ -1,3 +1,21 @@
+## 2.0.0 - Jun 12 2017
+
+Features:
+- [x] Symlinked modules now supported. 
+  - eg. `yarn link myModule` will work as expected when building
+- [x] Build times improved
+- [x] CLI output imrpoved
+  - [x] Can now specify the `silent` option to hush the CLI
+- [x] Artifacts are now configured for `archiver` 
+- [x] Supports `sls package` instead of `sls deploy --no-deploy`. This command can't build one function at a time at this time
+
+Breaking changes:
+- [x] `serverless@0.5` support dropped
+
+Under the covers:
+- [x] Rewritten in TypeScript for added sanity
+- [x] Fixed a race condition
+
 ## 1.5.0 - May 30 2017
 Features:
 - [x] Supports latest serverless versions as of now (1.14)
