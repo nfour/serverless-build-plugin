@@ -3,14 +3,12 @@ import { join } from 'path';
 import * as createWalker from 'walker';
 
 export class Walker {
-  followSymlinks: boolean;
   walker: any;
   pending: any[] = [];
   symlinkRoots: Set<string> = new Set();
 
-  constructor (directory, { followSymlinks = true } = {}) {
+  constructor (directory) {
     this.walker = createWalker(directory);
-    this.followSymlinks = followSymlinks;
   }
 
   filter (fn) {
@@ -27,8 +25,6 @@ export class Walker {
 
   file (fn) {
     this.walker.on('file', this.capture(fn));
-
-    if (this.followSymlinks) { this.walker.on('symlink', fn); }
 
     return this;
   }

@@ -82,7 +82,7 @@ export class SourceBundler {
       this.logger.source({ filePath: relPath });
     };
 
-    await new Walker(this.servicePath, { followSymlinks: this.followSymlinks })
+    await new Walker(this.servicePath)
       .filter((dir) => !/\/node_modules\//i.test(dir))
       .file(onFile)
       .end();
