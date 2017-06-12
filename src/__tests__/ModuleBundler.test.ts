@@ -1,14 +1,17 @@
-import path from 'path';
-import Yazl from 'yazl';
-import ModuleBundler from '../src/lib/ModuleBundler';
+import * as Archiver from 'archiver';
+import * as path from 'path';
+import { Logger } from '../lib/Logger';
+import { ModuleBundler } from '../ModuleBundler';
 
 describe('ModuleBundler', () => {
-  const servicePath = path.resolve(__dirname, './1.0');
+  const servicePath = path.resolve(__dirname, '../../test/1.0');
 
-  const artifact      = new Yazl.ZipFile();
+  const artifact = Archiver('zip', { store: true });
   const moduleBundler = new ModuleBundler({
     servicePath,
-  }, artifact);
+    logger: new Logger(),
+    archive: artifact,
+  });
 
   const { dependencies } = require(`${servicePath}/package.json`); // eslint-disable-line
 
