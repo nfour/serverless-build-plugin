@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from 'fs-extra';
+import { lstat, readdir, realpath } from 'fs-extra';
 import { join } from 'path';
 import * as createWalker from 'walker';
 
@@ -9,12 +9,8 @@ export class Walker {
   symlinkRoots: Set<string> = new Set();
 
   constructor (directory, { followSymlinks = true } = {}) {
-    this.checkForSymlinks(directory);
-
     this.walker = createWalker(directory);
     this.followSymlinks = followSymlinks;
-
-    this.walker.on('dir', this.checkForSymlinks);
   }
 
   filter (fn) {
@@ -50,20 +46,38 @@ export class Walker {
     return (...args) => {
       const result = fn(...args);
       this.pending.push(result);
+
       return result;
     };
   }
+}
 
-  private checkForSymlinks = (dirPath) => {
-    console.log("checking", dirPath)
-    const entries = readdirSync(dirPath);
+export async function findSymlinks (dirPath, maxDepth = 2) {
+  const links = new Map();
 
-    entries.forEach((entry) => {
-      const fullPath = join(dirPath, entry);
-      if (/lutil/.test(fullPath)) console.log(fullPath);
-      if (statSync(fullPath).isSymbolicLink()) {
-        this.symlinkRoots.add(fullPath);
-      }
-    });
-  }
+  const traverse = async (dir, depth) => {
+    if (depth < 0) { return; }
+
+    --depth;
+
+    const stats = await lstat(dir);
+
+    if (stats.isSymbolicLink()) {
+      const real = await realpath(dir);
+
+      return links.set(real, dir);
+    }
+
+    if (!stats.isDirectory()) { return; }
+
+    const entries = await readdir(dir);
+
+    await Promise.all(entries.map(async (entry) => {
+      await traverse(join(dir, entry), depth);
+    }));
+  };
+
+  await traverse(dirPath, maxDepth);
+
+  return links;
 }

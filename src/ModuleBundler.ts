@@ -6,7 +6,7 @@ import { Archiver } from 'archiver';
 import { exists } from 'fs-extra';
 import { Logger } from './lib/Logger';
 import { handleFile } from './lib/utils';
-import { Walker } from './lib/Walker';
+import { findSymlinks, Walker } from './lib/Walker';
 import { UglifyTransform } from './transforms/Uglify';
 
 export interface IModule {
@@ -49,20 +49,31 @@ export class ModuleBundler {
   async bundle ({ include = [], exclude = [], deepExclude = [] }: {
     include?: string[], exclude?: string[], deepExclude?: string[],
   }) {
+    const links = await findSymlinks(join(this.servicePath, 'node_modules'));
+
     this.modules = await this.resolveDependencies(
       this.servicePath,
-      { include, exclude, deepExclude },
+      { include, exclude, deepExclude, links },
     );
 
     const transforms = await this.resolveTransforms();
 
     const readModule = async ({ packagePath, packageDir, relativePath, packageJson }) => {
       const filter = (dirPath, stats) => {
-        if (walker.symlinkRoots.has(dirPath)) { console.log('wew', dirPath);}
+        const { linkedPath, link } = this.resolveSymlinkPath(dirPath, links);
+
+        let testPackagePath = packagePath;
+
+        if (linkedPath) {
+          dirPath = linkedPath;
+          testPackagePath = link;
+        }
+
+        if (!dirPath || !testPackagePath) { return true; }
 
         // This pulls ['node_modules', 'pack'] out of
         // .../node_modules/package/node_modules/pack
-        const endParts = dirPath.split(packagePath)[1].split('/').slice(-2);
+        const endParts = dirPath.split(testPackagePath)[1].split('/').slice(-2);
 
         // When a directory is a package and matches a deep exclude pattern
         // Then skip it
@@ -76,10 +87,19 @@ export class ModuleBundler {
         return true;
       };
 
-      const onFile = async (filePath, stats) => {
-        const relPath = filePath.substr(filePath.indexOf(relativePath)).replace(/^\/|\/$/g, '');
+      const onFile = async (filePath: string, stats) => {
+        let relPath;
 
-        // if (/lutils/.test(filePath)) console.log(filePath);
+        const { relLinkedPath } = this.resolveSymlinkPath(filePath, links);
+
+        if (relLinkedPath) { relPath = join(relativePath, relLinkedPath); }
+
+        if (!relPath) {
+          relPath = filePath.substr(filePath.indexOf(relativePath));
+        }
+
+        relPath = relPath.replace(/^\/|\/$/g, '');
+
         await handleFile({
           filePath,
           relPath,
@@ -90,19 +110,13 @@ export class ModuleBundler {
         });
       };
 
-      console.log({ packagePath, packageDir });
-
-      // TODO: to solve symlinks we need the package resolver to return the original path
-      // - option 1: traverse at depth 2 all folders beforehand, building up a list of symlinks & their resolved paths, then use that to fudge a new path
-      // - options 2: see if the module has symlink related functionality
-
       const walker = new Walker(packagePath, { followSymlinks: this.followSymlinks })
         .filter(filter)
         .file(onFile);
 
       await walker.end();
 
-      await this.logger.module(({ filePath: relativePath, packageJson }));
+      await this.logger.module(({ filePath: relativePath, realPath: packagePath, packageJson }));
     };
 
     await Bluebird.map(this.modules, readModule);
@@ -124,12 +138,34 @@ export class ModuleBundler {
     return transforms;
   }
 
+  private resolveSymlinkPath (filePath: string, links: Map<string, string>): {
+    linkedPath?: string,
+    link?: string, real?: string,
+    relLinkedPath?: string,
+  } {
+    const items = Array.from(links.entries()).reverse();
+
+    // Get a relPath from using a matching symlink
+    for (const [real, link] of items) {
+      if (filePath.startsWith(real)) {
+        const relLinkedPath = filePath.slice(real.length);
+        return {
+          real, link,
+          relLinkedPath,
+          linkedPath: join(link, relLinkedPath),
+        };
+      }
+    }
+
+    return {};
+  }
+
   /**
    * Resolves a package's dependencies to an array of paths.
    */
   private async resolveDependencies (
     initialPackageDir,
-    { include = [], exclude = [], deepExclude = [] } = {},
+    { include = [], exclude = [], deepExclude = [], links = new Map() } = {},
   ): Promise<IModule[]> {
     const resolvedDeps: IModule[] = [];
     const cache: Set<string> = new Set();
@@ -160,7 +196,7 @@ export class ModuleBundler {
         if (_exclude.length && _exclude.indexOf(packageName) > -1) { return; }
         if (_include.length && _include.indexOf(packageName) < 0) { return; }
 
-        const resolvedDir = resolvePackage(packageName, { cwd: packageDir });
+        let resolvedDir = resolvePackage(packageName, { cwd: packageDir });
 
         const childPackageJsonPath = join(resolvedDir, './package.json');
 
@@ -171,13 +207,19 @@ export class ModuleBundler {
 
         if (!resolvedDir) { return; }
 
+        const nextPackagePath = resolvedDir;
+
+        const link = links.get(resolvedDir);
+
+        if (link) { resolvedDir = link; }
+
         const relativePath = join('node_modules', resolvedDir.split(separator).slice(1).join(separator));
 
         if (cache.has(relativePath)) { return; }
 
         cache.add(relativePath);
 
-        const childResult = await recurse(resolvedDir, undefined, deepExclude);
+        const childResult = await recurse(nextPackagePath, undefined, deepExclude);
 
         resolvedDeps.push({ ...childResult, packageDir, relativePath, packageJson: childPackageJson });
       });

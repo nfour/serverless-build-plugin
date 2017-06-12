@@ -10,7 +10,7 @@ import { WebpackBuilder } from './WebpackBuilder';
 export class FileBuild {
   logger: Logger; // FIXME:
   externals: Set<string>;
-  alreadyBuilt: Set<string>;
+  webpackBuilder: WebpackBuilder;
 
   servicePath: string;
   buildTmpDir: string;
@@ -27,7 +27,11 @@ export class FileBuild {
     Object.assign(this, config);
 
     this.externals = new Set();
-    this.alreadyBuilt = new Set();
+    this.webpackBuilder = new WebpackBuilder({
+      logger: this.logger,
+      buildTmpDir: this.buildTmpDir,
+      servicePath: this.servicePath,
+    });
   }
 
   /**
@@ -67,29 +71,21 @@ export class FileBuild {
       // WEBPACK CONFIG
       //
 
-      if (!this.alreadyBuilt.has(entryRelPath)) {
-        this.alreadyBuilt.add(entryRelPath);
+      const webpackConfig = clone(result);
 
-        const webpackConfig = clone(result);
-
-        merge(
-          webpackConfig,
-          {
-            entry  : [...(webpackConfig.entry || []), entryPoint],
-            output : {
-              filename: buildFilename,
-            },
+      merge(
+        webpackConfig,
+        {
+          entry  : [...(webpackConfig.entry || []), entryPoint],
+          output : {
+            filename: buildFilename,
           },
-        );
+        },
+      );
 
-        const { externals } = await new WebpackBuilder({
-          logger: this.logger,
-          buildTmpDir: this.buildTmpDir,
-          servicePath: this.servicePath,
-        }).build(webpackConfig);
+      const externals = await this.webpackBuilder.build(webpackConfig);
 
-        externals.forEach((ext) => this.externals.add(ext));
-      }
+      externals && externals.forEach((ext) => this.externals.add(ext));
 
       await Bluebird.each([
         buildFilename, `${buildFilename}.map`,

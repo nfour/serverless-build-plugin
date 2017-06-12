@@ -3,8 +3,9 @@ import * as requireResolve from 'resolve-pkg';
 import { Logger } from './lib/Logger';
 
 export class WebpackBuilder {
-  externals: string[];
   webpack: any;
+  entryCache: Set<string> = new Set();
+  cache: boolean = true;
 
   servicePath: string;
   buildTmpDir: string;
@@ -14,6 +15,7 @@ export class WebpackBuilder {
     servicePath: string;
     buildTmpDir: string;
     logger: Logger;
+    cache?: boolean;
   }) {
     Object.assign(this, config);
 
@@ -26,16 +28,26 @@ export class WebpackBuilder {
   /**
    *  Builds a webpack config into the build directory.
    */
-  async build (config) {
+  async build (config): Promise<string[]> {
+    const entry = config.entry || [];
+
+    if (entry.length) {
+      const cacheKey = entry.join('');
+
+      if (this.entryCache.has(cacheKey)) { return; }
+
+      this.entryCache.add(cacheKey);
+    }
+
     config.context = this.servicePath;
-    config.entry = [...(config.entry || [])];
+    config.entry = [...entry];
     config.output = {
       ...config.output,
       libraryTarget : 'commonjs',
       path          : this.buildTmpDir,
     };
 
-    this.externals = this.normalizeExternals(config.externals || []);
+    const externals = this.normalizeExternals(config.externals || []);
 
     this.logger.message('WEBPACK');
     this.logger.log('');
@@ -45,7 +57,7 @@ export class WebpackBuilder {
     this.logger.log('');
     this.logger.block('WEBPACK', logs);
 
-    return this;
+    return externals;
   }
 
   /**
