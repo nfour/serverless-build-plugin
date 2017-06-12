@@ -2,7 +2,7 @@
 
 Breaking changes:
 - [x] `serverless@0.5` support dropped
-- [x] `babel`, `uglifyjs`, `babel-preset-babili` and `webpack` are now **peerDependencies**
+- [x] `babel`, `uglifyjs`, `babel-preset-babili` are now optional **peerDependencies**
 
 Features:
 - [x] Symlinked modules now supported. 
