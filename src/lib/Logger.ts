@@ -21,8 +21,8 @@ export class Logger {
 
   constructor (
     { serverless, silent = false }: {
-      silent?: boolean, serverless: any,
-    },
+      silent?: boolean, serverless?: any,
+    } = {},
   ) {
     Object.assign(this, { serverless, silent });
   }

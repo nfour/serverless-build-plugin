@@ -249,7 +249,7 @@ export class ServerlessBuildPlugin {
     let moduleIncludes: Set<string>;
     const { method } = this.config;
 
-    const artifact = Archiver('zip', { store: true });
+    const artifact = Archiver('zip', this.config.zip);
 
     this.logger.message('FUNCTION', c.reset.bold(fnName));
     this.logger.log('');

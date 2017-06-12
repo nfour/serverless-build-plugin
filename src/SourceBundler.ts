@@ -3,9 +3,9 @@ import { exists, readFile } from 'fs-extra';
 import { isObject, isRegExp } from 'lutils';
 import * as glob from 'minimatch';
 import { join } from 'path';
+import { Logger } from './lib/Logger';
 import { handleFile } from './lib/utils';
 import { Walker } from './lib/Walker';
-import { Logger } from './lib/Logger';
 import { BabelTransform } from './transforms/Babel';
 import { UglifyTransform } from './transforms/Uglify';
 

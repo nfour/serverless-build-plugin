@@ -10,6 +10,7 @@ import { findSymlinks, Walker } from './lib/Walker';
 import { UglifyTransform } from './transforms/Uglify';
 
 export interface IModule {
+  name: string;
   packagePath: string;
   relativePath: string;
   packageJson: any;
@@ -180,7 +181,7 @@ export class ModuleBundler {
       const packageJson = require(join(packageDir, './package.json')); // eslint-disable-line
       const { name, dependencies } = packageJson;
 
-      const result = {
+      const result = <IModule> {
         name,
         packageDir,
         packagePath: packageDir,

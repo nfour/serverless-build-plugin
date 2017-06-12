@@ -1,8 +1,23 @@
 language: node_js
+node_js: ["6.10"]
 
-node_js:
-  - "6"
+cache:
+  yarn: true
 
-before_script:
-  - "ls -la test/1.0/"
-  - "cd test/1.0/ && npm install && cd ../../"
+before_install:
+  - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
+
+install:
+  - yarn install
+
+script:
+  - yarn lint
+  - yarn build
+  - DEBUG=true yarn coverage
+
+deploy:
+  provider: script
+  script:
+    - npm run release
+  on:
+    tags: true
