@@ -9,6 +9,6 @@ Replaces packaging functionality for Node.JS functions:
 - **Bundling** of functions in a Node.js friendly way
 - Arbitrary builds, with your own build file or a **webpack** config.
 
-Docs:
-- [Installation & Configuration](https://github.com/nfour/serverless-build-plugin/blob/master/docs/Install%20&%20Config.md)
-- [Usage](https://github.com/nfour/serverless-build-plugin/blob/master/docs/Usage.md)
+Docs:s
+- [Installation & Configuration](./docs/Install%20&%20Config.md)
+- [Usage](./docs/Usage.md)
