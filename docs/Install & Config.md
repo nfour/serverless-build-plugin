@@ -3,7 +3,7 @@
 Serverless build plugin is available as [an NPM module](https://www.npmjs.com/package/serverless-build-plugin).
 
 ```sh
-npm i --save serverless-build-plugin
+yarn add --dev serverless-build-plugin
 ```
 
 Once installed, add `serverless-build-plugin` to your serverless plugin registry.
@@ -13,16 +13,17 @@ Once installed, add `serverless-build-plugin` to your serverless plugin registry
 Serverless build plugin can be configured by either or both of the following methods:
 
 - Creating a `serverless.build.yml` file.
-- Setting a `custom.build` section in your project's `serverless.yml` file.
+- Setting a `custom.build` section in your project's `serverless.yml`.
 
 > If no configuration is found, defaults settings are used.
 
-Serverless projects can be build using one of the following methods:
+Serverless projects can be built using one of the following methods:
 
 - [`bundle`](#bundle)
-  - Bundle your functions, keeping their directory structure based on globbing and module dependency resolution.
+  - Bundle your functions - keeps their directory structure. Based on globbing and module dependency resolution.
 - [`file`](#file)
-  - Use a `webpack.config.js` file, or any file which builds your functions, allowing flexibility.
+  - Understands a `webpack.config.js`
+  - Any file can be specified, as long as the default export is a function wich returns `Promise<string|Buffer|stream>`
 
 See [test/1.0](../test/1.0) for an example project.
 
@@ -36,6 +37,8 @@ The bundle build method.
   - **uglify**
 - `node_modules` are whitelisted based on the `package.json` `dependencies`, resolved recursively and reliably.
 
+> To use `babeli`, add it to your .babelrc with the preset
+
 ```yaml
 method: bundle
 
@@ -44,7 +47,7 @@ method: bundle
 # Each file can be babel transpiled. When set to:
 #   - An object, the object is parsed as babel configuration.
 #   - `true`, a `.babelrc` in the service's directory is used as babel configuration.
-#  Default is `null` (a null object).
+#  Default is `null`.
 babel: true
 
 # uglify
@@ -189,13 +192,9 @@ synchronous: true
 
 # zip
 #
-# Options to pass to the `yazl` zipping instances
+# Options to pass to the `archiver` zipping instances
 zip:
-  compress: true
+  gzip: true
+  gzipOptions: { level: 5 }
 
-# deploy
-#
-# Whether to deploy.
-# Specify --no-deploy in the CLI to disable this and do a dry run
-deploy: true
 ```
