@@ -19,8 +19,6 @@ export class BabelTransform {
       ...options,
     };
 
-    if (this.options.babili) { this.config.presets.push('babili'); }
-
     // eslint-disable-next-line
     this.babel = require(
       requireResolve('babel-core', { cwd: this.options.servicePath }),
