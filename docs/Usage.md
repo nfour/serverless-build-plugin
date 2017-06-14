@@ -17,12 +17,12 @@ If you'd like to test out a preconfigured project...
 ```
 git clone git@github.com:nfour/serverless-build-plugin
 cd serverless-build-plugin
-npm i
-npm run build
-npm link
+yarn
+yarn build
+yarn link
 cd test/1.0
-npm i
-npm link serverless-build-plugin
+yarn
+yarn link serverless-build-plugin
 
 sls deploy
 sls invoke -f one -l
@@ -30,10 +30,10 @@ sls deploy function -f two
 sls invoke -f two -l
 ```
 
-If you want to audit the built zip in a test run, add the `--no-deploy` option
+If you want to audit the built zip, run:
 
 ```
-sls deploy function -f two --no-deploy
+sls package
 ```
 
 Then check the `.serverless/artifacts` directory
