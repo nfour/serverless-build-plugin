@@ -203,7 +203,7 @@ export class ServerlessBuildPlugin {
         'method',
         'synchronous', 'deploy', 'useServerlessOffline',
         'babel', 'uglify', 'uglifySource', 'uglifyModules',
-        'nomralizeBabelExt', 'sourceMaps', 'transformExtensions',
+        'normalizeBabelExt', 'sourceMaps', 'transformExtensions',
         'baseExclude',
         'modules', 'include', 'exclude', 'zip',
         'followSymlinks',
