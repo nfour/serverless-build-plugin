@@ -1,3 +1,8 @@
+## 2.0.1 - Jun 13 2017
+
+- [x] Removed `babili` option.
+  - You can add it to your .babelrc yourself
+
 ## 2.0.0 - Jun 12 2017
 
 Breaking changes:

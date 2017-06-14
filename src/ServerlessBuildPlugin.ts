@@ -264,7 +264,10 @@ export class ServerlessBuildPlugin {
         uglify: this.config.uglifySource
           ? this.config.uglify
           : undefined,
-
+        babel: this.config.babel,
+        babili: this.config.babili,
+        sourceMaps: this.config.sourceMaps,
+        transformExtensions: this.config.transformExtensions,
         logger: this.logger,
         archive: artifact,
         servicePath: this.servicePath,
