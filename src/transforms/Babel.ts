@@ -15,7 +15,6 @@ export class BabelTransform {
       servicePath       : '',
       skipOnError       : false, // When false, errors will halt execution
       logErrors         : true,
-      babili            : false,
       normalizeBabelExt : false,
       ...options,
     };

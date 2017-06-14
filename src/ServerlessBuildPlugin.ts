@@ -202,7 +202,7 @@ export class ServerlessBuildPlugin {
       this.logger.config(reduceConfig([
         'method',
         'synchronous', 'deploy', 'useServerlessOffline',
-        'babel', 'babili', 'uglify', 'uglifySource', 'uglifyModules',
+        'babel', 'uglify', 'uglifySource', 'uglifyModules',
         'nomralizeBabelExt', 'sourceMaps', 'transformExtensions',
         'baseExclude',
         'modules', 'include', 'exclude', 'zip',
@@ -265,7 +265,6 @@ export class ServerlessBuildPlugin {
           ? this.config.uglify
           : undefined,
         babel: this.config.babel,
-        babili: this.config.babili,
         sourceMaps: this.config.sourceMaps,
         transformExtensions: this.config.transformExtensions,
         logger: this.logger,
