@@ -21,7 +21,6 @@ export const defaultConfig: IPluginConfig = {
   uglifyModules: true,
 
   babel: null,
-  babili: false,
   normalizeBabelExt: false,
   sourceMaps: true,
 
@@ -60,7 +59,6 @@ export interface IPluginConfig {
   uglifyModules: boolean;
 
   babel: any;
-  babili: boolean;
   normalizeBabelExt: boolean;
   sourceMaps: boolean;
 
