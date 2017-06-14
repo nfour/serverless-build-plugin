@@ -19,10 +19,12 @@ export class WebpackBuilder {
   }) {
     Object.assign(this, config);
 
-    // eslint-disable-next-line
-    this.webpack = require(
-      requireResolve('webpack', { cwd: this.servicePath }),
-    );
+    try {
+      // eslint-disable-next-line
+      this.webpack = require(
+        requireResolve('webpack', { cwd: this.servicePath }),
+      );
+    } catch (err) { /**/ }
   }
 
   /**

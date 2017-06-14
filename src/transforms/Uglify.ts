@@ -19,10 +19,12 @@ export class UglifyTransform {
       ...options,
     };
 
-    // eslint-disable-next-line
-    this.uglify = require(
-      requireResolve('uglify-js', { cwd: this.options.servicePath }),
-    );
+    try {
+      // eslint-disable-next-line
+      this.uglify = require(
+        requireResolve('uglify-js', { cwd: this.options.servicePath }),
+      );
+    } catch (err) { /**/ }
   }
 
   run ({ code, map, filePath }) {
