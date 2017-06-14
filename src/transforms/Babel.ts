@@ -22,12 +22,10 @@ export class BabelTransform {
 
     if (this.options.babili) { this.config.presets.push('babili'); }
 
-    try {
-      // eslint-disable-next-line
-      this.babel = require(
-        requireResolve('babel-core', { cwd: this.options.servicePath }),
-      );
-    } catch (err) { /**/ }
+    // eslint-disable-next-line
+    this.babel = require(
+      requireResolve('babel-core', { cwd: this.options.servicePath }),
+    );
   }
 
   run ({ code, map, relPath }) {

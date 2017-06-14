@@ -19,7 +19,7 @@ export class SourceBundler {
   archive: Archiver;
   servicePath: string;
   babel: any;
-  babili: false;
+  babili = false;
   uglify: any;
   sourceMaps = false;
   transformExtensions = ['ts', 'js', 'jsx', 'tsx'];
@@ -30,10 +30,10 @@ export class SourceBundler {
     archive: Archiver;
     servicePath: string;
     babel?: any;
-    babili?: false;
+    babili?: boolean;
     uglify?: any;
     sourceMaps?: boolean;
-    transformExtensions?: string;
+    transformExtensions?: string[];
     followSymlinks?: boolean;
   }) {
     Object.assign(this, config);
