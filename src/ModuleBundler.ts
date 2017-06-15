@@ -31,14 +31,12 @@ export class ModuleBundler {
   archive: Archiver;
   servicePath: string;
   uglify: IUglifyParams;
-  followSymlinks: boolean = true;
 
   constructor (config: {
     logger: Logger;
     archive: Archiver;
     servicePath: string;
     uglify?: IUglifyParams;
-    followSymlinks?: boolean;
   }) {
     Object.assign(this, config);
   }

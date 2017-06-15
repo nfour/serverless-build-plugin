@@ -28,7 +28,6 @@ export const defaultConfig: IPluginConfig = {
   handlerEntryExt: 'js',
 
   zip: { gzip: true, gzipOptions: { level: 5 } },
-  followSymlinks: true,
 
   functions: {},
 
@@ -67,7 +66,6 @@ export interface IPluginConfig {
 
   /** `archiver` options */
   zip: ArchiverOptions;
-  followSymlinks: boolean;
 
   functions: any;
 

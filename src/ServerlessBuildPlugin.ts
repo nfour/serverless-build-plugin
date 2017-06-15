@@ -196,7 +196,6 @@ export class ServerlessBuildPlugin {
         'method', 'tryFiles', 'handlerEntryExt',
         'synchronous', 'deploy', 'useServerlessOffline',
         'modules', 'zip',
-        'followSymlinks',
       ]));
     } else {
       this.logger.config(reduceConfig([
@@ -206,7 +205,6 @@ export class ServerlessBuildPlugin {
         'normalizeBabelExt', 'sourceMaps', 'transformExtensions',
         'baseExclude',
         'modules', 'include', 'exclude', 'zip',
-        'followSymlinks',
       ]));
     }
 
@@ -270,7 +268,6 @@ export class ServerlessBuildPlugin {
         logger: this.logger,
         archive: artifact,
         servicePath: this.servicePath,
-        followSymlinks: this.config.followSymlinks,
       });
 
       this.logger.log('');
@@ -303,7 +300,6 @@ export class ServerlessBuildPlugin {
 
         servicePath: this.servicePath,
         archive: artifact,
-        followSymlinks: this.config.followSymlinks,
       },
     ).bundle({
       include: Array.from(moduleIncludes || []),

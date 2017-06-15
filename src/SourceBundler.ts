@@ -22,7 +22,6 @@ export class SourceBundler {
   uglify: any;
   sourceMaps = false;
   transformExtensions = ['ts', 'js', 'jsx', 'tsx'];
-  followSymlinks = true;
 
   constructor (config: {
     logger: Logger;
@@ -32,7 +31,6 @@ export class SourceBundler {
     uglify?: any;
     sourceMaps?: boolean;
     transformExtensions?: string[];
-    followSymlinks?: boolean;
   }) {
     Object.assign(this, config);
   }
