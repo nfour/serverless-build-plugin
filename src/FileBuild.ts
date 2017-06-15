@@ -8,7 +8,7 @@ import { Logger } from './lib/Logger';
 import { WebpackBuilder } from './WebpackBuilder';
 
 export class FileBuild {
-  logger: Logger; // FIXME:
+  logger: Logger;
   externals: Set<string>;
   webpackBuilder: WebpackBuilder;
 
@@ -49,22 +49,22 @@ export class FileBuild {
 
     builderFilePath = path.resolve(this.servicePath, builderFilePath);
 
+    const entryRelPath = `${fnConfig.handler.split(/\.[^.]+$/)[0]}`;
+    const entryPoint = `./${entryRelPath}.${this.handlerEntryExt}`;
+    const buildFilename = `./${entryRelPath}.js`;
+
     // eslint-disable-next-line
     let result = require(builderFilePath);
 
     // Resolve any functions...
     if (isFunction(result)) {
-      result = await Bluebird.try(() => result(fnConfig, this));
+      result = await Bluebird.try(() => result(fnConfig, this, { entryRelPath, entryPoint, buildFilename }));
     }
 
     //
     // - String, Buffer or Stream : piped as 'handler.js' into zip
     // - Webpack Config           : executed and output files are zipped
     //
-
-    const entryRelPath = `${fnConfig.handler.split(/\.[^.]+$/)[0]}`;
-    const entryPoint = `./${entryRelPath}.${this.handlerEntryExt}`;
-    const buildFilename = `./${entryRelPath}.js`;
 
     if (isObject(result)) {
       //
