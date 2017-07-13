@@ -1,3 +1,8 @@
+
+## 2.1.0 - Jul 13 2017
+
+- [x] Fixed #36, issue with `.map` files being required for file builds
+
 ## 2.0.1 - Jun 13 2017
 
 - [x] Removed `babili` option.
