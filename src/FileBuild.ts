@@ -92,9 +92,7 @@ export class FileBuild {
       ], async (relPath) => {
         const filePath = path.resolve(this.buildTmpDir, relPath);
 
-        try {
-          await exists(filePath);
-        } catch (err) { return; }
+        if (!await exists(filePath)) { return; }
 
         archive.file(filePath, { name: relPath });
       });
