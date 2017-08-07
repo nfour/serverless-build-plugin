@@ -1,3 +1,4 @@
+import * as Bluebird from 'bluebird';
 import { lstat, readdir, realpath } from 'fs-extra';
 import { join } from 'path';
 import * as createWalker from 'walker';
@@ -68,9 +69,9 @@ export async function findSymlinks (dirPath, maxDepth = 2) {
 
     const entries = await readdir(dir);
 
-    await Promise.all(entries.map(
-      (entry) => traverse(join(dir, entry), depth)
-    ));
+    return Bluebird.map(entries, (entry) =>
+      traverse(join(dir, entry), depth),
+    );
   };
 
   await traverse(dirPath, maxDepth);
