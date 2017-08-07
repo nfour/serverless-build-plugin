@@ -15,6 +15,7 @@
     "test:prepare": "cd test/1.0 && yarn",
     "release": "cd dist && npm publish",
     "lint": "tslint 'src/**/*.ts'",
+    "preversion": "yarn build && yarn test:dist",
     "coverage": "jest src --coverage"
   },
   "dependencies": {
