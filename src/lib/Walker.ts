@@ -68,9 +68,9 @@ export async function findSymlinks (dirPath, maxDepth = 2) {
 
     const entries = await readdir(dir);
 
-    await Promise.all(entries.map(async (entry) => {
-      await traverse(join(dir, entry), depth);
-    }));
+    await Promise.all(entries.map(
+      (entry) => traverse(join(dir, entry), depth)
+    ));
   };
 
   await traverse(dirPath, maxDepth);
