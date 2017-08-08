@@ -1,4 +1,12 @@
 
+## 2.3.0 - Aug 08 2017
+Features:
+- [x] Now supports `webpack.config.ts` and any TypeScript build file by default
+  - Uses the services local `ts-node` to execute
+
+## 2.2.0 - Aug 07 2017
+- [x] Fixed regression with `node@8` in regards to async/await and Promise.all
+
 ## 2.1.0 - Jul 13 2017
 
 - [x] Fixed #36, issue with `.map` files being required for file builds
