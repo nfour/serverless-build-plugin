@@ -6,6 +6,7 @@ Features:
 
 ## 2.2.0 - Aug 07 2017
 - [x] Fixed regression with `node@8` in regards to async/await and Promise.all
+  - Thanks @brendo
 
 ## 2.1.0 - Jul 13 2017
 
