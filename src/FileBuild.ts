@@ -4,6 +4,7 @@ import { existsSync } from 'fs-extra';
 import * as isStream from 'is-stream';
 import { clone, isFunction, isObject, isString, merge } from 'lutils';
 import * as path from 'path';
+import * as requireResolve from 'resolve-pkg';
 import { Logger } from './lib/Logger';
 import { WebpackBuilder } from './WebpackBuilder';
 
@@ -32,6 +33,13 @@ export class FileBuild {
       buildTmpDir: this.buildTmpDir,
       servicePath: this.servicePath,
     });
+
+    try {
+      // Register TypeScript for requiring if possible
+      require(
+        requireResolve('ts-node/register', { cwd: this.servicePath }),
+      );
+    } catch (err) { /**/ }
   }
 
   /**
@@ -55,6 +63,9 @@ export class FileBuild {
 
     // eslint-disable-next-line
     let result = require(builderFilePath);
+
+    // Fudge to default exports
+    if (result instanceof Object && result.default) { result = result.default; }
 
     // Resolve any functions...
     if (isFunction(result)) {
