@@ -1,5 +1,5 @@
 import { Archiver } from 'archiver';
-import { exists, readFile } from 'fs-extra';
+import { existsSync, readFile } from 'fs-extra';
 import { isObject, isRegExp } from 'lutils';
 import * as glob from 'minimatch';
 import { join } from 'path';
@@ -95,7 +95,7 @@ export class SourceBundler {
       if (!isObject(babelQuery)) {
         const babelrcPath = join(this.servicePath, '.babelrc');
 
-        babelQuery = exists(babelrcPath)
+        babelQuery = existsSync(babelrcPath)
           ? JSON.parse(await readFile(babelrcPath, 'utf8'))
           : {};
       }

@@ -3,7 +3,7 @@ import { join, sep } from 'path';
 import * as resolvePackage from 'resolve-pkg';
 
 import { Archiver } from 'archiver';
-import { exists } from 'fs-extra';
+import { existsSync } from 'fs-extra';
 import { Logger } from './lib/Logger';
 import { handleFile } from './lib/utils';
 import { findSymlinks, Walker } from './lib/Walker';
@@ -201,7 +201,7 @@ export class ModuleBundler {
         const childPackageJsonPath = join(resolvedDir, './package.json');
 
         let childPackageJson;
-        if (await exists(childPackageJsonPath)) {
+        if (await existsSync(childPackageJsonPath)) {
           childPackageJson = require(childPackageJsonPath); // eslint-disable-line
         }
 

@@ -1,9 +1,10 @@
 import { Archiver } from 'archiver';
 import * as Bluebird from 'bluebird';
-import { exists } from 'fs-extra';
+import { existsSync } from 'fs-extra';
 import * as isStream from 'is-stream';
 import { clone, isFunction, isObject, isString, merge } from 'lutils';
 import * as path from 'path';
+import * as requireResolve from 'resolve-pkg';
 import { Logger } from './lib/Logger';
 import { WebpackBuilder } from './WebpackBuilder';
 
@@ -32,6 +33,13 @@ export class FileBuild {
       buildTmpDir: this.buildTmpDir,
       servicePath: this.servicePath,
     });
+
+    try {
+      // Register TypeScript for requiring if possible
+      require(
+        requireResolve('ts-node/register', { cwd: this.servicePath }),
+      );
+    } catch (err) { /**/ }
   }
 
   /**
@@ -55,6 +63,9 @@ export class FileBuild {
 
     // eslint-disable-next-line
     let result = require(builderFilePath);
+
+    // Fudge to default exports
+    if (result instanceof Object && result.default) { result = result.default; }
 
     // Resolve any functions...
     if (isFunction(result)) {
@@ -92,7 +103,7 @@ export class FileBuild {
       ], async (relPath) => {
         const filePath = path.resolve(this.buildTmpDir, relPath);
 
-        if (!await exists(filePath)) { return; }
+        if (!await existsSync(filePath)) { return; }
 
         archive.file(filePath, { name: relPath });
       });
@@ -124,7 +135,7 @@ export class FileBuild {
    */
   private async tryBuildFiles () {
     for (const fileName of this.tryFiles) {
-      if (await exists(fileName)) { return fileName; }
+      if (await existsSync(fileName)) { return fileName; }
     }
 
     return null;

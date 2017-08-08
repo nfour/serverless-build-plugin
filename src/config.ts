@@ -5,7 +5,10 @@ export const defaultConfig: IPluginConfig = {
 
   useServerlessOffline: false,
 
-  tryFiles: ['webpack.config.js'],
+  tryFiles: [
+    'webpack.config.ts',
+    'webpack.config.js',
+  ],
   baseExclude: [/\bnode_modules\b/],
 
   modules: {
