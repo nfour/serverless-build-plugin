@@ -1,6 +1,6 @@
 import { Archiver } from 'archiver';
 import * as Bluebird from 'bluebird';
-import { exists } from 'fs-extra';
+import { existsSync } from 'fs-extra';
 import * as isStream from 'is-stream';
 import { clone, isFunction, isObject, isString, merge } from 'lutils';
 import * as path from 'path';
@@ -92,7 +92,7 @@ export class FileBuild {
       ], async (relPath) => {
         const filePath = path.resolve(this.buildTmpDir, relPath);
 
-        if (!await exists(filePath)) { return; }
+        if (!await existsSync(filePath)) { return; }
 
         archive.file(filePath, { name: relPath });
       });
@@ -124,7 +124,7 @@ export class FileBuild {
    */
   private async tryBuildFiles () {
     for (const fileName of this.tryFiles) {
-      if (await exists(fileName)) { return fileName; }
+      if (await existsSync(fileName)) { return fileName; }
     }
 
     return null;
