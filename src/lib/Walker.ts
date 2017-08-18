@@ -13,7 +13,7 @@ export class Walker {
   }
 
   filter (fn) {
-    this.walker.filterDir(this.capture(fn));
+    this.walker.filterDir(fn);
 
     return this;
   }
@@ -36,7 +36,7 @@ export class Walker {
       this.walker.on('end', resolve);
     });
 
-    await Promise.all(this.pending);
+    return Promise.all(this.pending);
   }
 
   private capture = (fn) => {

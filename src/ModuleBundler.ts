@@ -50,12 +50,12 @@ export class ModuleBundler {
   }) {
     const links = await findSymlinks(join(this.servicePath, 'node_modules'));
 
-    this.modules = await this.resolveDependencies(
+    this.modules = this.resolveDependencies(
       this.servicePath,
       { include, exclude, deepExclude, links },
     );
 
-    const transforms = await this.resolveTransforms();
+    const transforms = this.resolveTransforms();
 
     const readModule = async ({ packagePath, packageDir, relativePath, packageJson }) => {
       const filter = (dirPath, stats) => {
@@ -109,13 +109,12 @@ export class ModuleBundler {
         });
       };
 
-      const walker = new Walker(packagePath)
+      await new Walker(packagePath)
         .filter(filter)
-        .file(onFile);
+        .file(onFile)
+        .end();
 
-      await walker.end();
-
-      await this.logger.module(({ filePath: relativePath, realPath: packagePath, packageJson }));
+      return this.logger.module(({ filePath: relativePath, realPath: packagePath, packageJson }));
     };
 
     await Bluebird.map(this.modules, readModule);
@@ -123,7 +122,7 @@ export class ModuleBundler {
     return this;
   }
 
-  private async resolveTransforms () {
+  private resolveTransforms () {
     const transforms = [];
 
     let uglifyConfig = this.uglify;
@@ -163,10 +162,10 @@ export class ModuleBundler {
   /**
    * Resolves a package's dependencies to an array of paths.
    */
-  private async resolveDependencies (
+  private resolveDependencies (
     initialPackageDir,
     { include = [], exclude = [], deepExclude = [], links = new Map() } = {},
-  ): Promise<IModule[]> {
+  ): IModule[] {
     const resolvedDeps: IModule[] = [];
     const cache: Set<string> = new Set();
     const separator = `${sep}node_modules${sep}`;
@@ -176,7 +175,7 @@ export class ModuleBundler {
      *  also resolves dependant packages recursively.
      *  - Will also ignore the input package in the results
      */
-    const recurse = async (packageDir, _include = [], _exclude = []) => {
+    const recurse = (packageDir, _include = [], _exclude = []) => {
       const packageJson = require(join(packageDir, './package.json')); // eslint-disable-line
       const { name, dependencies } = packageJson;
 
@@ -188,7 +187,7 @@ export class ModuleBundler {
 
       if (!dependencies) { return result; }
 
-      await Bluebird.map(Object.keys(dependencies), async (packageName) => {
+      Object.keys(dependencies).map((packageName) => {
         /**
          *  Skips on exclude matches, if set
          *  Skips on include mis-matches, if set
@@ -196,38 +195,31 @@ export class ModuleBundler {
         if (_exclude.length && _exclude.indexOf(packageName) > -1) { return; }
         if (_include.length && _include.indexOf(packageName) < 0) { return; }
 
-        let resolvedDir = resolvePackage(packageName, { cwd: packageDir });
+        let nextPackagePath = resolvePackage(packageName, { cwd: packageDir });
+        if (!nextPackagePath) { return; }
 
-        const childPackageJsonPath = join(resolvedDir, './package.json');
+        const link = links.get(nextPackagePath);
+        if (link) { nextPackagePath = link; }
 
+        const relativePath = join('node_modules', nextPackagePath.split(separator).slice(1).join(separator));
+
+        if (cache.has(relativePath)) { return; }
+        cache.add(relativePath);
+
+        const childPackageJsonPath = join(nextPackagePath, './package.json');
         let childPackageJson;
-        if (await existsSync(childPackageJsonPath)) {
+        if (existsSync(childPackageJsonPath)) {
           childPackageJson = require(childPackageJsonPath); // eslint-disable-line
         }
 
-        if (!resolvedDir) { return; }
-
-        const nextPackagePath = resolvedDir;
-
-        const link = links.get(resolvedDir);
-
-        if (link) { resolvedDir = link; }
-
-        const relativePath = join('node_modules', resolvedDir.split(separator).slice(1).join(separator));
-
-        if (cache.has(relativePath)) { return; }
-
-        cache.add(relativePath);
-
-        const childResult = await recurse(nextPackagePath, undefined, deepExclude);
-
+        const childResult = recurse(nextPackagePath, undefined, deepExclude);
         resolvedDeps.push({ ...childResult, packageDir, relativePath, packageJson: childPackageJson });
       });
 
       return result;
     };
 
-    await recurse(initialPackageDir, include, exclude);
+    recurse(initialPackageDir, include, exclude);
 
     return resolvedDeps;
   }
