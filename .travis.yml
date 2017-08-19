@@ -1,11 +1,8 @@
 language: node_js
-node_js: ["6.10"]
+node_js: ["6.10", "8"]
 
 cache:
   yarn: true
-
-before_install:
-  - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
 
 script:
   - yarn
@@ -13,6 +10,9 @@ script:
   - yarn build
   - yarn test:prepare
   - DEBUG=true yarn coverage
+
+before_deploy:
+  - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
 
 deploy:
   provider: script
