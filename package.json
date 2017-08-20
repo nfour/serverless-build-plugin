@@ -16,7 +16,7 @@
     "release": "cd dist && npm publish",
     "lint": "tslint 'src/**/*.ts'",
     "preversion": "yarn build && yarn test:dist",
-    "coverage": "jest src --coverage"
+    "coverage": "jest src --coverage --coverageReporters text text-summary"
   },
   "dependencies": {
     "archiver": "^2.0.0",
