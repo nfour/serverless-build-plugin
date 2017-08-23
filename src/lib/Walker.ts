@@ -36,7 +36,7 @@ export class Walker {
       this.walker.on('end', resolve);
     });
 
-    await Promise.all(this.pending);
+    return Promise.all(this.pending);
   }
 
   private capture = (fn) => {

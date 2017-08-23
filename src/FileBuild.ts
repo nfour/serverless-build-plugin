@@ -49,7 +49,7 @@ export class FileBuild {
     fnConfig: { handler: string; },
     archive: Archiver,
   ) {
-    let builderFilePath = await this.tryBuildFiles();
+    let builderFilePath = this.tryBuildFiles();
 
     if (!builderFilePath) {
       throw new Error('Unrecognized build file path');
@@ -98,12 +98,10 @@ export class FileBuild {
 
       externals && externals.forEach((ext) => this.externals.add(ext));
 
-      await Bluebird.each([
-        buildFilename, `${buildFilename}.map`,
-      ], async (relPath) => {
+      [buildFilename, `${buildFilename}.map`].forEach((relPath) => {
         const filePath = path.resolve(this.buildTmpDir, relPath);
 
-        if (!await existsSync(filePath)) { return; }
+        if (!existsSync(filePath)) { return; }
 
         archive.file(filePath, { name: relPath });
       });
@@ -133,9 +131,9 @@ export class FileBuild {
   /**
    *  Allows for build files to be auto selected
    */
-  private async tryBuildFiles () {
+  private tryBuildFiles () {
     for (const fileName of this.tryFiles) {
-      if (await existsSync(fileName)) { return fileName; }
+      if (existsSync(fileName)) { return fileName; }
     }
 
     return null;
