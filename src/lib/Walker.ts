@@ -13,7 +13,7 @@ export class Walker {
   }
 
   filter (fn) {
-    this.walker.filterDir(fn);
+    this.walker.filterDir(this.capture(fn));
 
     return this;
   }
