@@ -1,5 +1,6 @@
 import * as Archiver from 'archiver';
 import * as path from 'path';
+import { Logger } from '../lib/Logger';
 import { ModuleBundler } from '../ModuleBundler';
 
 describe('ModuleBundler', () => {
@@ -7,12 +8,10 @@ describe('ModuleBundler', () => {
 
   const servicePath = path.resolve(__dirname, '../../test/1.0');
   const artifact = Archiver('zip', { store: true });
-  const loggerFn = {
-    module: jest.fn(),
-  };
+  const logger = new Logger({ silent: true });
   const moduleBundler = new ModuleBundler({
     servicePath,
-    logger: loggerFn,
+    logger,
     archive: artifact,
   });
 
