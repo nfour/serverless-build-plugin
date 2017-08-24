@@ -70,6 +70,11 @@ export class ModuleBundler {
 
         if (!dirPath || !testPackagePath) { return true; }
 
+        // If there are no deep exclusions, then there is no more filtering.
+        if (!deepExclude.length) {
+          return true;
+        }
+
         // This pulls ['node_modules', 'pack'] out of
         // .../node_modules/package/node_modules/pack
         const endParts = dirPath.split(testPackagePath)[1].split('/').slice(-2);
@@ -188,11 +193,9 @@ export class ModuleBundler {
       if (!dependencies) { return result; }
 
       Object.keys(dependencies).map((packageName) => {
-        /**
-         *  Skips on exclude matches, if set
-         *  Skips on include mis-matches, if set
-         */
+        // Skips on exclude matches, if set
         if (_exclude.length && _exclude.indexOf(packageName) > -1) { return; }
+        // Skips on include mis-matches, if set
         if (_include.length && _include.indexOf(packageName) < 0) { return; }
 
         let nextPackagePath = resolvePackage(packageName, { cwd: packageDir });
