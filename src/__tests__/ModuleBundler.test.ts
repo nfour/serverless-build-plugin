@@ -20,7 +20,7 @@ describe('ModuleBundler', () => {
   const findModule = (module) =>
     moduleBundler.modules.find(({ name }) => name === module);
 
-  test('can bundle all dependencies', async () => {
+  it('can bundle all dependencies', async () => {
     await moduleBundler.bundle({});
 
     Object.keys(dependencies).forEach((dep) => {
@@ -28,7 +28,7 @@ describe('ModuleBundler', () => {
     });
   });
 
-  test('can include specific dependencies', async () => {
+  it('can include specific dependencies', async () => {
     const includePackage = 'lutils';
     await moduleBundler.bundle({ include: [includePackage] });
 
@@ -36,7 +36,7 @@ describe('ModuleBundler', () => {
     expect(moduleBundler.modules).toHaveLength(1);
   });
 
-  test('can exclude specific dependencies', async () => {
+  it('can exclude specific dependencies', async () => {
     const excludePackage = 'bluebird';
     await moduleBundler.bundle({ exclude: [excludePackage] });
 
@@ -44,7 +44,7 @@ describe('ModuleBundler', () => {
     expect(findModule('lutils')).toBeTruthy();
   });
 
-  test('can deep exclude specific dependencies', async () => {
+  it('can deep exclude specific dependencies', async () => {
     const excludePackage = 'babel-runtime';
     await moduleBundler.bundle({ exclude: [excludePackage], deepExclude: [excludePackage] });
 

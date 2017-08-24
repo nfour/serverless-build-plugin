@@ -11,12 +11,12 @@
     "build:watch": "tsc --watch",
     "build:link": "yarn build && cd dist && yarn unlink && yarn link",
     "test": "jest src",
+    "test:coverage": "jest src --coverage",
     "test:dist": "jest -c '{}' dist",
     "test:prepare": "cd test/1.0 && yarn",
     "release": "cd dist && npm publish",
     "lint": "tslint 'src/**/*.ts'",
-    "preversion": "yarn build && yarn test:dist",
-    "coverage": "jest src --coverage --coverageReporters text text-summary"
+    "preversion": "yarn build && yarn test:dist"
   },
   "dependencies": {
     "archiver": "^2.0.0",
