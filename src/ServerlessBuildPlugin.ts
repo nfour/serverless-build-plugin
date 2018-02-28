@@ -242,7 +242,7 @@ export class ServerlessBuildPlugin {
 
   async buildFunction (fnName, fnConfig) {
 
-    const runtime = (fnConfig.runtime && fnConfig.runtime) || this.serverless.config.service.runtime;
+    const runtime = fnConfig.runtime || this.serverless.service.provider.runtime;
 
     this.logger.message('FUNCTION', c.reset.bold(fnName));
     this.logger.log('');
@@ -251,7 +251,7 @@ export class ServerlessBuildPlugin {
       return this.buildNodejsFunction(fnName, fnConfig);
     }
     if (runtime.indexOf('java') > -1) {
-      return this.buildJavaFunction(fnName, fnConfig);
+      return this.passThroughFunction(fnName, fnConfig);
     }
 
     throw new this.serverless.classes.Error(
@@ -259,7 +259,7 @@ export class ServerlessBuildPlugin {
     );
   }
 
-  async buildJavaFunction (fnName, fnConfig) {
+  async passThroughFunction (fnName, fnConfig) {
 
     this.logger.log(c.reset.bold(`No build step for ${fnName} as it uses the ${fnConfig.runtime} runtime`));
     this.logger.log('');
