@@ -282,9 +282,6 @@ export class ServerlessBuildPlugin {
 
     const artifact = Archiver('zip', this.config.zip);
 
-    this.logger.message('FUNCTION', c.reset.bold(fnName));
-    this.logger.log('');
-
     if (method === 'bundle') {
       //
       // SOURCE BUNDLER
