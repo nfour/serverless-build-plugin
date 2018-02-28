@@ -14,7 +14,7 @@
     "test:coverage": "jest src --coverage",
     "test:dist": "jest -c '{}' dist",
     "test:prepare": "cd test/1.0 && yarn",
-    "release": "cd dist && npm publish",
+    "release": "cd dist && yarn publish",
     "lint": "tslint 'src/**/*.ts'",
     "preversion": "yarn build && yarn test:dist"
   },
