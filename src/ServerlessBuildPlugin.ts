@@ -55,10 +55,11 @@ export class ServerlessBuildPlugin {
     // Put the package plugin into 'individual' mode
     this.serverless.service.package.individually = true;
 
-    // In sls 1.11 and lower this will skip 'archiving' (no effect in 1.12+)
-    this.serverless.service.package.artifact = true;
-
     if (semver.lt(version, '1.12.0')) {
+
+      // In sls 1.11 and lower this will skip 'archiving'
+      this.serverless.service.package.artifact = true;
+
       this.logger.message(
         c.red('DEPRECATION'),
         'Upgrade to >= serverless@1.12. Build plugin is dropping support in the next major version',
@@ -239,19 +240,47 @@ export class ServerlessBuildPlugin {
     }
   }
 
+  async buildFunction (fnName, fnConfig) {
+
+    const runtime = fnConfig.runtime || this.serverless.service.provider.runtime;
+
+    this.logger.message('FUNCTION', c.reset.bold(fnName));
+    this.logger.log('');
+
+    if (runtime.indexOf('nodejs') > -1) {
+      return this.buildNodejsFunction(fnName, fnConfig);
+    }
+    if (runtime.indexOf('java') > -1) {
+      return this.passThroughFunction(fnName, fnConfig);
+    }
+
+    throw new this.serverless.classes.Error(
+      '[serverless-build-plugin]: Unsupported runtime. Only supports nodejs and java.',
+    );
+  }
+
+  async passThroughFunction (fnName, fnConfig) {
+
+    this.logger.log(c.reset.bold(`No build step for ${fnName} as it uses the ${fnConfig.runtime} runtime`));
+    this.logger.log('');
+    this.logger.log('');
+
+    // Nothing needs to be done here, as we expect java artifacts to be compiled
+    // outside of serverless and specified as `package.artifact`
+
+    return fnConfig;
+  }
+
   /**
    * Builds a function into an streaming zip artifact
    * and sets it in `serverless.yml:functions[fnName].artifact`
    * in order for `serverless` to consume it.
    */
-  async buildFunction (fnName, fnConfig) {
+  async buildNodejsFunction (fnName, fnConfig) {
     let moduleIncludes: Set<string>;
     const { method } = this.config;
 
     const artifact = Archiver('zip', this.config.zip);
-
-    this.logger.message('FUNCTION', c.reset.bold(fnName));
-    this.logger.log('');
 
     if (method === 'bundle') {
       //
@@ -359,13 +388,18 @@ export class ServerlessBuildPlugin {
       item.constructor.name === 'Package',
     );
 
+    const oldPluginFn = packagePlugin.packageFunction;
     packagePlugin.packageFunction = async (fnName) => {
       const fnConfig = this.serverless.service.functions[fnName];
       const artifactPath = fnConfig.artifact || (fnConfig.package && fnConfig.package.artifact);
 
-      if (!artifactPath) { throw new Error(`Artifact path not found for function ${fnName}`); }
+      // If we haven't built the artifact ourself, delegate back to the vanilla packagePlugin implementation
+      if (!artifactPath) {
+        return oldPluginFn.call(packagePlugin, fnName);
+      }
 
-      const packageFilePath = path.join(this.tmpDir, `./${fnName}.zip`);
+      const ext = artifactPath.indexOf('.jar') > -1 ? 'jar' : 'zip';
+      const packageFilePath = path.join(this.tmpDir, `./${fnName}.${ext}`);
 
       await copy(artifactPath, packageFilePath);
 
