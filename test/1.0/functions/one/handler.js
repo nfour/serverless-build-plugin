@@ -4,6 +4,9 @@ import { typeOf } from 'lutils';
 import Promise from 'bluebird';
 import number from '../../lib/one';
 
+import 'notamodulke'
+
+
 export const handler = async (event, context, done) => {
   console.log({ number });
   console.log({ env: process.env });
