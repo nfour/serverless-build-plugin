@@ -1,4 +1,8 @@
 
+## 2.4.0-alpha.1 - Aug 18 2018
+Fix:
+- [x] Fix symlink, walker required / at the end of packagePath for reading symlink.
+
 ## 2.3.0 - Aug 08 2017
 Features:
 - [x] Now supports `webpack.config.ts` and any TypeScript build file by default
