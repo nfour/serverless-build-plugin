@@ -114,7 +114,7 @@ export class ModuleBundler {
         });
       };
 
-      await new Walker(`${packagePath}/`)
+      await new Walker(`${packagePath}${sep}`)
         .filter(filter)
         .file(onFile)
         .end();
