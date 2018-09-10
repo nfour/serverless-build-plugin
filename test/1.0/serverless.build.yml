@@ -1,9 +1,9 @@
-# method: file
-# tryFiles:
-#   - webpack.config.js
-#   - gulpfile.babel.js
+method: file
+tryFiles:
+  - webpack.config.js
+  - gulpfile.babel.js
 
-method: bundle
+# method: bundle
 
 sourceMaps : true
 babel      : true

@@ -92,13 +92,24 @@ export class WebpackBuilder {
       this.webpack(config).run((err, stats) => {
         if (err) { return reject(err); }
 
-        return resolve(stats.toString({
-          colors   : true,
-          hash     : false,
-          version  : false,
-          chunks   : false,
-          children : false,
-        }));
+        const errors = stats.compilation.errors;
+
+        const statsText = stats.toString({
+          colors: true,
+          hash: false,
+          version: false,
+          chunks: false,
+          children: false,
+        });
+
+        if (errors.length) {
+          // tslint:disable-next-line:no-console
+          console.error(`\n${statsText}\n`);
+
+          return reject(errors[0]);
+        }
+
+        return resolve(statsText);
       });
     });
   }
