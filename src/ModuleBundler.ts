@@ -9,6 +9,8 @@ import { readPath } from './lib/readPath';
 import { handleFile } from './lib/utils';
 import { UglifyTransform } from './transforms/Uglify';
 
+import resolve = require('resolve');
+
 export interface IModule {
   name: string;
   packagePath: string;
@@ -81,6 +83,7 @@ export class ModuleBundler {
           return false;
         },
         onFile: ({ filePath, previousPaths }) => {
+          console.log({ previousPaths });
           const relPath = join(
             'node_modules',
             basename(packagePath),
@@ -157,7 +160,20 @@ export class ModuleBundler {
         // Skips on include mis-matches, if set
         if (_include.length && _include.indexOf(packageName) < 0) { return; }
 
-        const nextPackagePath = resolvePackage(packageName, { cwd: packageDir });
+        const nextPackagePathOld = resolvePackage(packageName, { cwd: packageDir });
+        console.log({ nextPackagePathOld });
+        let main: string;
+        let nextPackagePath = resolve.sync(packageName, {
+          basedir: packageDir,
+          preserveSymlinks: true,
+          packageFilter (pkgJson) {
+            main = pkgJson.main || 'index.js';
+          },
+        });
+
+        nextPackagePath = nextPackagePath.slice(0, -main.length - 1);
+
+        console.log({ nextPackagePathOld, nextPackagePath, main });
         if (!nextPackagePath) { return; }
 
         const relativePath = join('node_modules', nextPackagePath.split(separator).slice(1).join(separator));
