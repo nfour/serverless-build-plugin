@@ -1,12 +1,12 @@
 import { Archiver } from 'archiver';
 import * as Bluebird from 'bluebird';
 import { existsSync } from 'fs-extra';
-import { join, relative, sep } from 'path';
+import { basename, join, sep } from 'path';
 import * as resolvePackage from 'resolve-pkg';
 
 import { Logger } from './lib/Logger';
+import { readPath } from './lib/readPath';
 import { handleFile } from './lib/utils';
-import { findSymlinks, Walker } from './lib/Walker';
 import { UglifyTransform } from './transforms/Uglify';
 
 export interface IModule {
@@ -48,111 +48,58 @@ export class ModuleBundler {
   async bundle ({ include = [], exclude = [], deepExclude = [] }: {
     include?: string[], exclude?: string[], deepExclude?: string[],
   }) {
-    const links = await findSymlinks(join(this.servicePath, 'node_modules'), 10);
-
     this.modules = this.resolveDependencies(
       this.servicePath,
-      { include, exclude, deepExclude, links },
+      { include, exclude, deepExclude },
       );
 
     const transforms = this.resolveTransforms();
 
-    console.dir(links, { depth: 5, colors: true });
-    process.exit();
-
     const readModule = async ({ packagePath, packageDir, relativePath, packageJson }) => {
-      const filter = (dirPath, stats) => {
-        const { linkedPath, link } = this.resolveSymlinkPath(dirPath, links);
+      const basePath = `${packagePath}${sep}`;
 
-        let testPackagePath = packagePath;
+      await readPath(basePath, {
+        onFileFilter: ({ filePath }) => {
+          if (!deepExclude.length) { return false; }
 
-        if (linkedPath) {
-          dirPath = linkedPath;
-          testPackagePath = link;
-        }
+          // This pulls ['node_modules', 'pack'] out of
+          // .../node_modules/package/node_modules/pack
+          const endParts = filePath
+            .split(packagePath)[1]
+            .split('/')
+            .slice(-2);
 
-        if (!dirPath || !testPackagePath) { return true; }
+          // When a directory is a package and matches a deep exclude pattern
+          // Then skip it
+          if (
+            endParts[0] === 'node_modules' &&
+            deepExclude.indexOf(endParts[1]) !== -1
+          ) {
+            return true;
+          }
 
-        // If there are no deep exclusions, then there is no more filtering.
-        if (!deepExclude.length) {
-          return true;
-        }
-
-        // This pulls ['node_modules', 'pack'] out of
-        // .../node_modules/package/node_modules/pack
-        const endParts = dirPath.split(testPackagePath)[1].split('/').slice(-2);
-
-        // When a directory is a package and matches a deep exclude pattern
-        // Then skip it
-        if (
-          endParts[0] === 'node_modules' &&
-          deepExclude.indexOf(endParts[1]) !== -1
-        ) {
           return false;
-        }
+        },
+        onFile: ({ filePath, previousPaths }) => {
+          const relPath = join(
+            'node_modules',
+            basename(packagePath),
+            ...previousPaths.slice(1).map((path) => basename(path)),
+            basename(filePath),
+          );
 
-        return true;
-      };
+          console.dir({ packageDir, packagePath, relPath, filePath }, { colors: true });
 
-      const onFile = async (filePath: string, stats) => {
-        let relPath: string;
-
-        const { linkedPath } = this.resolveSymlinkPath(filePath, links);
-
-        if (linkedPath) { relPath = linkedPath.slice(this.servicePath.length); }
-
-        if (!relPath) {
-          relPath = filePath.substr(filePath.indexOf(relativePath));
-        }
-
-        relPath = relPath.replace(/^\/|\/$/g, '');
-
-        // const isSchemas = /json-pointer/.test(relPath);
-
-        // // TODO: should rewrite all of this to merely traverse down and save each directory/symlink traversed relative to bundle dir
-        // if (isSchemas) {
-        //   console.log('--------------------------', packageJson.name);
-        //   console.dir({
-        //     links: {
-        //       schemaFoundInSource: [...links].filter(([k, v]) => /@temando\/schema/.test(v)),
-        //       schemaToolingFoundInKey: [...links].filter(([k, v]) => /schema-tooling/.test(k)),
-        //       schemaToolingFoundInKeyFromModules: [...links].filter(([k, v]) => /schema-tooling/.test(k)),
-        //       jsonPointerKey: [...links].filter(([k, v]) => /json-pointer/.test(k)),
-        //       jsonPointerVal: [...links].filter(([k, v]) => /json-pointer/.test(v)),
-        //     },
-        //     parentModule: {
-        //       packageDir,
-        //     },
-        //     currentModule: {
-        //       packagePath,
-        //     },
-        //     currentFile: {
-        //       filePath,
-        //       relPath,
-        //       linkedPath,
-        //       '(real) relativePathFromModule': relativePath,
-        //     },
-        //   }, { colors: true, depth: 4 });
-
-        //   console.log(`
-        //     I want: /node_modules/@temando/schemas/node_modules/schema-tooling/node_modules/json-pointer/test/test.js
-        //   `);
-        // }
-
-        await handleFile({
-          filePath,
-          relPath,
-          transforms,
-          transformExtensions: ['js', 'jsx'],
-          useSourceMaps: false,
-          archive: this.archive,
-        });
-      };
-
-      await new Walker(`${packagePath}${sep}`)
-        .filter(filter)
-        .file(onFile)
-        .end();
+          return handleFile({
+            filePath,
+            relPath,
+            transforms,
+            transformExtensions: ['js', 'jsx'],
+            useSourceMaps: false,
+            archive: this.archive,
+          });
+        },
+      });
 
       return this.logger.module(({ filePath: relativePath, realPath: packagePath, packageJson }));
     };
@@ -176,35 +123,12 @@ export class ModuleBundler {
     return transforms;
   }
 
-  private resolveSymlinkPath (filePath: string, links: Map<string, string>): {
-    linkedPath?: string,
-    link?: string, real?: string,
-    relLinkedPath?: string,
-  } {
-    const items = Array.from(links.entries()).reverse();
-
-    // Get a relPath from using a matching symlink
-    for (const [real, link] of items) {
-      if (filePath.startsWith(real)) {
-        const relLinkedPath = filePath.slice(real.length);
-
-        return {
-          real, link,
-          relLinkedPath,
-          linkedPath: join(link, relLinkedPath),
-        };
-      }
-    }
-
-    return {};
-  }
-
   /**
    * Resolves a package's dependencies to an array of paths.
    */
   private resolveDependencies (
     initialPackageDir,
-    { include = [], exclude = [], deepExclude = [], links = new Map() } = {},
+    { include = [], exclude = [], deepExclude = [] } = {},
   ): IModule[] {
     const resolvedDeps: IModule[] = [];
     const cache: Set<string> = new Set();
@@ -233,11 +157,8 @@ export class ModuleBundler {
         // Skips on include mis-matches, if set
         if (_include.length && _include.indexOf(packageName) < 0) { return; }
 
-        let nextPackagePath = resolvePackage(packageName, { cwd: packageDir });
+        const nextPackagePath = resolvePackage(packageName, { cwd: packageDir });
         if (!nextPackagePath) { return; }
-
-        const link = links.get(nextPackagePath);
-        if (link) { nextPackagePath = link; }
 
         const relativePath = join('node_modules', nextPackagePath.split(separator).slice(1).join(separator));
 
