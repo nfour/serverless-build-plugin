@@ -1,7 +1,7 @@
 import { map } from 'bluebird';
-import { lstat, readdir, stat, Stats } from 'fs-extra';
+import { readdir, stat, Stats } from 'fs-extra';
 import { flatten } from 'lodash';
-import { resolve } from 'path';
+import { isAbsolute, join } from 'path';
 
 import { Omit } from '../types';
 
@@ -48,7 +48,7 @@ async function traversePath (inputPath: string, {
   if (stats.isDirectory()) {
     const fileNames = await readdir(filePath);
 
-    console.log(`${'  '.repeat(depth)} directory: ${depth}`, fileNames);
+    // console.log(`${'  '.repeat(depth)} directory: ${depth}`, fileNames);
 
     const operations = await map(fileNames, async (fileName) => {
       const currentPaths = [...previousPaths, inputPath];
@@ -65,7 +65,7 @@ async function traversePath (inputPath: string, {
 
     return operations;
   } else {
-    console.log(`${'  '.repeat(depth)} file:`, filePath);
+    // console.log(`${'  '.repeat(depth)} file:`, filePath);
 
     const operation = await onFile({ filePath, previousPaths, startPath, stats });
 
@@ -78,7 +78,6 @@ type IResolveParams = Pick<ITraverseParams, 'depth' | 'previousPaths' | 'startPa
 async function validatePath (pathName: string, { previousPaths, depth, startPath }: IResolveParams) {
   const filePath = resolvePathName(previousPaths, pathName);
   const stats = await stat(filePath);
-  const lstats = await lstat(filePath);
 
   const skip = await filterPath({
     previousPaths, depth, startPath,
@@ -86,13 +85,15 @@ async function validatePath (pathName: string, { previousPaths, depth, startPath
     stats,
   });
 
-  return { skip, filePath, lstats, stats };
+  return { skip, filePath, stats };
 }
 
 function resolvePathName (previousPaths: string[], pathName: string) {
-  const lastPath = previousPaths.slice(-1)[0];
+  if (isAbsolute(pathName)) { return pathName; }
 
-  return resolve(lastPath, pathName);
+  const lastPath = previousPaths.slice(-1)[0] || '';
+
+  return join(lastPath, pathName);
 }
 
 type IFilterParams = Omit<ITraverseParams, 'onFile'> & IFileParams;

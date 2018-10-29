@@ -1,8 +1,8 @@
-import { relative, resolve } from 'path';
+import { resolve } from 'path';
 
 import { readPath } from '../readPath';
 
-const testDir = resolve(__dirname, './project');
+const testDir = resolve(__dirname, '../../__tests__/project');
 
 it('reads regular file nested in 1 folder', async () => {
   const files: string[] = [];
