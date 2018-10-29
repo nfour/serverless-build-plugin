@@ -5,6 +5,7 @@ import { copy, createWriteStream, emptyDir, ensureDir } from 'fs-extra';
 import { clone, isArray, merge } from 'lutils';
 import * as path from 'path';
 import * as semver from 'semver';
+
 import { defaultConfig, IPluginConfig } from './config';
 import { FileBuild } from './FileBuild';
 import { Logger } from './lib/Logger';
@@ -87,7 +88,7 @@ export class ServerlessBuildPlugin {
 
     const functionSelection = this.config.f || this.config.function;
 
-    let selectedFunctions = isArray(functionSelection)
+    let selectedFunctions: string[] = isArray(functionSelection)
       ? functionSelection
       : [functionSelection];
 

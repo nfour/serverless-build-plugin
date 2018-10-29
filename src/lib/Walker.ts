@@ -1,5 +1,5 @@
 import * as Bluebird from 'bluebird';
-import { lstat, readdir, realpath } from 'fs-extra';
+import { existsSync, lstat, readdir, realpath } from 'fs-extra';
 import { join } from 'path';
 import * as createWalker from 'walker';
 
@@ -8,8 +8,8 @@ export class Walker {
   pending: any[] = [];
   symlinkRoots: Set<string> = new Set();
 
-  constructor (directory) {
-    this.walker = createWalker(directory);
+  constructor (startDirectory: string) {
+    this.walker = createWalker(startDirectory);
   }
 
   filter (fn) {
@@ -56,6 +56,8 @@ export async function findSymlinks (dirPath, maxDepth = 2) {
     if (depth < 0) { return; }
 
     --depth;
+
+    if (!existsSync(dir)) { return; }
 
     const stats = await lstat(dir);
 
