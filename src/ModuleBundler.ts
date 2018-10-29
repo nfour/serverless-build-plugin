@@ -1,9 +1,9 @@
+import { Archiver } from 'archiver';
 import * as Bluebird from 'bluebird';
-import { join, sep } from 'path';
+import { existsSync } from 'fs-extra';
+import { join, relative, sep } from 'path';
 import * as resolvePackage from 'resolve-pkg';
 
-import { Archiver } from 'archiver';
-import { existsSync } from 'fs-extra';
 import { Logger } from './lib/Logger';
 import { handleFile } from './lib/utils';
 import { findSymlinks, Walker } from './lib/Walker';
@@ -48,14 +48,17 @@ export class ModuleBundler {
   async bundle ({ include = [], exclude = [], deepExclude = [] }: {
     include?: string[], exclude?: string[], deepExclude?: string[],
   }) {
-    const links = await findSymlinks(join(this.servicePath, 'node_modules'));
+    const links = await findSymlinks(join(this.servicePath, 'node_modules'), 10);
 
     this.modules = this.resolveDependencies(
       this.servicePath,
       { include, exclude, deepExclude, links },
-    );
+      );
 
     const transforms = this.resolveTransforms();
+
+    console.dir(links, { depth: 5, colors: true });
+    process.exit();
 
     const readModule = async ({ packagePath, packageDir, relativePath, packageJson }) => {
       const filter = (dirPath, stats) => {
@@ -92,17 +95,49 @@ export class ModuleBundler {
       };
 
       const onFile = async (filePath: string, stats) => {
-        let relPath;
+        let relPath: string;
 
-        const { relLinkedPath } = this.resolveSymlinkPath(filePath, links);
+        const { linkedPath } = this.resolveSymlinkPath(filePath, links);
 
-        if (relLinkedPath) { relPath = join(relativePath, relLinkedPath); }
+        if (linkedPath) { relPath = linkedPath.slice(this.servicePath.length); }
 
         if (!relPath) {
           relPath = filePath.substr(filePath.indexOf(relativePath));
         }
 
         relPath = relPath.replace(/^\/|\/$/g, '');
+
+        // const isSchemas = /json-pointer/.test(relPath);
+
+        // // TODO: should rewrite all of this to merely traverse down and save each directory/symlink traversed relative to bundle dir
+        // if (isSchemas) {
+        //   console.log('--------------------------', packageJson.name);
+        //   console.dir({
+        //     links: {
+        //       schemaFoundInSource: [...links].filter(([k, v]) => /@temando\/schema/.test(v)),
+        //       schemaToolingFoundInKey: [...links].filter(([k, v]) => /schema-tooling/.test(k)),
+        //       schemaToolingFoundInKeyFromModules: [...links].filter(([k, v]) => /schema-tooling/.test(k)),
+        //       jsonPointerKey: [...links].filter(([k, v]) => /json-pointer/.test(k)),
+        //       jsonPointerVal: [...links].filter(([k, v]) => /json-pointer/.test(v)),
+        //     },
+        //     parentModule: {
+        //       packageDir,
+        //     },
+        //     currentModule: {
+        //       packagePath,
+        //     },
+        //     currentFile: {
+        //       filePath,
+        //       relPath,
+        //       linkedPath,
+        //       '(real) relativePathFromModule': relativePath,
+        //     },
+        //   }, { colors: true, depth: 4 });
+
+        //   console.log(`
+        //     I want: /node_modules/@temando/schemas/node_modules/schema-tooling/node_modules/json-pointer/test/test.js
+        //   `);
+        // }
 
         await handleFile({
           filePath,

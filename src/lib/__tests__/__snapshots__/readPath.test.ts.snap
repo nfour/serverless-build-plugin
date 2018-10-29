@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`reads regular file nested in 1 folder 1`] = `Array []`;

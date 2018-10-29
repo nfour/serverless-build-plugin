@@ -7,6 +7,7 @@ module.exports = {
   "coverageThreshold": {
     "global": { lines: 30 }
   },
+  "testEnvironment": "node",
   "moduleFileExtensions": ["ts", "tsx", "js"],
   "transform": { ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js" },
   "testRegex": "(\\.(test|spec))\\.(ts|tsx|js)$",
