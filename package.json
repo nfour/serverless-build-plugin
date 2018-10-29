@@ -19,6 +19,7 @@
     "preversion": "yarn build && yarn test:dist"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.117",
     "archiver": "^2.0.0",
     "bluebird": "^3.5.0",
     "chalk": "^2.1.0",
@@ -26,6 +27,7 @@
     "get-folder-size": "^1.0.0",
     "is-stream": "~1.1.0",
     "js-yaml": "^3.9.1",
+    "lodash": "^4.17.11",
     "lutils": "^2.4.0",
     "minimatch": "^3.0.4",
     "mkdirp": "~0.5.1",

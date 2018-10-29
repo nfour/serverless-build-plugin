@@ -9,7 +9,7 @@ it('reads regular file nested in 1 folder', async () => {
 
   await readPath(testDir, {
     depth: 2,
-    async onFile ({ startPath, traversedPaths, filePath, stats }) {
+    async onFile ({ startPath, previousPaths, filePath, stats }) {
       filesRead.push(filePath);
     },
   });
