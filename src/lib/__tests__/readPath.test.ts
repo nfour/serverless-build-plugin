@@ -5,19 +5,43 @@ import { readPath } from '../readPath';
 const testDir = resolve(__dirname, './project');
 
 it('reads regular file nested in 1 folder', async () => {
-  const filesRead: string[] = [];
+  const files: string[] = [];
 
   await readPath(testDir, {
     depth: 2,
     async onFile ({ startPath, previousPaths, filePath, stats }) {
-      filesRead.push(filePath);
+      console.log({ previousPaths });
+      files.push(filePath);
     },
   });
 
-  expect(filesRead).toMatchSnapshot();
+  expect(files.sort()).toMatchSnapshot();
 });
 
-it('can filter out some paths');
+it('can filter out paths matching /c/', async () => {
+  const files: string[] = [];
 
-it('reads symlinked files nested 2 and maintains reference to traversed paths');
-it('does not traverse circular symlinks');
+  await readPath(testDir, {
+    depth: 4,
+    async onFile ({ startPath, previousPaths, filePath, stats }) {
+      if (!/\/c\//.test(filePath)) { return true; }
+
+      files.push(filePath);
+    },
+  });
+
+  expect(files.sort()).toMatchSnapshot();
+});
+
+it('can traverse circular symlinks up to depth', async () => {
+  const files: string[] = [];
+
+  await readPath(testDir, {
+    depth: 20,
+    async onFile ({ startPath, previousPaths, filePath, stats }) {
+      files.push(filePath);
+    },
+  });
+
+  expect(files.sort()).toMatchSnapshot();
+});

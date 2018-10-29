@@ -1,7 +1,7 @@
 import { map } from 'bluebird';
-import { readdir, stat, Stats } from 'fs-extra';
+import { lstat, readdir, stat, Stats } from 'fs-extra';
 import { flatten } from 'lodash';
-import { basename, resolve } from 'path';
+import { resolve } from 'path';
 
 import { Omit } from '../types';
 
@@ -20,11 +20,11 @@ export interface IReadPathParams {
   onFile (params: IFileParams);
 }
 
-export async function readPath (startDirectory: string, input: IReadPathParams) {
+export async function readPath (startDirectory: string, { depth = 4, ...input }: IReadPathParams) {
   const operations = await traversePath(startDirectory, {
     ...input,
-    depth: input.depth || 4,
-    previousPaths: [startDirectory],
+    depth,
+    previousPaths: [],
     startPath: startDirectory,
   });
 
@@ -41,21 +41,22 @@ async function traversePath (inputPath: string, {
   previousPaths, startPath, onFile,
   onFileFilter, depth,
 }: ITraverseParams): Promise<Array<PromiseLike<unknown>>> {
-  const { skip, filePath, stats } = await resolvePath(inputPath, { depth, previousPaths, startPath });
+  const { skip, filePath, stats } = await validatePath(inputPath, { depth, previousPaths, startPath });
 
   if (skip) { return; }
 
   if (stats.isDirectory()) {
     const fileNames = await readdir(filePath);
 
-    console.log(`directory:`, fileNames);
+    console.log(`${'  '.repeat(depth)} directory: ${depth}`, fileNames);
 
     const operations = await map(fileNames, async (fileName) => {
-      const lastPathSegment = basename(inputPath);
+      const currentPaths = [...previousPaths, inputPath];
+      const nextFilePath = resolvePathName(currentPaths, fileName);
 
-      return traversePath(fileName, {
+      return traversePath(nextFilePath, {
         depth: depth - 1,
-        previousPaths: [...previousPaths, lastPathSegment],
+        previousPaths: currentPaths,
         startPath,
         onFile,
         onFileFilter,
@@ -64,7 +65,8 @@ async function traversePath (inputPath: string, {
 
     return operations;
   } else {
-    console.log(`file:`, filePath);
+    console.log(`${'  '.repeat(depth)} file:`, filePath);
+
     const operation = await onFile({ filePath, previousPaths, startPath, stats });
 
     return [operation];
@@ -73,9 +75,10 @@ async function traversePath (inputPath: string, {
 
 type IResolveParams = Pick<ITraverseParams, 'depth' | 'previousPaths' | 'startPath'>;
 
-async function resolvePath (path: string, { previousPaths, depth, startPath }: IResolveParams) {
-  const filePath = resolve(...previousPaths, path);
+async function validatePath (pathName: string, { previousPaths, depth, startPath }: IResolveParams) {
+  const filePath = resolvePathName(previousPaths, pathName);
   const stats = await stat(filePath);
+  const lstats = await lstat(filePath);
 
   const skip = await filterPath({
     previousPaths, depth, startPath,
@@ -83,7 +86,13 @@ async function resolvePath (path: string, { previousPaths, depth, startPath }: I
     stats,
   });
 
-  return { skip, filePath, stats };
+  return { skip, filePath, lstats, stats };
+}
+
+function resolvePathName (previousPaths: string[], pathName: string) {
+  const lastPath = previousPaths.slice(-1)[0];
+
+  return resolve(lastPath, pathName);
 }
 
 type IFilterParams = Omit<ITraverseParams, 'onFile'> & IFileParams;
