@@ -1,3 +1,5 @@
+## [Unreleased]
+- babel 7 compliance. Add optional parameter babelCore.
 
 ## 2.3.0 - Aug 08 2017
 Features:

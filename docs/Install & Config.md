@@ -50,6 +50,10 @@ method: bundle
 #  Default is `null`.
 babel: true
 
+# Define core babel package
+# Default is babel-core
+babelCore: "babel-core"
+
 # uglify
 #
 # To minify each file.
