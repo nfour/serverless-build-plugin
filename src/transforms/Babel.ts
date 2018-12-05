@@ -30,19 +30,13 @@ export class BabelTransform {
     let result = { code, map, relPath };
 
     try {
-      let transformed = null;
-      if (semver.gt(this.babel.version, '7.0.0')) {
-        transformed = this.babel.transform(code, {
-          ...this.config,
-          sourceFileName  : relPath,
-        });
-      } else {
-        transformed = this.babel.transform(code, {
-          ...this.config,
-          sourceFileName  : relPath,
-          sourceMapTarget : relPath,
-        });
-      }
+      const options = {
+        ...this.config,
+        sourceFileName: relPath,
+        sourceMapTarget: relPath,
+      };
+      semver.gt(this.babel.version, '7.0.0') && delete options.sourceMapTarget;
+      const transformed = this.babel.transform(code, options);
 
       result = {
         ...result,

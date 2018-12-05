@@ -292,7 +292,7 @@ export class ServerlessBuildPlugin {
           ? this.config.uglify
           : undefined,
         babel: this.config.babel,
-        babelCore: this.config.babelCore ? this.config.babelCore : 'babel-core',
+        babelCore: this.config.babelCore || 'babel-core',
         sourceMaps: this.config.sourceMaps,
         transformExtensions: this.config.transformExtensions,
         logger: this.logger,

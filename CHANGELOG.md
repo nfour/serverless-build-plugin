@@ -1,5 +1,8 @@
 ## [Unreleased]
-- babel 7 compliance. Add optional parameter babelCore.
+- Babel 7 compliance. Add optional parameter babelCore (Babel compiler core)
+  Babel compiler core was on previous version hardcoded to "babel-core".
+  The change is required in order to allow developper to specify babel compiler core: "@babel/core", if package is babel7 or not.
+  See doc: https://babeljs.io/docs/en/v7-migration
 
 ## 2.3.0 - Aug 08 2017
 Features:

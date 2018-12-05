@@ -51,7 +51,7 @@ method: bundle
 babel: true
 
 # Define core babel package
-# Default is babel-core
+# Default is "babel-core", can be "@babel/core" for babel 7 (see https://babeljs.io/docs/en/v7-migration)
 babelCore: "babel-core"
 
 # uglify
