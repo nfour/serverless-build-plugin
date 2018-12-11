@@ -1,4 +1,5 @@
 import * as requireResolve from 'resolve-pkg';
+import * as semver from 'semver';
 
 export class BabelTransform {
   config: any;
@@ -21,7 +22,7 @@ export class BabelTransform {
 
     // eslint-disable-next-line
     this.babel = require(
-      requireResolve('babel-core', { cwd: this.options.servicePath }),
+      requireResolve(this.options.babelCore, { cwd: this.options.servicePath }),
     );
   }
 
@@ -29,10 +30,13 @@ export class BabelTransform {
     let result = { code, map, relPath };
 
     try {
+      const transformConfig = semver.gt(this.babel.version, '7.0.0') ?
+        { sourceFileName: relPath } :
+        { sourceFileName: relPath, sourceMapTarget: relPath };
+
       const transformed = this.babel.transform(code, {
         ...this.config,
-        sourceFileName  : relPath,
-        sourceMapTarget : relPath,
+        ...transformConfig,
       });
 
       result = {

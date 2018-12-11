@@ -19,6 +19,7 @@ export class SourceBundler {
   archive: Archiver;
   servicePath: string;
   babel: any;
+  babelCore: string;
   uglify: any;
   sourceMaps = false;
   transformExtensions = ['ts', 'js', 'jsx', 'tsx'];
@@ -28,6 +29,7 @@ export class SourceBundler {
     archive: Archiver;
     servicePath: string;
     babel?: any;
+    babelCore?: string;
     uglify?: any;
     sourceMaps?: boolean;
     transformExtensions?: string[];
