@@ -16,7 +16,7 @@
     "test:prepare": "cd test/1.0 && yarn",
     "release": "cd dist && yarn publish",
     "lint": "tslint 'src/**/*.ts'",
-    "preversion": "yarn build && yarn test:dist"
+    "preversion": "yarn build && yarn test"
   },
   "dependencies": {
     "archiver": "^2.0.0",
